@@ -48,7 +48,7 @@ Route::post('apply-landlord', [LandlordController::class, 'apply'])->name('landl
 Route::get('become-landlord', [PropertyController::class, 'showBecomeLandlordForm'])->name('become-landlord.form')->middleware('auth');
 Route::post('become-landlord', [PropertyController::class, 'storeAsLandlord'])->name('become-landlord.store')->middleware('auth');
 
-// Административные маршруты
+// Административные маршруты (АААА, должно работат)
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminController::class, 'index'])->name('dashboard');
     Route::get('/landlord-applications', [AdminController::class, 'landlordApplications'])->name('landlord.applications');
