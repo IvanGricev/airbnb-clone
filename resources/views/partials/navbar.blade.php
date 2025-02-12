@@ -9,7 +9,7 @@
                 @auth
                     <!-- Ссылки для всех авторизованных пользователей -->
                     <li class="nav-item"><a class="nav-link" href="{{ route('bookings.history') }}">Мои бронирования</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('support.tickets') }}">Мои тикеты</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('support.tickets') }}">Мои запросы в поддержку</a></li>
 
                     <!-- Проверка роли администратора -->
                     @if(Auth::user()->role === 'admin')

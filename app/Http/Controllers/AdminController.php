@@ -5,61 +5,102 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\LandlordApplication;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class AdminController extends Controller
 {
-    /**
-     * Применение middleware для проверки роли администратора.
-     */
     public function __construct()
     {
         $this->middleware(['auth', 'admin']);
     }
 
-    /**
-     * Отображение главной страницы админки.
-     */
     public function index()
     {
-        return view('admin.dashboard');
+        try {
+            return view('admin.dashboard');
+        } catch (\Exception $e) {
+            Log::error('Ошибка при отображении админ-панели', [
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+
+            return redirect()->route('admin.landlord.applications')
+                ->with('error', 'Произошла ошибка при загрузке админ-панели');
+        }
     }
 
-    /**
-     * Отображение списка заявок на роль арендодателя.
-     */
-    public function landlordApplications()
+    public function landlordApplications(Request $request)
     {
-        $applications = LandlordApplication::with('user')
-            ->where('status', 'pending')
-            ->orderBy('created_at', 'desc')
-            ->get();
+        try {
+            $status = $request->query('status', 'pending');
+            $search = $request->query('search', '');
 
-        return view('admin.landlord_applications', compact('applications'));
+            $applications = LandlordApplication::with('user')
+                ->when($status, fn($q) => $q->where('status', $status))
+                ->when($search, fn($q) => 
+                    $q->whereHas('user', fn($q) => 
+                        $q->where('name', 'like', "%$search%")
+                        ->orWhere('email', 'like', "%$search%")
+                    )
+                )
+                ->orderBy('created_at', 'desc')
+                ->paginate(10);
+
+            $statuses = ['pending' => 'На рассмотрении', 'approved' => 'Одобрено', 'rejected' => 'Отклонено'];
+
+            return view('admin.landlord_applications', compact('applications', 'status', 'search', 'statuses'));
+        } catch (\Exception $e) {
+            Log::error('Ошибка при получении списка заявок арендодателей', [
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+
+            return redirect()->back()->with('error', 'Произошла ошибка при загрузке списка заявок');
+        }
     }
 
-    /**
-     * Одобрение заявки на роль арендодателя.
-     */
     public function approveLandlordApplication(LandlordApplication $application)
     {
-        $application->status = 'approved';
-        $application->save();
+        try {
+            $application->status = 'approved';
+            $application->save();
 
-        $user = $application->user;
-        $user->role = 'landlord';
-        $user->save();
+            $user = $application->user;
+            $user->role = 'landlord';
+            $user->save();
 
-        return back()->with('success', 'Заявка одобрена, пользователь теперь является арендодателем.');
+            return redirect()->route('admin.landlord.applications')
+                ->with('success', 'Заявка одобрена, пользователь теперь является арендодателем.');
+        } catch (\Exception $e) {
+            Log::error('Ошибка при одобрении заявки арендодателя', [
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+
+            return redirect()->back()->with('error', 'Произошла ошибка при одобрении заявки');
+        }
     }
 
-    /**
-     * Отклонение заявки на роль арендодателя.
-     */
     public function rejectLandlordApplication(LandlordApplication $application)
     {
-        $application->status = 'rejected';
-        $application->save();
+        try {
+            $application->status = 'rejected';
+            $application->save();
 
-        return back()->with('success', 'Заявка отклонена.');
+            return redirect()->route('admin.landlord.applications')
+                ->with('success', 'Заявка отклонена.');
+        } catch (\Exception $e) {
+            Log::error('Ошибка при отклонении заявки арендодателя', [
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+
+            return redirect()->back()->with('error', 'Произошла ошибка при отклонении заявки');
+        }
     }
 }
