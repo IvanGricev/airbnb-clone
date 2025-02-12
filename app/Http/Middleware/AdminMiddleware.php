@@ -8,13 +8,6 @@ use Illuminate\Support\Facades\Auth;
 
 class AdminMiddleware
 {
-    /**
-     * Обработка входящего запроса.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response|\Illuminate\Http\RedirectResponse)  $next
-     * @return \Symfony\Component\HttpFoundation\Response|\Illuminate\Http\RedirectResponse
-     */
     public function handle(Request $request, Closure $next)
     {
         if (Auth::check() && Auth::user()->role === 'admin') {
