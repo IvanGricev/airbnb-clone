@@ -38,17 +38,23 @@ class AdminController extends Controller
             $search = $request->query('search', '');
 
             $applications = LandlordApplication::with('user')
-                ->when($status, fn($q) => $q->where('status', $status))
-                ->when($search, fn($q) => 
-                    $q->whereHas('user', fn($q) => 
+                ->when($status, function($query) use ($status) {
+                    return $query->where('status', $status);
+                })
+                ->when($search, function($query) use ($search) {
+                    return $query->whereHas('user', function($q) use ($search) {
                         $q->where('name', 'like', "%$search%")
-                        ->orWhere('email', 'like', "%$search%")
-                    )
-                )
+                          ->orWhere('email', 'like', "%$search%");
+                    });
+                })
                 ->orderBy('created_at', 'desc')
                 ->paginate(10);
 
-            $statuses = ['pending' => 'На рассмотрении', 'approved' => 'Одобрено', 'rejected' => 'Отклонено'];
+            $statuses = [
+                'pending' => 'На рассмотрении',
+                'approved' => 'Одобрено',
+                'rejected' => 'Отклонено'
+            ];
 
             return view('admin.landlord_applications', compact('applications', 'status', 'search', 'statuses'));
         } catch (\Exception $e) {

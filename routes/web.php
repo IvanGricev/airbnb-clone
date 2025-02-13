@@ -44,12 +44,12 @@ Route::middleware('auth')->group(function () {
     Route::get('my-tickets', [SupportController::class, 'myTickets'])->name('support.tickets');
     
     // Заявка на роль арендодателя
-    Route::get('apply-landlord', [LandlordController::class, 'showApplyForm'])->name('landlord.apply');
-    Route::post('apply-landlord', [LandlordController::class, 'apply'])->name('landlord.apply.submit');
+    // Route::get('apply-landlord', [LandlordController::class, 'showApplyForm'])->name('landlord.apply');
+    // Route::post('apply-landlord', [LandlordController::class, 'apply'])->name('landlord.apply.submit');
     
     // Стать арендодателем и добавить жильё
-    Route::get('become-landlord', [PropertyController::class, 'showBecomeLandlordForm'])->name('become-landlord.form');
-    Route::post('become-landlord', [PropertyController::class, 'storeAsLandlord'])->name('become-landlord.store');
+    Route::get('become-landlord', [PropertyController::class, 'showBecomeLandlordForm'])->name('become-landlord.form')->middleware('auth');
+    Route::post('become-landlord', [PropertyController::class, 'storeAsLandlord'])->name('become-landlord.store')->middleware('auth');
 });
 
 // Административные маршруты

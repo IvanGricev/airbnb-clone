@@ -1,7 +1,7 @@
 @extends('layouts.main')
 
 @section('title', 'Заявка на роль арендодателя')
-
+<!--НА УДАЛЕНИЕ-->
 @section('content')
 <h1>Стать арендодателем</h1>
 
