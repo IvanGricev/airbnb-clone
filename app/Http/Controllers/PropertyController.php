@@ -109,7 +109,7 @@ class PropertyController extends Controller
                     'regex:/^\d{4} \d{6}$/'
                 ],
                 'passport_expiration_month' => 'required|integer|between:1,12',
-                'passport_expiration_year' => 'required|integer|min:' . date('Y'),
+                'passport_expiration_year' => 'required|integer|min:' . date('y'), // Используем двухзначный год
             ], [
                 'first_name.required' => 'Поле "Имя" обязательно для заполнения.',
                 'middle_name.required' => 'Поле "Отчество" обязательно для заполнения.',
@@ -132,14 +132,19 @@ class PropertyController extends Controller
                     ->withInput();
             }
 
+            // Формируем дату в формате mm/yy
+            $expirationDate = sprintf('%02d/%02d', 
+                $validated['passport_expiration_month'], 
+                $validated['passport_expiration_year']
+            );
+
             // Обновление данных пользователя
             $user->update([
                 'first_name' => $validated['first_name'],
                 'middle_name' => $validated['middle_name'],
                 'last_name' => $validated['last_name'],
                 'passport_number' => $validated['passport_number'],
-                'passport_expiration_month' => $validated['passport_expiration_month'],
-                'passport_expiration_year' => $validated['passport_expiration_year'],
+                'passport_expiration_date' => $expirationDate, // Сохраняем в формате mm/yy
             ]);
 
             // Создание заявки

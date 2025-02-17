@@ -77,7 +77,7 @@
                             name="passport_expiration_month"
                             required>
                         @foreach(range(1, 12) as $month)
-                            <option value="{{ $month }}" {{ old('passport_expiration_month', $user->passport_expiration_month ?? '') == $month ? 'selected' : '' }}>
+                            <option value="{{ $month }}" {{ old('passport_expiration_month', $user->passport_expiration_date ? explode('/', $user->passport_expiration_date)[0] : '') == $month ? 'selected' : '' }}>
                                 {{ DateTime::createFromFormat('!m', $month)->format('F') }}
                             </option>
                         @endforeach
@@ -93,8 +93,8 @@
                             class="form-control @error('passport_expiration_year') is-invalid @enderror"
                             name="passport_expiration_year"
                             required>
-                        @foreach(range(date('Y'), date('Y') + 10) as $year)
-                            <option value="{{ $year }}" {{ old('passport_expiration_year', $user->passport_expiration_year ?? '') == $year ? 'selected' : '' }}>
+                        @foreach(range(date('y'), date('y') + 10) as $year)
+                            <option value="{{ $year }}" {{ old('passport_expiration_year', $user->passport_expiration_date ? explode('/', $user->passport_expiration_date)[1] : '') == $year ? 'selected' : '' }}>
                                 {{ $year }}
                             </option>
                         @endforeach

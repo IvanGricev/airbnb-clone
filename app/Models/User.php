@@ -19,8 +19,7 @@ class User extends Authenticatable
         'middle_name',
         'last_name',
         'passport_number',
-        'passport_expiration_month',
-        'passport_expiration_year',
+        'passport_expiration_date',
     ];
     
     protected $dates = [

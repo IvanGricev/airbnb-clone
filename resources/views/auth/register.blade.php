@@ -7,18 +7,6 @@
     <h1>Регистрация</h1>
     <div class="row justify-content-center">
         <div class="col-md-6">
-            <!-- Отображение сообщений об ошибках -->
-            <!-- @if($errors->any())
-                <div class="alert alert-danger">
-                    <h5>При регистрации произошли следующие ошибки:</h5>
-                    <ul class="mb-0">
-                        @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif -->
-
             <!-- Форма регистрации -->
             <form method="POST" action="{{ route('register') }}">
                 @csrf
