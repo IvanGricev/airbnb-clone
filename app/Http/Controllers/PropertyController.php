@@ -120,25 +120,22 @@ class PropertyController extends Controller
                 'passport_expiration_year.required' => 'Поле "Год действия паспорта" обязательно для заполнения.',
                 'passport_expiration_year.min' => 'Год действия паспорта должен быть не меньше текущего.',
             ]);
-
+    
             $user = Auth::user();
-            
-            // Проверка существующей заявки
             if (LandlordApplication::where('user_id', $user->id)
-                ->whereIn('status', ['pending', 'approved'])
-                ->exists()) {
+                    ->whereIn('status', ['pending', 'approved'])
+                    ->exists()) {
                 return redirect()->back()
                     ->with('error', 'Вы уже подали заявку или она уже была одобрена.')
                     ->withInput();
             }
-
+    
             // Формируем дату в формате mm/yy
-            $expirationDate = sprintf('%02d/%02d', 
-                $validated['passport_expiration_month'], 
+            $expirationDate = sprintf('%02d/%02d',
+                $validated['passport_expiration_month'],
                 $validated['passport_expiration_year']
             );
-
-            // Обновление данных пользователя
+    
             $user->update([
                 'first_name' => $validated['first_name'],
                 'middle_name' => $validated['middle_name'],
@@ -146,26 +143,29 @@ class PropertyController extends Controller
                 'passport_number' => $validated['passport_number'],
                 'passport_expiration_date' => $expirationDate, // Сохраняем в формате mm/yy
             ]);
-
-            // Создание заявки
+    
+            // Добавляем значение для поля message
             LandlordApplication::create([
                 'user_id' => $user->id,
                 'status' => 'pending',
+                'message' => 'Заявка на роль арендодателя', // Предустановленное сообщение
             ]);
-
+    
             return redirect()->route('home')
                 ->with('success', 'Ваша заявка успешно подана на рассмотрение.');
-
+    
         } catch (\Exception $e) {
             Log::error('Ошибка обработки заявки арендодателя: ' . $e->getMessage(), [
                 'exception' => $e,
                 'user_id' => Auth::id(),
                 'input' => $request->all()
             ]);
-
+    
+            // Выводим точную ошибку для отладки
             return redirect()->back()
-                ->with('error', 'Произошла ошибка при обработке вашей заявки. Пожалуйста, проверьте введённые данные.')
+                ->withErrors(['error' => 'Произошла ошибка при обработке вашей заявки: ' . $e->getMessage()])
                 ->withInput();
         }
     }
+    
 }
