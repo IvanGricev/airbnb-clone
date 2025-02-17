@@ -8,6 +8,8 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\SupportController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\LandlordController;
+use App\Http\Controllers\SupportTicketController;
+use App\Http\Controllers\DatabaseController;
 
 // Главная страница
 Route::get('/', [PropertyController::class, 'index'])->name('home');
@@ -43,10 +45,13 @@ Route::middleware('auth')->group(function () {
     Route::post('support', [SupportController::class, 'store'])->name('support.store');
     Route::get('my-tickets', [SupportController::class, 'myTickets'])->name('support.tickets');
     
-    // Заявка на роль арендодателя
-    // Route::get('apply-landlord', [LandlordController::class, 'showApplyForm'])->name('landlord.apply');
-    // Route::post('apply-landlord', [LandlordController::class, 'apply'])->name('landlord.apply.submit');
-    
+    // Тикеты поддержки
+    Route::get('/support', [SupportTicketController::class, 'userTickets'])->name('support.index');
+    Route::get('/support/create', [SupportTicketController::class, 'create'])->name('support.create');
+    Route::post('/support/store', [SupportTicketController::class, 'store'])->name('support.store');
+    Route::get('/support/{id}', [SupportTicketController::class, 'show'])->name('support.show');
+    Route::post('/support/{id}/message', [SupportTicketController::class, 'sendMessage'])->name('support.message.send');
+
     // Стать арендодателем и добавить жильё
     Route::get('become-landlord', [PropertyController::class, 'showBecomeLandlordForm'])->name('become-landlord.form')->middleware('auth');
     Route::post('become-landlord', [PropertyController::class, 'storeAsLandlord'])->name('become-landlord.store')->middleware('auth');
@@ -60,4 +65,18 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('landlord-applications', [AdminController::class, 'landlordApplications'])->name('landlord.applications');
     Route::post('landlord-applications/{application}/approve', [AdminController::class, 'approveLandlordApplication'])->name('landlord.applications.approve');
     Route::post('landlord-applications/{application}/reject', [AdminController::class, 'rejectLandlordApplication'])->name('landlord.applications.reject');
+
+    // Управление базой данных
+    Route::get('/database', [DatabaseController::class, 'index'])->name('database.index');
+    Route::get('/database/{table}', [DatabaseController::class, 'table'])->name('database.table');
+    Route::get('/database/{table}/create', [DatabaseController::class, 'createRow'])->name('database.create');
+    Route::post('/database/{table}/store', [DatabaseController::class, 'storeRow'])->name('database.store');
+    Route::get('/database/{table}/edit/{id}', [DatabaseController::class, 'editRow'])->name('database.edit');
+    Route::put('/database/{table}/update/{id}', [DatabaseController::class, 'updateRow'])->name('database.update');
+    Route::delete('/database/{table}/delete/{id}', [DatabaseController::class, 'deleteRow'])->name('database.delete');
+
+    // Управление тикетами поддержки
+    Route::get('/support', [SupportTicketController::class, 'index'])->name('support.index');
+    Route::get('/support/{id}', [SupportTicketController::class, 'show'])->name('support.show');
+    Route::post('/support/{id}/message', [SupportTicketController::class, 'sendMessage'])->name('support.message.send');
 });

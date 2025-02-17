@@ -45,4 +45,9 @@ class User extends Authenticatable
     {
         return parent::update($attributes, $options);
     }
+
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
 }

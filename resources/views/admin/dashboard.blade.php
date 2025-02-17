@@ -11,12 +11,13 @@
                 <div class="card-body">
                     <ul class="nav flex-column">
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" 
-                               href="{{ route('admin.dashboard') }}">Главная</a>
+                            <a class="nav-link {{ request()->routeIs('admin.landlord.applications') ? 'active' : '' }}" href="{{ route('admin.landlord.applications') }}">Заявки арендодателей</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('admin.landlord.applications') ? 'active' : '' }}" 
-                               href="{{ route('admin.landlord.applications') }}">Заявки арендодателей</a>
+                            <a class="nav-link {{ request()->routeIs('admin.database.index') ? 'active' : '' }}" href="{{ route('admin.database.index') }}">Управление БД</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.support.index') ? 'active' : '' }}" href="{{ route('admin.support.index') }}">Тикеты поддержки</a>
                         </li>
                     </ul>
                 </div>
