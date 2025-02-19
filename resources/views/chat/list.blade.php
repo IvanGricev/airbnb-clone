@@ -25,7 +25,7 @@
     <ul>
         @foreach($supportTickets as $ticket)
             <li>
-                <a href="{{ route('support.tickets.show', $ticket->id) }}">Тикет #{{ $ticket->id }}: {{ $ticket->subject }}</a>
+                <a href="{{ route('support.show', $ticket->id) }}">Тикет #{{ $ticket->id }}: {{ $ticket->subject }}</a>
             </li>
         @endforeach
     </ul>

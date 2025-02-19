@@ -3,18 +3,26 @@
 namespace App\Http\Controllers;
 
 use App\Models\SupportTicket;
+use App\Models\SupportMessage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class SupportController extends Controller
 {
-    // Форма отправки заявки в поддержку
-    public function index()
+    // Просмотр списка тикетов пользователя
+    public function myTickets()
     {
-        return view('support.index');
+        $tickets = SupportTicket::where('user_id', Auth::id())->orderBy('created_at', 'desc')->get();
+        return view('support.tickets', compact('tickets'));
     }
 
-    // Отправка заявки
+    // Форма создания нового тикета
+    public function create()
+    {
+        return view('support.index'); // Ваше представление для формы создания тикета
+    }
+
+    // Сохранение нового тикета
     public function store(Request $request)
     {
         $request->validate([
@@ -22,20 +30,56 @@ class SupportController extends Controller
             'message' => 'required|string',
         ]);
 
-        $ticket = new SupportTicket();
-        $ticket->user_id = Auth::id();
-        $ticket->subject = $request->subject;
-        $ticket->message = $request->message;
-        $ticket->status = 'open';
-        $ticket->save();
+        $ticket = SupportTicket::create([
+            'user_id' => Auth::id(),
+            'subject' => $request->subject,
+            'status' => 'open',
+        ]);
 
-        return back()->with('success', 'Ваша заявка отправлена в поддержку.');
+        SupportMessage::create([
+            'ticket_id' => $ticket->id,
+            'user_id' => Auth::id(),
+            'message' => $request->message,
+        ]);
+
+        return redirect()->route('support.show', $ticket->id)->with('success', 'Ваша заявка отправлена в поддержку.');
     }
 
-    public function myTickets()
+    // Просмотр конкретного тикета и сообщений
+    public function show($id)
     {
-        $tickets = SupportTicket::where('user_id', Auth::id())->orderBy('created_at', 'desc')->get();
-        return view('support.tickets', compact('tickets'));
+        $ticket = SupportTicket::findOrFail($id);
+
+        // Проверка доступа
+        if ($ticket->user_id !== Auth::id()) {
+            return redirect()->route('support.index')->with('error', 'У вас нет доступа к этому тикету.');
+        }
+
+        $messages = $ticket->messages()->orderBy('created_at', 'asc')->get();
+
+        return view('support.chat', compact('ticket', 'messages'));
     }
 
+    // Отправка сообщения в тикете
+    public function sendMessage(Request $request, $id)
+    {
+        $request->validate([
+            'message' => 'required|string',
+        ]);
+
+        $ticket = SupportTicket::findOrFail($id);
+
+        // Проверка доступа
+        if ($ticket->user_id !== Auth::id()) {
+            return redirect()->route('support.index')->with('error', 'У вас нет доступа к этому тикету.');
+        }
+
+        SupportMessage::create([
+            'ticket_id' => $ticket->id,
+            'user_id' => Auth::id(),
+            'message' => $request->message,
+        ]);
+
+        return redirect()->back()->with('success', 'Сообщение отправлено.');
+    }
 }

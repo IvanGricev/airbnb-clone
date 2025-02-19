@@ -7,8 +7,6 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\SupportController;
 use App\Http\Controllers\AdminController;
-use App\Http\Controllers\LandlordController;
-use App\Http\Controllers\SupportTicketController;
 use App\Http\Controllers\DatabaseController;
 
 /**
@@ -40,7 +38,7 @@ Route::middleware('auth')->group(function () {
      */
     Route::resource('properties', PropertyController::class);
     Route::get('/properties/{propertyId}/unavailable-dates', [PropertyController::class, 'getUnavailableDates'])->name('properties.unavailableDates');
-    
+
     /**
      * Бронирования
      */
@@ -56,26 +54,19 @@ Route::middleware('auth')->group(function () {
     /**
      * Чат
      */
-    Route::get('chat/{user}', [ChatController::class, 'index'])->name('chat.index');
+    Route::get('chat/{withUserId}', [ChatController::class, 'index'])->name('chat.index');
     Route::post('messages', [ChatController::class, 'sendMessage'])->name('messages.send');
     Route::get('/chats', [ChatController::class, 'conversations'])->name('chat.conversations');
-    
+
     /**
      * Поддержка
      */
-    Route::get('support', [SupportController::class, 'index'])->name('support.index');
-    Route::post('support', [SupportController::class, 'store'])->name('support.store');
-    Route::get('my-tickets', [SupportController::class, 'myTickets'])->name('support.tickets');
-
-    /**
-     * Тикеты поддержки (обновленные маршруты)
-     */
-    // *** Изменено для предотвращения конфликтов маршрутов ***
-    Route::get('/support-tickets', [SupportTicketController::class, 'userTickets'])->name('support.tickets.index');
-    Route::get('/support-tickets/create', [SupportTicketController::class, 'create'])->name('support.tickets.create');
-    Route::post('/support-tickets/store', [SupportTicketController::class, 'store'])->name('support.tickets.store');
-    Route::get('/support-tickets/{id}', [SupportTicketController::class, 'show'])->name('support.tickets.show');
-    Route::post('/support-tickets/{id}/message', [SupportTicketController::class, 'sendMessage'])->name('support.tickets.message.send');
+    // Просмотр списка тикетов пользователя
+    Route::get('/support', [SupportController::class, 'myTickets'])->name('support.index');
+    Route::get('/support/create', [SupportController::class, 'create'])->name('support.create');
+    Route::post('/support/store', [SupportController::class, 'store'])->name('support.store');
+    Route::get('/support/{id}', [SupportController::class, 'show'])->name('support.show');
+    Route::post('/support/{id}/message', [SupportController::class, 'sendMessage'])->name('support.message.send');
 
     /**
      * Стать арендодателем и добавить жильё
@@ -89,7 +80,7 @@ Route::middleware('auth')->group(function () {
  */
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminController::class, 'index'])->name('dashboard');
-    
+
     /**
      * Управление заявками на роль арендодателя
      */
@@ -111,8 +102,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     /**
      * Управление тикетами поддержки
      */
-    // *** Изменено для согласованности с обновлениями маршрутов поддержки ***
-    Route::get('/support-tickets', [SupportTicketController::class, 'index'])->name('support.tickets.admin.index');
-    Route::get('/support-tickets/{id}', [SupportTicketController::class, 'show'])->name('support.tickets.admin.show');
-    Route::post('/support-tickets/{id}/message', [SupportTicketController::class, 'sendMessage'])->name('support.tickets.admin.message.send');
+     Route::get('/support', [AdminController::class, 'supportTickets'])->name('support.index');
+     Route::get('/support/{id}', [AdminController::class, 'showSupportTicket'])->name('support.show');
+     Route::post('/support/{id}/message', [AdminController::class, 'sendSupportMessage'])->name('support.message.send');
 });

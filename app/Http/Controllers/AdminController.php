@@ -7,7 +7,8 @@ use App\Models\LandlordApplication;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-
+use App\Models\SupportTicket;
+use App\Models\SupportMessage;
 class AdminController extends Controller
 {
     public function __construct()
@@ -109,4 +110,43 @@ class AdminController extends Controller
             return redirect()->back()->with('error', 'Произошла ошибка при отклонении заявки');
         }
     }
+
+     // Отображение списка тикетов поддержки
+     public function supportTickets()
+     {
+         $tickets = SupportTicket::orderBy('updated_at', 'desc')->get();
+         return view('admin.support.index', compact('tickets'));
+     }
+ 
+     // Отображение конкретного тикета поддержки
+     public function showSupportTicket($id)
+     {
+         $ticket = SupportTicket::findOrFail($id);
+         $messages = $ticket->messages()->orderBy('created_at', 'asc')->get();
+         return view('admin.support.chat', compact('ticket', 'messages'));
+     }
+ 
+     // Отправка сообщения в тикете поддержки
+     public function sendSupportMessage(Request $request, $id)
+     {
+         $request->validate([
+             'message' => 'required|string',
+         ]);
+ 
+         $ticket = SupportTicket::findOrFail($id);
+ 
+         SupportMessage::create([
+             'ticket_id' => $ticket->id,
+             'user_id' => auth()->id(),
+             'message' => $request->message,
+         ]);
+ 
+         // Обновляем статус тикета, если необходимо
+         if ($ticket->status !== 'answered') {
+             $ticket->status = 'answered';
+             $ticket->save();
+         }
+ 
+         return redirect()->back()->with('success', 'Сообщение отправлено.');
+     }
 }
