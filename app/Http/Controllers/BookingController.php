@@ -51,15 +51,71 @@ class BookingController extends Controller
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,
             'total_price' => $totalPrice,
+            'status' => 'confirmed',
         ]);
-
+    
         return redirect()->route('bookings.history')->with('success', 'Бронирование успешно создано.');
     }
-
+    
     // Метод для отображения истории бронирований пользователя
     public function history()
     {
         $bookings = Booking::where('user_id', Auth::id())->with('property')->get();
         return view('bookings.history', compact('bookings'));
+    }
+
+    public function cancelBooking($id)
+    {
+        $booking = Booking::findOrFail($id);
+
+        // Проверяем, что текущий пользователь является хозяином бронирования
+        if ($booking->user_id !== Auth::id()) {
+            return redirect()->back()->with('error', 'У вас нет прав для отмены этого бронирования.');
+        }
+
+        // Проверяем, можно ли отменить бронирование
+        if (!$booking->canBeCancelled()) {
+            return redirect()->back()->with('error', 'Невозможно отменить бронирование после даты начала.');
+        }
+
+        $booking->status = 'cancelled_by_user';
+        $booking->save();
+
+        // Можно добавить логику возврата средств или уведомления
+
+        return redirect()->back()->with('success', 'Бронирование успешно отменено.');
+    }
+
+    // Метод для отмены бронирования арендодателем
+    public function cancelBookingByLandlord($id)
+    {
+        $booking = Booking::findOrFail($id);
+        $property = $booking->property;
+
+        // Проверяем, что текущий пользователь является хозяином жилья
+        if ($property->user_id !== Auth::id()) {
+            return redirect()->back()->with('error', 'У вас нет прав для отмены этого бронирования.');
+        }
+
+        // Проверяем, можно ли отменить бронирование
+        if (!$booking->canBeCancelled()) {
+            return redirect()->back()->with('error', 'Невозможно отменить бронирование после даты начала.');
+        }
+
+        $booking->status = 'cancelled_by_landlord';
+        $booking->save();
+
+        // Можно добавить логику уведомления пользователя
+
+        return redirect()->back()->with('success', 'Бронирование успешно отменено.');
+    }
+
+    public function landlordBookings()
+    {
+        $bookings = Booking::whereHas('property', function($query) {
+            $query->where('user_id', Auth::id());
+        })->with('property', 'user')->get();
+
+        return view('landlord.bookings', compact('bookings'));
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class Booking extends Model
 {
@@ -12,6 +13,7 @@ class Booking extends Model
         'start_date',
         'end_date',
         'total_price',
+        'status',
     ];
 
     public function user()
@@ -22,5 +24,10 @@ class Booking extends Model
     public function property()
     {
         return $this->belongsTo(Property::class);
+    }
+
+    public function canBeCancelled()
+    {
+        return Carbon::now()->lt(Carbon::parse($this->start_date));
     }
 }

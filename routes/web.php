@@ -39,8 +39,6 @@ Route::middleware('auth')->group(function () {
      * Управление жильём
      */
     Route::resource('properties', PropertyController::class);
-
-    // *** Новый маршрут: Получение недоступных дат для жилья ***
     Route::get('/properties/{propertyId}/unavailable-dates', [PropertyController::class, 'getUnavailableDates'])->name('properties.unavailableDates');
     
     /**
@@ -49,6 +47,11 @@ Route::middleware('auth')->group(function () {
     Route::post('bookings', [BookingController::class, 'store'])->name('bookings.store');
     Route::get('bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
     Route::get('my-bookings', [BookingController::class, 'history'])->name('bookings.history');
+    Route::get('landlord/bookings', [BookingController::class, 'landlordBookings'])->name('landlord.bookings');
+
+    // Отмена бронирования
+    Route::post('bookings/{id}/cancel', [BookingController::class, 'cancelBooking'])->name('bookings.cancel');
+    Route::post('bookings/{id}/cancel-by-landlord', [BookingController::class, 'cancelBookingByLandlord'])->name('bookings.cancelByLandlord');
 
     /**
      * Чат

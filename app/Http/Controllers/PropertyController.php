@@ -173,6 +173,7 @@ class PropertyController extends Controller
     public function getUnavailableDates($propertyId)
     {
         $bookings = Booking::where('property_id', $propertyId)
+            ->where('status', 'confirmed')
             ->get(['start_date', 'end_date']);
 
         $unavailableDates = [];
@@ -192,4 +193,5 @@ class PropertyController extends Controller
 
         return response()->json($unavailableDates);
     }
+
 }

@@ -7,17 +7,16 @@
         <div class="collapse navbar-collapse p-2" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 @auth
-                    <!-- Ссылки для всех авторизованных пользователей -->
                     <li class="nav-item"><a class="nav-link" href="{{ route('bookings.history') }}">Мои бронирования</a></li>
 
-                    <!-- Проверка роли администратора -->
+                    @if(Auth::user()->role === 'landlord')
+                        <li class="nav-item"><a class="nav-link" href="{{ route('landlord.bookings') }}">Управление арендой</a></li>
+                    @endif
+
                     @if(Auth::user()->role === 'admin')
                         <li class="nav-item"><a class="nav-link" href="{{ route('admin.dashboard') }}">Админка</a></li>
                     @endif
 
-                    <li class="nav-item">
-
-                    </li>
                     <li class="nav-item">
                         <div class="dropdown text-end">
                             <a href="#" class="d-block link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
@@ -31,8 +30,8 @@
                                     <li><a class="dropdown-item" href="{{ route('become-landlord.form') }}">Стать арендодателем</a></li>
                                 @endif
                                 <li><a class="dropdown-item" href="#">Настройки</a></li>
-                                <li><a class="dropdown-item" href="{{ route('support.tickets') }}">Мои запросы в поддержку</a></li>
-                                <li><a class="dropdown-item" href="{{ route('support.index') }}">Обратится в поддержку</a></li>
+                                <li><a class="dropdown-item" href="{{ route('support.tickets.index') }}">Мои запросы в поддержку</a></li>
+                                <li><a class="dropdown-item" href="{{ route('support.tickets.create') }}">Обратиться в поддержку</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <form action="{{ route('logout') }}" method="POST" class="d-inline">
@@ -46,7 +45,6 @@
                 @endauth
 
                 @guest
-                    <!-- Ссылки для гостей -->
                     <li class="nav-item"><a class="nav-link" href="{{ route('login') }}">Вход</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ route('register') }}">Регистрация</a></li>
                 @endguest

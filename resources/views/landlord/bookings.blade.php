@@ -1,9 +1,9 @@
 @extends('layouts.main')
 
-@section('title', 'Мои бронирования')
+@section('title', 'Бронирования моих объектов')
 
 @section('content')
-<h1>Мои бронирования</h1>
+<h1>Бронирования моих объектов</h1>
 
 @if(session('success'))
     <div class="alert alert-success">{{ session('success') }}</div>
@@ -14,15 +14,15 @@
 @endif
 
 @if($bookings->isEmpty())
-    <p>У вас нет бронирований.</p>
+    <p>На ваши объекты нет бронирований.</p>
 @else
     <table class="table">
         <thead>
             <tr>
                 <th>Жильё</th>
+                <th>Арендатор</th>
                 <th>Дата заезда</th>
                 <th>Дата выезда</th>
-                <th>Общая стоимость</th>
                 <th>Статус</th>
                 <th>Действия</th>
             </tr>
@@ -31,21 +31,21 @@
             @foreach($bookings as $booking)
             <tr>
                 <td>{{ $booking->property->title }}</td>
+                <td>{{ $booking->user->name }}</td>
                 <td>{{ $booking->start_date }}</td>
                 <td>{{ $booking->end_date }}</td>
-                <td>{{ $booking->total_price }} руб.</td>
                 <td>
                     @if($booking->status == 'confirmed')
                         Подтверждено
                     @elseif($booking->status == 'cancelled_by_user')
-                        Отменено вами
+                        Отменено арендатором
                     @elseif($booking->status == 'cancelled_by_landlord')
-                        Отменено арендодателем
+                        Отменено вами
                     @endif
                 </td>
                 <td>
                     @if($booking->status == 'confirmed' && $booking->canBeCancelled())
-                        <form action="{{ route('bookings.cancel', $booking->id) }}" method="POST" style="display:inline-block;">
+                        <form action="{{ route('bookings.cancelByLandlord', $booking->id) }}" method="POST" style="display:inline-block;">
                             @csrf
                             <button type="submit" class="btn btn-danger">Отменить</button>
                         </form>
