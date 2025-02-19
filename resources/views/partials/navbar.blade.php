@@ -24,6 +24,7 @@
                             </a>
                             <ul class="dropdown-menu text-small">
                                 <li><a class="dropdown-item" href="#">Профиль</a></li>
+                                <li><a class="dropdown-item" href="{{ route('chat.conversations') }}">Мои чаты</a></li>
                                 @if(Auth::user()->role === 'landlord')
                                     <li><a class="dropdown-item" href="{{ route('properties.create') }}">Добавить жильё</a></li>
                                 @else

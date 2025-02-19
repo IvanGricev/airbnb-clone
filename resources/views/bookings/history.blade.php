@@ -44,6 +44,7 @@
                     @endif
                 </td>
                 <td>
+                    <a href="{{ route('chat.index', ['user' => $booking->property->user_id]) }}" class="btn btn-info">Чат с арендодателем</a>
                     @if($booking->status == 'confirmed' && $booking->canBeCancelled())
                         <form action="{{ route('bookings.cancel', $booking->id) }}" method="POST" style="display:inline-block;">
                             @csrf

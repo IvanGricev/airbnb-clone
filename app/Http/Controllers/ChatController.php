@@ -6,7 +6,7 @@ use App\Models\Message;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
+use App\Models\SupportTicket;
 class ChatController extends Controller
 {
     // Отображение чата
@@ -41,4 +41,26 @@ class ChatController extends Controller
 
         return back()->with('success', 'Сообщение отправлено.');
     }
+
+    public function conversations()
+    {
+        $userId = Auth::id();
+
+        // Получаем уникальные ID пользователей, с которыми у текущего пользователя есть сообщения
+        $userMessages = Message::where('from_user_id', $userId)
+            ->orWhere('to_user_id', $userId)
+            ->get();
+
+        $userIds = $userMessages->map(function ($message) use ($userId) {
+            return $message->from_user_id == $userId ? $message->to_user_id : $message->from_user_id;
+        })->unique();
+
+        $users = User::whereIn('id', $userIds)->get();
+
+        // Получаем тикеты поддержки
+        $supportTickets = SupportTicket::where('user_id', $userId)->get();
+
+        return view('chat.list', compact('users', 'supportTickets'));
+    }
+
 }
