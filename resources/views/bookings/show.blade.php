@@ -1,20 +1,36 @@
 @extends('layouts.main')
 
-@section('title', 'Бронирование')
+@section('title', 'Мои бронирования')
 
 @section('content')
-<h1>Информация о бронировании</h1>
+<h1>Мои бронирования</h1>
 
-<p><strong>Жильё:</strong> <a href="{{ route('properties.show', $booking->property) }}">{{ $booking->property->title }}</a></p>
-<p><strong>Даты проживания:</strong> с {{ $booking->start_date }} по {{ $booking->end_date }}</p>
-<p><strong>Общая стоимость:</strong> {{ $booking->total_price }} руб.</p>
-
-@if(Auth::id() === $booking->property->user_id)
-    <p>Это бронирование вашего жилья.</p>
+@if(session('success'))
+    <div class="alert alert-success">{{ session('success') }}</div>
 @endif
 
-@if(Auth::id() === $booking->user_id)
-    <p>Вы забронировали это жильё.</p>
+@if($bookings->isEmpty())
+    <p>У вас нет бронирований.</p>
+@else
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Жильё</th>
+                <th>Дата заезда</th>
+                <th>Дата выезда</th>
+                <th>Общая стоимость</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($bookings as $booking)
+            <tr>
+                <td>{{ $booking->property->title }}</td>
+                <td>{{ $booking->start_date }}</td>
+                <td>{{ $booking->end_date }}</td>
+                <td>{{ $booking->total_price }} руб.</td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
 @endif
-
 @endsection

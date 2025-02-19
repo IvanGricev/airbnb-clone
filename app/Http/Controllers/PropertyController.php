@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Property;
+use App\Models\Booking;
 use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use App\Models\LandlordApplication;
 use App\Models\User;
@@ -64,6 +64,7 @@ class PropertyController extends Controller
         return view('properties.show', compact('property'));
     }
 
+    // Форма подачи заявки на роль арендодателя
     public function showBecomeLandlordForm()
     {
         try {
@@ -95,6 +96,7 @@ class PropertyController extends Controller
         }
     }
 
+    // Сохранение заявки на роль арендодателя
     public function storeAsLandlord(Request $request)
     {
         try {
@@ -120,22 +122,23 @@ class PropertyController extends Controller
                 'passport_expiration_year.required' => 'Поле "Год действия паспорта" обязательно для заполнения.',
                 'passport_expiration_year.min' => 'Год действия паспорта должен быть не меньше текущего.',
             ]);
-    
+
             $user = Auth::user();
+
             if (LandlordApplication::where('user_id', $user->id)
-                    ->whereIn('status', ['pending', 'approved'])
-                    ->exists()) {
+                ->whereIn('status', ['pending', 'approved'])
+                ->exists()) {
                 return redirect()->back()
                     ->with('error', 'Вы уже подали заявку или она уже была одобрена.')
                     ->withInput();
             }
-    
+
             // Формируем дату в формате mm/yy
             $expirationDate = sprintf('%02d/%02d',
                 $validated['passport_expiration_month'],
                 $validated['passport_expiration_year']
             );
-    
+
             $user->update([
                 'first_name' => $validated['first_name'],
                 'middle_name' => $validated['middle_name'],
@@ -143,29 +146,50 @@ class PropertyController extends Controller
                 'passport_number' => $validated['passport_number'],
                 'passport_expiration_date' => $expirationDate, // Сохраняем в формате mm/yy
             ]);
-    
-            // Добавляем значение для поля message
+
             LandlordApplication::create([
                 'user_id' => $user->id,
                 'status' => 'pending',
                 'message' => 'Заявка на роль арендодателя', // Предустановленное сообщение
             ]);
-    
+
             return redirect()->route('home')
                 ->with('success', 'Ваша заявка успешно подана на рассмотрение.');
-    
+
         } catch (\Exception $e) {
             Log::error('Ошибка обработки заявки арендодателя: ' . $e->getMessage(), [
                 'exception' => $e,
                 'user_id' => Auth::id(),
                 'input' => $request->all()
             ]);
-    
-            // Выводим точную ошибку для отладки
+
             return redirect()->back()
                 ->withErrors(['error' => 'Произошла ошибка при обработке вашей заявки: ' . $e->getMessage()])
                 ->withInput();
         }
     }
-    
+
+    // Метод для получения недоступных дат для конкретного жилья
+    public function getUnavailableDates($propertyId)
+    {
+        $bookings = Booking::where('property_id', $propertyId)
+            ->get(['start_date', 'end_date']);
+
+        $unavailableDates = [];
+
+        foreach ($bookings as $booking) {
+            $start = new \DateTime($booking->start_date);
+            $end = new \DateTime($booking->end_date);
+            $end = $end->modify('+1 day'); // Включаем последний день
+
+            $interval = new \DateInterval('P1D');
+            $period = new \DatePeriod($start, $interval, $end);
+
+            foreach ($period as $date) {
+                $unavailableDates[] = $date->format('Y-m-d');
+            }
+        }
+
+        return response()->json($unavailableDates);
+    }
 }
