@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('middle_name')->nullable()->after('first_name');
             $table->string('last_name')->nullable()->after('middle_name');
             $table->string('passport_number')->nullable()->after('last_name');
-            $table->date('passport_expiration_date')->nullable()->after('passport_number');
+            $table->string('passport_expiration_date')->nullable()->after('passport_number');
         });
     }
 
