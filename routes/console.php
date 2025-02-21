@@ -1,8 +1,10 @@
 <?php
 
-use Illuminate\Foundation\Inspiring;
-use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
+use App\Console\Commands\SoftDeleteOldChats;
 
-Artisan::command('inspire', function () {
-    $this->comment(Inspiring::quote());
-})->purpose('Display an inspiring quote');
+Schedule::command('chats:soft-delete-old')
+    ->dailyAt('00:00')
+    ->withoutOverlapping()
+    ->onOneServer()
+    ->emailOutputTo('admin@example.com');
