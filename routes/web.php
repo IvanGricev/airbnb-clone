@@ -14,6 +14,7 @@ use App\Http\Controllers\DatabaseController;
  */
 Route::get('/', [PropertyController::class, 'index'])->name('home');
 Route::get('/search', [PropertyController::class, 'search'])->name('properties.search');
+Route::resource('properties', PropertyController::class)->only(['index', 'show', 'create', 'store', 'edit', 'update', 'destroy']);
 
 /**
  * Аутентификация

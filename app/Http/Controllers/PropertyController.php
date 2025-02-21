@@ -13,30 +13,37 @@ use App\Models\Tag;
 
 class PropertyController extends Controller
 {
-    // Отображение списка жилья
     public function index(Request $request)
     {
         $query = $request->input('query');
-        $tagFilter = $request->input('tags');
-    
+        $selectedTags = $request->input('tags', []);
+
+        // Получаем все категории тегов и их соответствующие теги
+        $tags = Tag::all()->groupBy('category');
+
         $properties = Property::with('tags');
-    
+
+        // Поиск по заголовку и описанию
         if ($query) {
-            $properties->where('title', 'like', '%' . $query . '%')
-                       ->orWhere('description', 'like', '%' . $query . '%');
-        }
-    
-        if ($tagFilter) {
-            $tags = explode(',', $tagFilter);
-            $properties->whereHas('tags', function($q) use ($tags) {
-                $q->whereIn('name', $tags);
+            $properties->where(function ($q) use ($query) {
+                $q->where('title', 'like', '%' . $query . '%')
+                ->orWhere('description', 'like', '%' . $query . '%')
+                ->orWhere('address', 'like', '%' . $query . '%');
             });
         }
-    
+
+        // Фильтрация по выбранным тегам
+        if (!empty($selectedTags)) {
+            $properties->whereHas('tags', function($q) use ($selectedTags) {
+                $q->whereIn('tags.id', $selectedTags);
+            });
+        }
+
         $properties = $properties->get();
-    
-        return view('properties.index', compact('properties', 'query', 'tagFilter'));
-    }    
+
+        return view('properties.index', compact('properties', 'query', 'selectedTags', 'tags'));
+    }
+        
 
     // Форма создания жилья (для арендодателей)
     public function create()
@@ -44,8 +51,11 @@ class PropertyController extends Controller
         if (Auth::user()->role !== 'landlord') {
             return redirect()->route('home')->with('error', 'У вас нет прав для создания жилья.');
         }
-        return view('properties.create');
-    }
+    
+        $tags = Tag::all()->groupBy('category');
+    
+        return view('properties.create', compact('tags'));
+    }    
 
     // Сохранение нового жилья
     public function store(Request $request)
@@ -73,14 +83,7 @@ class PropertyController extends Controller
         $property->save();
     
         if ($request->has('tags')) {
-            $tags = explode(',', $request->tags);
-            $tagIds = [];
-            foreach ($tags as $tagName) {
-                $tagName = trim($tagName);
-                $tag = Tag::firstOrCreate(['name' => $tagName]);
-                $tagIds[] = $tag->id;
-            }
-            $property->tags()->sync($tagIds);
+            $property->tags()->sync($request->input('tags'));
         }
     
         return redirect()->route('properties.show', $property)->with('success', 'Жильё успешно добавлено.');
@@ -106,17 +109,11 @@ class PropertyController extends Controller
         $property->price_per_night = $request->price_per_night;
         $property->save();
 
-        // Обработка тегов
         if ($request->has('tags')) {
-            $tags = explode(',', $request->tags);
-            $tagIds = [];
-            foreach ($tags as $tagName) {
-                $tagName = trim($tagName);
-                $tag = Tag::firstOrCreate(['name' => $tagName]);
-                $tagIds[] = $tag->id;
-            }
-            $property->tags()->sync($tagIds);
-        }
+            $property->tags()->sync($request->input('tags'));
+        } else {
+            $property->tags()->detach();
+        }    
 
         return redirect()->route('properties.show', $property)->with('success', 'Жильё успешно обновлено.');
     }
