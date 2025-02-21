@@ -10,6 +10,13 @@
 <p><strong>Адрес:</strong> {{ $property->address }}</p>
 
 <p><strong>Цена за ночь:</strong> {{ $property->price_per_night }} руб.</p>
+@if($property->tags->isNotEmpty())
+    <p><strong>Теги:</strong>
+        @foreach($property->tags as $tag)
+            <span class="badge bg-secondary">{{ $tag->name }}</span>
+        @endforeach
+    </p>
+@endif
 
 <!--
 Карта с использованием Google Maps

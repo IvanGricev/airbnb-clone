@@ -26,6 +26,12 @@
         <input type="number" name="price_per_night" class="form-control" value="{{ old('price_per_night') }}">
         @error('price_per_night') <div class="text-danger">{{ $message }}</div> @enderror
     </div>
+    <div class="mb-3">
+        <label for="tags" class="form-label">Теги (через запятую)</label>
+        <input type="text" name="tags" class="form-control" value="{{ old('tags') }}">
+        @error('tags') <div class="text-danger">{{ $message }}</div> @enderror
+    </div>
+
     <!-- Здесь можно добавить загрузку изображений -->
     <button type="submit" class="btn btn-primary">Добавить</button>
 </form>

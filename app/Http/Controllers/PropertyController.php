@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use App\Models\LandlordApplication;
 use App\Models\User;
+use App\Models\Tag;
 
 class PropertyController extends Controller
 {
@@ -34,29 +35,74 @@ class PropertyController extends Controller
         if (Auth::user()->role !== 'landlord') {
             return redirect()->route('home')->with('error', 'У вас нет прав для создания жилья.');
         }
-
+    
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'address' => 'required|string',
             'price_per_night' => 'required|numeric',
+            'tags' => 'nullable|string',
         ]);
-
+    
         $property = new Property();
         $property->user_id = Auth::id();
         $property->title = $request->title;
         $property->description = $request->description;
         $property->address = $request->address;
         $property->price_per_night = $request->price_per_night;
+        $property->latitude = null; 
+        $property->longitude = null; 
+        $property->save();
+    
+        if ($request->has('tags')) {
+            $tags = explode(',', $request->tags);
+            $tagIds = [];
+            foreach ($tags as $tagName) {
+                $tagName = trim($tagName);
+                $tag = Tag::firstOrCreate(['name' => $tagName]);
+                $tagIds[] = $tag->id;
+            }
+            $property->tags()->sync($tagIds);
+        }
+    
+        return redirect()->route('properties.show', $property)->with('success', 'Жильё успешно добавлено.');
+    }    
 
-        // Здесь можно добавить логику для получения координат по адресу
-        $property->latitude = null; // placeholder
-        $property->longitude = null; // placeholder
+    public function update(Request $request, Property $property)
+    {
+        if (Auth::user()->role !== 'landlord') {
+            return redirect()->route('home')->with('error', 'У вас нет прав для обновления жилья.');
+        }
 
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'address' => 'required|string',
+            'price_per_night' => 'required|numeric',
+            'tags' => 'nullable|string',
+        ]);
+
+        $property->title = $request->title;
+        $property->description = $request->description;
+        $property->address = $request->address;
+        $property->price_per_night = $request->price_per_night;
         $property->save();
 
-        return redirect()->route('properties.show', $property)->with('success', 'Жильё успешно добавлено.');
+        // Обработка тегов
+        if ($request->has('tags')) {
+            $tags = explode(',', $request->tags);
+            $tagIds = [];
+            foreach ($tags as $tagName) {
+                $tagName = trim($tagName);
+                $tag = Tag::firstOrCreate(['name' => $tagName]);
+                $tagIds[] = $tag->id;
+            }
+            $property->tags()->sync($tagIds);
+        }
+
+        return redirect()->route('properties.show', $property)->with('success', 'Жильё успешно обновлено.');
     }
+
 
     // Отображение конкретного жилья
     public function show(Property $property)
