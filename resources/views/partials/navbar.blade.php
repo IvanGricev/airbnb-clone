@@ -5,7 +5,7 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse p-2" id="navbarNav">
-            <!-- возможно поменяется -->
+            <!--  возможно поменяется-->
             <!-- 
             <form class="d-flex me-auto" action="{{ route('properties.index') }}" method="GET">
                 <input class="form-control me-2" type="search" name="query" placeholder="Поиск жилья" aria-label="Search" value="{{ request('query') }}">
