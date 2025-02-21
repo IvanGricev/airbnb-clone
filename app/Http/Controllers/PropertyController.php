@@ -169,7 +169,6 @@ class PropertyController extends Controller
         }
     }
 
-    // Метод для получения недоступных дат для конкретного жилья
     public function getUnavailableDates($propertyId)
     {
         $bookings = Booking::where('property_id', $propertyId)
@@ -181,7 +180,7 @@ class PropertyController extends Controller
         foreach ($bookings as $booking) {
             $start = new \DateTime($booking->start_date);
             $end = new \DateTime($booking->end_date);
-            $end = $end->modify('+1 day'); // Включаем последний день
+            $end = $end->modify('+1 day');
 
             $interval = new \DateInterval('P1D');
             $period = new \DatePeriod($start, $interval, $end);
@@ -193,5 +192,6 @@ class PropertyController extends Controller
 
         return response()->json($unavailableDates);
     }
+
 
 }

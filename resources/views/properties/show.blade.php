@@ -65,32 +65,33 @@
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
 
     <script>
-    $(function() {
-        var propertyId = @json($property->id);
-        var unavailableDates = [];
+        $(function() {
+            var propertyId = @json($property->id);
+            var unavailableDates = [];
 
-        // Функция для отключения недоступных дат
-        function disableDates(date) {
-            var string = jQuery.datepicker.formatDate('yy-mm-dd', date);
-            return [ unavailableDates.indexOf(string) == -1 ];
-        }
-
-        // Получаем недоступные даты через AJAX
-        $.ajax({
-            url: '/properties/' + propertyId + '/unavailable-dates',
-            method: 'GET',
-            success: function(dates) {
-                unavailableDates = dates;
-
-                $('#start_date, #end_date').datepicker({
-                    dateFormat: 'yy-mm-dd',
-                    minDate: 0,
-                    beforeShowDay: disableDates
-                });
+            // Function to disable unavailable dates
+            function disableDates(date) {
+                var string = jQuery.datepicker.formatDate('yy-mm-dd', date);
+                return [ unavailableDates.indexOf(string) == -1 ];
             }
+
+            // Fetch unavailable dates via AJAX
+            $.ajax({
+                url: '/properties/' + propertyId + '/unavailable-dates',
+                method: 'GET',
+                success: function(dates) {
+                    unavailableDates = dates;
+
+                    $('#start_date, #end_date').datepicker({
+                        dateFormat: 'yy-mm-dd',
+                        minDate: 0,
+                        beforeShowDay: disableDates
+                    });
+                }
+            });
         });
-    });
     </script>
+
 @endauth
 
 @endsection
