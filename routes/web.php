@@ -13,6 +13,7 @@ use App\Http\Controllers\DatabaseController;
  * Главная страница
  */
 Route::get('/', [PropertyController::class, 'index'])->name('home');
+Route::get('/search', [PropertyController::class, 'search'])->name('properties.search');
 
 /**
  * Аутентификация

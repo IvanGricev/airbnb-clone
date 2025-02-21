@@ -14,11 +14,29 @@ use App\Models\Tag;
 class PropertyController extends Controller
 {
     // Отображение списка жилья
-    public function index()
+    public function index(Request $request)
     {
-        $properties = Property::all();
-        return view('properties.index', compact('properties'));
-    }
+        $query = $request->input('query');
+        $tagFilter = $request->input('tags');
+    
+        $properties = Property::with('tags');
+    
+        if ($query) {
+            $properties->where('title', 'like', '%' . $query . '%')
+                       ->orWhere('description', 'like', '%' . $query . '%');
+        }
+    
+        if ($tagFilter) {
+            $tags = explode(',', $tagFilter);
+            $properties->whereHas('tags', function($q) use ($tags) {
+                $q->whereIn('name', $tags);
+            });
+        }
+    
+        $properties = $properties->get();
+    
+        return view('properties.index', compact('properties', 'query', 'tagFilter'));
+    }    
 
     // Форма создания жилья (для арендодателей)
     public function create()
@@ -239,5 +257,25 @@ class PropertyController extends Controller
         return response()->json($unavailableDates);
     }
 
+    public function search(Request $request)
+    {
+        $query = $request->input('query');
+        $tagFilter = $request->input('tags');
+
+        $properties = Property::with('tags')
+            ->where('title', 'like', '%' . $query . '%')
+            ->orWhere('description', 'like', '%' . $query . '%');
+
+        if ($tagFilter) {
+            $tags = explode(',', $tagFilter);
+            $properties->whereHas('tags', function($q) use ($tags) {
+                $q->whereIn('name', $tags);
+            });
+        }
+
+        $properties = $properties->get();
+
+        return view('properties.index', compact('properties', 'query', 'tagFilter'));
+    }
 
 }
