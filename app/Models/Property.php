@@ -26,4 +26,14 @@ class Property extends Model
         return $this->belongsToMany(Tag::class);
     }
 
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function getAverageRatingAttribute()
+    {
+        return round($this->reviews()->avg('rating'), 1);
+    }
+
 }

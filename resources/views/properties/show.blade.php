@@ -5,6 +5,15 @@
 @section('content')
 <h1>{{ $property->title }}</h1>
 
+@if($property->reviews->count() > 0)
+    <p><strong>Средний рейтинг:</strong>
+        @php
+            $averageRating = round($property->reviews->avg('rating'), 1);
+        @endphp
+        {{ $averageRating }} из 5
+    </p>
+@endif
+
 <p>{{ $property->description }}</p>
 
 <p><strong>Адрес:</strong> {{ $property->address }}</p>
@@ -17,6 +26,25 @@
         @endforeach
     </p>
 @endif
+
+@auth
+    @php
+        $userId = Auth::id();
+        $hasCompletedBooking = \App\Models\Booking::where('property_id', $property->id)
+            ->where('user_id', $userId)
+            ->where('end_date', '<', now())
+            ->where('status', 'confirmed')
+            ->exists();
+
+        $alreadyReviewed = \App\Models\Review::where('property_id', $property->id)
+            ->where('user_id', $userId)
+            ->exists();
+    @endphp
+
+    @if($hasCompletedBooking && !$alreadyReviewed)
+        <a href="{{ route('reviews.create', $property->id) }}" class="btn btn-secondary">Оставить отзыв</a>
+    @endif
+@endauth
 
 <!--
 Карта с использованием Google Maps

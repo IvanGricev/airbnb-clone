@@ -39,6 +39,13 @@
                     <!-- Здесь можно добавить изображение жилья -->
                     <div class="card-body">
                         <h5 class="card-title">{{ $property->title }}</h5>
+                        <p>
+                            @if($property->reviews->count() > 0)
+                                Средний рейтинг: {{ $property->average_rating }} из 5
+                            @else
+                                Нет оценок
+                            @endif
+                        </p>
                         <p class="card-text">{{ Str::limit($property->description, 100) }}</p>
                         @if($property->tags->isNotEmpty())
                             <p>

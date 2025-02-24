@@ -8,7 +8,7 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\SupportController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\DatabaseController;
-
+use App\Http\Controllers\ReviewController;
 /**
  * Главная страница
  */
@@ -75,6 +75,12 @@ Route::middleware('auth')->group(function () {
      */
     Route::get('become-landlord', [PropertyController::class, 'showBecomeLandlordForm'])->name('become-landlord.form');
     Route::post('become-landlord', [PropertyController::class, 'storeAsLandlord'])->name('become-landlord.store');
+
+    /** 
+     * Отзывы
+     */ 
+    Route::get('/properties/{propertyId}/reviews/create', [ReviewController::class, 'create'])->name('reviews.create');
+    Route::post('/properties/{propertyId}/reviews', [ReviewController::class, 'store'])->name('reviews.store');
 });
 
 /**
