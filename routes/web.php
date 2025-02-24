@@ -9,6 +9,9 @@ use App\Http\Controllers\SupportController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\DatabaseController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\FavoriteController;
+
 /**
  * Главная страница
  */
@@ -34,6 +37,7 @@ Route::middleware('guest')->group(function () {
  */
 Route::middleware('auth')->group(function () {
     Route::post('logout', [AuthController::class, 'logout'])->name('logout');
+    Route::get('/profile', [UserController::class, 'profile'])->name('user.profile');
 
     /**
      * Управление жильём
@@ -81,6 +85,13 @@ Route::middleware('auth')->group(function () {
      */ 
     Route::get('/properties/{propertyId}/reviews/create', [ReviewController::class, 'create'])->name('reviews.create');
     Route::post('/properties/{propertyId}/reviews', [ReviewController::class, 'store'])->name('reviews.store');
+
+
+    /** 
+     * Избранное
+     */         
+    Route::post('/favorites/add/{propertyId}', [FavoriteController::class, 'add'])->name('favorites.add');
+    Route::post('/favorites/remove/{propertyId}', [FavoriteController::class, 'remove'])->name('favorites.remove');
 });
 
 /**

@@ -29,6 +29,21 @@
 
 @auth
     @php
+        $isFavorite = \App\Models\Favorite::where('user_id', Auth::id())
+            ->where('property_id', $property->id)
+            ->exists();
+    @endphp
+
+    <form action="{{ $isFavorite ? route('favorites.remove', $property->id) : route('favorites.add', $property->id) }}" method="POST" style="display:inline-block;">
+        @csrf
+        <button type="submit" class="btn btn-{{ $isFavorite ? 'danger' : 'success' }}">
+            {{ $isFavorite ? 'Убрать из избранного' : 'В избранное' }}
+        </button>
+    </form>
+@endauth
+
+@auth
+    @php
         $userId = Auth::id();
         $hasCompletedBooking = \App\Models\Booking::where('property_id', $property->id)
             ->where('user_id', $userId)
