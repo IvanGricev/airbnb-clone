@@ -10,7 +10,21 @@
         <div class="col-md-4 mb-3">
             <input type="text" name="query" class="form-control" placeholder="Что ищем?" value="{{ request('query') }}">
         </div>
-        <div class="col-md-8">
+        <div class="col-md-2 mb-3">
+            <input type="number" name="min_price" class="form-control" placeholder="Минимальная цена" value="{{ request('min_price') }}">
+        </div>
+        <div class="col-md-2 mb-3">
+            <input type="number" name="max_price" class="form-control" placeholder="Максимальная цена" value="{{ request('max_price') }}">
+        </div>
+        <div class="col-md-4 mb-3">
+            <select name="sort_order" class="form-control">
+                <option value="asc" {{ request('sort_order') == 'asc' ? 'selected' : '' }}>От дешевого к дорогому</option>
+                <option value="desc" {{ request('sort_order') == 'desc' ? 'selected' : '' }}>От дорогого к дешевому</option>
+            </select>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
             @foreach($tags as $category => $tagsGroup)
                 <div class="mb-3">
                     <label class="form-label">{{ $category }}</label>
@@ -54,6 +68,7 @@
                                 @endforeach
                             </p>
                         @endif
+                        <p><strong>Цена за ночь:</strong> {{ $property->price_per_night }} руб.</p>
                         <a href="{{ route('properties.show', $property->id) }}" class="btn btn-primary">Подробнее</a>
                     </div>
                 </div>

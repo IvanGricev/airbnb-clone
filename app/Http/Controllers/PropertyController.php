@@ -17,6 +17,9 @@ class PropertyController extends Controller
     {
         $query = $request->input('query');
         $selectedTags = $request->input('tags', []);
+        $minPrice = $request->input('min_price');
+        $maxPrice = $request->input('max_price');
+        $sortOrder = $request->input('sort_order', 'asc');
 
         // Получаем все категории тегов и их соответствующие теги
         $tags = Tag::all()->groupBy('category');
@@ -39,11 +42,60 @@ class PropertyController extends Controller
             });
         }
 
+        // Фильтрация по цене
+        if ($minPrice) {
+            $properties->where('price_per_night', '>=', $minPrice);
+        }
+        if ($maxPrice) {
+            $properties->where('price_per_night', '<=', $maxPrice);
+        }
+
+        // Сортировка по цене
+        $properties->orderBy('price_per_night', $sortOrder);
+
         $properties = $properties->get();
 
-        return view('properties.index', compact('properties', 'query', 'selectedTags', 'tags'));
+        return view('properties.index', compact('properties', 'query', 'selectedTags', 'tags', 'minPrice', 'maxPrice', 'sortOrder'));
     }
-        
+    
+    //Поисковик
+    public function search(Request $request)
+    {
+        $query = $request->input('query');
+        $tagFilter = $request->input('tags');
+        $minPrice = $request->input('min_price');
+        $maxPrice = $request->input('max_price');
+        $sortOrder = $request->input('sort_order', 'asc');
+
+        $properties = Property::with('tags')
+            ->where(function ($q) use ($query) {
+                $q->where('title', 'like', '%' . $query . '%')
+                ->orWhere('description', 'like', '%' . $query . '%')
+                ->orWhere('address', 'like', '%' . $query . '%');
+            });
+
+        if ($tagFilter) {
+            $tags = explode(',', $tagFilter);
+            $properties->whereHas('tags', function($q) use ($tags) {
+                $q->whereIn('name', $tags);
+            });
+        }
+
+        // Фильтрация по цене
+        if ($minPrice) {
+            $properties->where('price_per_night', '>=', $minPrice);
+        }
+        if ($maxPrice) {
+            $properties->where('price_per_night', '<=', $maxPrice);
+        }
+
+        // Сортировка по цене
+        $properties->orderBy('price_per_night', $sortOrder);
+
+        $properties = $properties->get();
+
+        return view('properties.index', compact('properties', 'query', 'tagFilter', 'minPrice', 'maxPrice', 'sortOrder'));
+    }
 
     // Форма создания жилья (для арендодателей)
     public function create()
@@ -280,26 +332,4 @@ class PropertyController extends Controller
 
         return response()->json($unavailableDates);
     }
-
-    public function search(Request $request)
-    {
-        $query = $request->input('query');
-        $tagFilter = $request->input('tags');
-
-        $properties = Property::with('tags')
-            ->where('title', 'like', '%' . $query . '%')
-            ->orWhere('description', 'like', '%' . $query . '%');
-
-        if ($tagFilter) {
-            $tags = explode(',', $tagFilter);
-            $properties->whereHas('tags', function($q) use ($tags) {
-                $q->whereIn('name', $tags);
-            });
-        }
-
-        $properties = $properties->get();
-
-        return view('properties.index', compact('properties', 'query', 'tagFilter'));
-    }
-
 }
