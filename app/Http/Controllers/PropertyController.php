@@ -63,31 +63,32 @@ class PropertyController extends Controller
         if (Auth::user()->role !== 'landlord') {
             return redirect()->route('home')->with('error', 'У вас нет прав для создания жилья.');
         }
-    
+
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'address' => 'required|string',
             'price_per_night' => 'required|numeric',
-            'tags' => 'nullable|string',
+            'tags' => 'array|nullable',
+            'tags.*' => 'exists:tags,id',
         ]);
-    
+
         $property = new Property();
         $property->user_id = Auth::id();
         $property->title = $request->title;
         $property->description = $request->description;
         $property->address = $request->address;
         $property->price_per_night = $request->price_per_night;
-        $property->latitude = null; 
-        $property->longitude = null; 
+        $property->latitude = null;
+        $property->longitude = null;
         $property->save();
-    
+
         if ($request->has('tags')) {
             $property->tags()->sync($request->input('tags'));
         }
-    
+
         return redirect()->route('properties.show', $property)->with('success', 'Жильё успешно добавлено.');
-    }    
+    }
 
     public function update(Request $request, Property $property)
     {

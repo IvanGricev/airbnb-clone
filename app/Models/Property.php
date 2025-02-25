@@ -11,9 +11,9 @@ class Property extends Model
         'title',
         'description',
         'address',
+        'price_per_night',
         'latitude',
         'longitude',
-        'price_per_night',
     ];
 
     public function user()
