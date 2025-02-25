@@ -44,7 +44,9 @@ Route::middleware('auth')->group(function () {
      */
     Route::resource('properties', PropertyController::class);
     Route::get('/properties/{propertyId}/unavailable-dates', [PropertyController::class, 'getUnavailableDates'])->name('properties.unavailableDates');
-
+    Route::get('properties/{property}/edit', [PropertyController::class, 'edit'])->name('properties.edit');
+    Route::put('properties/{property}', [PropertyController::class, 'update'])->name('properties.update');
+        
     /**
      * Бронирования
      */

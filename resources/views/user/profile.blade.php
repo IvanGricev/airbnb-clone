@@ -81,6 +81,7 @@
                 <p><strong>Количество бронирований:</strong> {{ $item['booking_count'] }}</p>
                 <p><strong>Доход:</strong> {{ $item['revenue'] }} руб.</p>
                 <a href="{{ route('properties.show', $item['property']->id) }}" class="btn btn-primary">Подробнее</a>
+                <a href="{{ route('properties.edit', $item['property']->id) }}" class="btn">Редактировать</a>
             </div>
         </div>
     @endforeach

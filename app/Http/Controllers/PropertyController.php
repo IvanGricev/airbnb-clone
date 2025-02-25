@@ -90,35 +90,61 @@ class PropertyController extends Controller
         return redirect()->route('properties.show', $property)->with('success', 'Жильё успешно добавлено.');
     }
 
+    public function edit(Property $property)
+    {
+        // Проверка роли пользователя
+        if (Auth::user()->role !== 'landlord') {
+            return redirect()->route('home')->with('error', 'У вас нет прав для редактирования жилья.');
+        }
+
+        // Проверка, является ли текущий пользователь владельцем объекта
+        if (Auth::id() !== $property->user_id) {
+            return redirect()->route('home')->with('error', 'Вы можете редактировать только свои объекты.');
+        }
+
+        $tags = Tag::all()->groupBy('category');
+
+        return view('properties.edit', compact('property', 'tags'));
+    }
+
     public function update(Request $request, Property $property)
     {
+        // Проверка роли пользователя
         if (Auth::user()->role !== 'landlord') {
             return redirect()->route('home')->with('error', 'У вас нет прав для обновления жилья.');
         }
 
+        // Проверка, является ли текущий пользователь владельцем объекта
+        if (Auth::id() !== $property->user_id) {
+            return redirect()->route('home')->with('error', 'Вы можете обновлять только свои объекты.');
+        }
+
+        // Валидация данных
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'address' => 'required|string',
             'price_per_night' => 'required|numeric',
-            'tags' => 'nullable|string',
+            'tags' => 'array|nullable',
+            'tags.*' => 'exists:tags,id',
         ]);
 
+        // Обновление свойств объекта
         $property->title = $request->title;
         $property->description = $request->description;
         $property->address = $request->address;
         $property->price_per_night = $request->price_per_night;
         $property->save();
 
+        // Обновление тегов
         if ($request->has('tags')) {
             $property->tags()->sync($request->input('tags'));
         } else {
             $property->tags()->detach();
-        }    
+        }
 
         return redirect()->route('properties.show', $property)->with('success', 'Жильё успешно обновлено.');
     }
-
 
     // Отображение конкретного жилья
     public function show(Property $property)

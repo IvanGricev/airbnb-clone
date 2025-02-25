@@ -5,6 +5,12 @@
 @section('content')
 <h1>{{ $property->title }}</h1>
 
+@auth
+    @if(Auth::id() == $property->user_id)
+        <a href="{{ route('properties.edit', $property->id) }}" class="btn btn-warning">Редактировать</a>
+    @endif
+@endauth
+
 @if($property->reviews->count() > 0)
     <p><strong>Средний рейтинг:</strong>
         @php
