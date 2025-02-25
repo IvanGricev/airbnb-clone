@@ -22,4 +22,9 @@ class SupportTicket extends Model
     {
         return $this->hasMany(SupportMessage::class, 'ticket_id');
     }
+
+    public function userRentals()
+    {
+        return $this->user->bookings()->with('property')->get();
+    }
 }

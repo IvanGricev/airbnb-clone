@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use App\Models\SupportTicket;
 use App\Models\SupportMessage;
+use App\Models\Booking;
 class AdminController extends Controller
 {
     public function __construct()
@@ -123,8 +124,16 @@ class AdminController extends Controller
      {
          $ticket = SupportTicket::findOrFail($id);
          $messages = $ticket->messages()->orderBy('created_at', 'asc')->get();
-         return view('admin.support.chat', compact('ticket', 'messages'));
-     }
+         $user = $ticket->user;
+     
+         // Получаем активные бронирования пользователя
+         $bookings = Booking::where('user_id', $user->id)
+             ->where('status', 'confirmed')
+             ->with('property')
+             ->get();
+     
+         return view('admin.support.chat', compact('ticket', 'messages', 'user', 'bookings'));
+     }     
  
      // Отправка сообщения в тикете поддержки
      public function sendSupportMessage(Request $request, $id)
@@ -148,5 +157,40 @@ class AdminController extends Controller
          }
  
          return redirect()->back()->with('success', 'Сообщение отправлено.');
-     }
+    }
+
+    public function updateSupportTicketStatus(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|string|in:open,answered,closed',
+        ]);
+
+        $ticket = SupportTicket::findOrFail($id);
+        $ticket->status = $request->status;
+        $ticket->save();
+
+        return redirect()->back()->with('success', 'Статус тикета обновлён.');
+    }
+
+    public function viewChatBetweenUsers($user1, $user2)
+    {
+        // Проверяем, что текущий пользователь - администратор
+        if (Auth::user()->role !== 'admin') {
+            return redirect()->route('home')->with('error', 'У вас нет доступа к этому чату.');
+        }
+
+        $userOne = User::findOrFail($user1);
+        $userTwo = User::findOrFail($user2);
+
+        $messages = Message::where(function($query) use ($user1, $user2) {
+            $query->where('from_user_id', $user1)
+                ->where('to_user_id', $user2);
+        })->orWhere(function($query) use ($user1, $user2) {
+            $query->where('from_user_id', $user2)
+                ->where('to_user_id', $user1);
+        })->orderBy('created_at', 'asc')->get();
+
+        return view('admin.chat.between_users', compact('userOne', 'userTwo', 'messages'));
+    }
+
 }
