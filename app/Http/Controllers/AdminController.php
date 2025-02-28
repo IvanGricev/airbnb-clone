@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 use App\Models\SupportTicket;
 use App\Models\SupportMessage;
 use App\Models\Booking;
+use App\Models\Message;
 class AdminController extends Controller
 {
     public function __construct()
