@@ -11,6 +11,7 @@ use App\Http\Controllers\DatabaseController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\FavoriteController;
+use App\Http\Controllers\PaymentController;
 
 /**
  * Главная страница
@@ -38,6 +39,12 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/profile', [UserController::class, 'profile'])->name('user.profile');
+
+    // Маршруты для симуляции оплаты бронирования
+    Route::get('/payments/{booking}/checkout', [PaymentController::class, 'showPaymentForm'])
+        ->name('payments.checkout');
+    Route::post('/payments/{booking}/process', [PaymentController::class, 'processPayment'])
+        ->name('payments.process');
 
     /**
      * Управление жильём

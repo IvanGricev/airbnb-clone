@@ -36,25 +36,26 @@ class BookingController extends Controller
             return redirect()->back()->with('error', 'Выбранные даты уже заняты. Пожалуйста, выберите другие даты.');
         }
 
-        // Расчет общей стоимости
+        // Расчет общей стоимости бронирования
         $startDate = new \DateTime($request->start_date);
         $endDate = new \DateTime($request->end_date);
         $interval = $startDate->diff($endDate);
         $days = $interval->days;
-
         $totalPrice = $property->price_per_night * $days;
 
-        // Создание бронирования
-        Booking::create([
-            'user_id' => Auth::id(),
-            'property_id' => $property->id,
-            'start_date' => $request->start_date,
-            'end_date' => $request->end_date,
-            'total_price' => $totalPrice,
-            'status' => 'confirmed',
+        // Создание бронирования с установкой статуса "pending_payment"
+        $booking = Booking::create([
+            'user_id'       => Auth::id(),
+            'property_id'   => $property->id,
+            'start_date'    => $request->start_date,
+            'end_date'      => $request->end_date,
+            'total_price'   => $totalPrice,
+            'status'        => 'pending_payment',
         ]);
     
-        return redirect()->route('bookings.history')->with('success', 'Бронирование успешно создано.');
+        // Перенаправление на страницу симуляции оплаты для данного бронирования
+        return redirect()->route('payments.checkout', $booking->id)
+             ->with('success', 'Бронирование создано. Пожалуйста, оплатите его.');
     }
     
     // Метод для отображения истории бронирований пользователя
@@ -68,7 +69,7 @@ class BookingController extends Controller
     {
         $booking = Booking::findOrFail($id);
 
-        // Проверяем, что текущий пользователь является хозяином бронирования
+        // Проверяем, что текущий пользователь является владельцем бронирования
         if ($booking->user_id !== Auth::id()) {
             return redirect()->back()->with('error', 'У вас нет прав для отмены этого бронирования.');
         }
@@ -81,8 +82,6 @@ class BookingController extends Controller
         $booking->status = 'cancelled_by_user';
         $booking->save();
 
-        // Можно добавить логику возврата средств или уведомления
-
         return redirect()->back()->with('success', 'Бронирование успешно отменено.');
     }
 
@@ -92,20 +91,18 @@ class BookingController extends Controller
         $booking = Booking::findOrFail($id);
         $property = $booking->property;
 
-        // Проверяем, что текущий пользователь является хозяином жилья
+        // Проверка, что текущий пользователь является хозяином жилья
         if ($property->user_id !== Auth::id()) {
             return redirect()->back()->with('error', 'У вас нет прав для отмены этого бронирования.');
         }
 
-        // Проверяем, можно ли отменить бронирование
+        // Проверка, можно ли отменить бронирование
         if (!$booking->canBeCancelled()) {
             return redirect()->back()->with('error', 'Невозможно отменить бронирование после даты начала.');
         }
 
         $booking->status = 'cancelled_by_landlord';
         $booking->save();
-
-        // Можно добавить логику уведомления пользователя
 
         return redirect()->back()->with('success', 'Бронирование успешно отменено.');
     }
