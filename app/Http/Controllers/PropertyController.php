@@ -10,92 +10,131 @@ use Illuminate\Support\Facades\Log;
 use App\Models\LandlordApplication;
 use App\Models\User;
 use App\Models\Tag;
-use Illuminate\Support\Facades\Cache;
 
 class PropertyController extends Controller
 {
-    /**
-     * Отображает список объектов недвижимости с поиском, фильтрацией и сортировкой.
-     *
-     * @param Request $request
-     * @return \Illuminate\View\View
-     */
+    // Отображение списка объектов недвижимости
     public function index(Request $request)
     {
-        $query         = $request->input('query');
-        $selectedTags  = $request->input('tags', []);
-        $minPrice      = $request->input('min_price');
-        $maxPrice      = $request->input('max_price');
-        $sortOrder     = $request->input('sort_order', 'asc');
+        $query = $request->input('query');
+        $selectedTags = $request->input('tags', []);
+        $minPrice = $request->input('min_price');
+        $maxPrice = $request->input('max_price');
+        $sortOrder = $request->input('sort_order', 'asc');
 
-        // Получение тегов с использованием кэширования.
-        $tags = Cache::remember('tags', now()->addHours(1), function () {
-            return Tag::all()->groupBy('category');
-        });
+        // Получаем все теги сгруппированные по категориям
+        $tags = Tag::all()->groupBy('category');
 
-        // Формирование ключа для кэширования результатов поиска.
-        $cacheKey = 'properties_' . md5(json_encode($request->all()));
-        // Получаем список объектов с eager loading зависимостей
-        $properties = Cache::remember($cacheKey, now()->addMinutes(10), function () use ($query, $selectedTags, $minPrice, $maxPrice, $sortOrder) {
-            $queryBuilder = Property::with(['tags', 'reviews']);
-            
-            // Поиск по заголовку, описанию и адресу
-            if ($query) {
-                $queryBuilder->where(function ($q) use ($query) {
-                    $q->where('title', 'like', '%' . $query . '%')
-                      ->orWhere('description', 'like', '%' . $query . '%')
-                      ->orWhere('address', 'like', '%' . $query . '%');
-                });
-            }
+        $properties = Property::with('tags');
 
-            // Фильтрация по выбранным тегам
-            if (!empty($selectedTags)) {
-                $queryBuilder->whereHas('tags', function($q) use ($selectedTags) {
-                    $q->whereIn('tags.id', $selectedTags);
-                });
-            }
+        // Поиск по заголовку, описанию и адресу
+        if ($query) {
+            $properties->where(function ($q) use ($query) {
+                $q->where('title', 'like', '%' . $query . '%')
+                  ->orWhere('description', 'like', '%' . $query . '%')
+                  ->orWhere('address', 'like', '%' . $query . '%');
+            });
+        }
 
-            // Фильтрация по цене
-            if ($minPrice) {
-                $queryBuilder->where('price_per_night', '>=', $minPrice);
-            }
-            if ($maxPrice) {
-                $queryBuilder->where('price_per_night', '<=', $maxPrice);
-            }
+        // Фильтрация по выбранным тегам
+        if (!empty($selectedTags)) {
+            $properties->whereHas('tags', function ($q) use ($selectedTags) {
+                $q->whereIn('tags.id', $selectedTags);
+            });
+        }
 
-            // Сортировка по цене
-            $queryBuilder->orderBy('price_per_night', $sortOrder);
+        // Фильтрация по цене
+        if ($minPrice) {
+            $properties->where('price_per_night', '>=', $minPrice);
+        }
+        if ($maxPrice) {
+            $properties->where('price_per_night', '<=', $maxPrice);
+        }
 
-            // Используем пагинацию, если объектов много, иначе можно использовать ->get()
-            return $queryBuilder->paginate(10);
-        });
+        // Сортировка по цене
+        $properties->orderBy('price_per_night', $sortOrder);
 
-        return view('properties.index', compact('properties', 'query', 'selectedTags', 'tags', 'minPrice', 'maxPrice', 'sortOrder'));
+        $properties = $properties->get();
+
+        return view('properties.index', compact(
+            'properties', 
+            'query', 
+            'selectedTags', 
+            'tags', 
+            'minPrice', 
+            'maxPrice', 
+            'sortOrder'
+        ));
     }
 
-    /**
-     * Форма создания объекта недвижимости (для арендодателей).
-     */
+    // Поисковый метод (альтернативный вариант)
+    public function search(Request $request)
+    {
+        $query = $request->input('query');
+        $tagFilter = $request->input('tags');
+        $minPrice = $request->input('min_price');
+        $maxPrice = $request->input('max_price');
+        $sortOrder = $request->input('sort_order', 'asc');
+
+        $properties = Property::with('tags')
+            ->where(function ($q) use ($query) {
+                $q->where('title', 'like', '%' . $query . '%')
+                  ->orWhere('description', 'like', '%' . $query . '%')
+                  ->orWhere('address', 'like', '%' . $query . '%');
+            });
+
+        // Если передан фильтр по тегам, разбиваем строку в массив
+        if ($tagFilter) {
+            $tags = explode(',', $tagFilter);
+            $properties->whereHas('tags', function ($q) use ($tags) {
+                $q->whereIn('name', $tags);
+            });
+        }
+
+        // Фильтрация по цене
+        if ($minPrice) {
+            $properties->where('price_per_night', '>=', $minPrice);
+        }
+        if ($maxPrice) {
+            $properties->where('price_per_night', '<=', $maxPrice);
+        }
+
+        // Сортировка по цене
+        $properties->orderBy('price_per_night', $sortOrder);
+
+        $properties = $properties->get();
+
+        return view('properties.index', compact(
+            'properties', 
+            'query', 
+            'tagFilter', 
+            'minPrice', 
+            'maxPrice', 
+            'sortOrder'
+        ));
+    }
+
+    // Форма создания жилья для арендодателей
     public function create()
     {
-        if (Auth::user()->role !== 'landlord') {
-            return redirect()->route('home')->with('error', 'У вас нет прав для создания жилья.');
-        }
-    
-        $tags = Tag::all()->groupBy('category');
-    
-        return view('properties.create', compact('tags'));
-    }
-    
-    /**
-     * Сохранение нового объекта недвижимости.
-     */
-    public function store(Request $request)
-    {
+        // Только пользователи с ролью "landlord" могут создавать жильё
         if (Auth::user()->role !== 'landlord') {
             return redirect()->route('home')->with('error', 'У вас нет прав для создания жилья.');
         }
 
+        $tags = Tag::all()->groupBy('category');
+        return view('properties.create', compact('tags'));
+    }
+
+    // Сохранение нового объекта недвижимости
+    public function store(Request $request)
+    {
+        // Проверка прав доступа
+        if (Auth::user()->role !== 'landlord') {
+            return redirect()->route('home')->with('error', 'У вас нет прав для создания жилья.');
+        }
+
+        // Валидация входных данных, ограниченные правилами:
         $request->validate([
             'title'           => 'required|string|max:255',
             'description'     => 'required|string',
@@ -111,7 +150,7 @@ class PropertyController extends Controller
         $property->description = $request->description;
         $property->address = $request->address;
         $property->price_per_night = $request->price_per_night;
-        $property->latitude = null; // или задайте реальные значения, если доступны
+        $property->latitude = null;
         $property->longitude = null;
         $property->save();
 
@@ -119,17 +158,18 @@ class PropertyController extends Controller
             $property->tags()->sync($request->input('tags'));
         }
 
-        return redirect()->route('properties.show', $property)->with('success', 'Жильё успешно добавлено.');
+        return redirect()->route('properties.show', $property)
+                         ->with('success', 'Жильё успешно добавлено.');
     }
 
-    /**
-     * Форма редактирования объекта недвижимости.
-     */
+    // Форма редактирования объекта недвижимости
     public function edit(Property $property)
     {
+        // Проверяем, что пользователь является арендодателем
         if (Auth::user()->role !== 'landlord') {
             return redirect()->route('home')->with('error', 'У вас нет прав для редактирования жилья.');
         }
+        // Проверяем, что пользователь владеет объектом
         if (Auth::id() !== $property->user_id) {
             return redirect()->route('home')->with('error', 'Вы можете редактировать только свои объекты.');
         }
@@ -138,18 +178,19 @@ class PropertyController extends Controller
         return view('properties.edit', compact('property', 'tags'));
     }
 
-    /**
-     * Обновление объекта недвижимости.
-     */
+    // Обновление существующего объекта недвижимости
     public function update(Request $request, Property $property)
     {
+        // Проверка прав доступа
         if (Auth::user()->role !== 'landlord') {
             return redirect()->route('home')->with('error', 'У вас нет прав для обновления жилья.');
         }
+        // Проверяем, что пользователь владеет объектом
         if (Auth::id() !== $property->user_id) {
             return redirect()->route('home')->with('error', 'Вы можете обновлять только свои объекты.');
         }
 
+        // Валидация введённых данных
         $request->validate([
             'title'           => 'required|string|max:255',
             'description'     => 'required|string',
@@ -159,62 +200,63 @@ class PropertyController extends Controller
             'tags.*'          => 'exists:tags,id',
         ]);
 
+        // Обновляем поля объекта
         $property->title = $request->title;
         $property->description = $request->description;
         $property->address = $request->address;
         $property->price_per_night = $request->price_per_night;
         $property->save();
 
+        // Обновляем теги объекта, если они были переданы
         if ($request->has('tags')) {
             $property->tags()->sync($request->input('tags'));
         } else {
             $property->tags()->detach();
         }
 
-        return redirect()->route('properties.show', $property)->with('success', 'Жильё успешно обновлено.');
+        return redirect()->route('properties.show', $property)
+                         ->with('success', 'Жильё успешно обновлено.');
     }
 
-    /**
-     * Отображает конкретный объект недвижимости.
-     */
+    // Отображение конкретного объекта недвижимости
     public function show(Property $property)
     {
         return view('properties.show', compact('property'));
     }
 
-    /**
-     * Отображает форму подачи заявки на роль арендодателя.
-     */
+    // Форма подачи заявки на роль арендодателя
     public function showBecomeLandlordForm()
     {
         try {
+            // Убедимся, что пользователь авторизован
             if (!Auth::check()) {
                 return redirect()->route('login')->with('error', 'Необходимо авторизоваться');
             }
+
+            // Извлекаем текущего пользователя
             $user = Auth::user();
+
             if (!$user) {
-                \Log::error('Пользователь не найден после авторизации', [
-                    'auth_id' => Auth::id(),
-                    'session_data' => session()->all(),
+                Log::error('Пользователь не найден после авторизации', [
+                    'auth_id'       => Auth::id(),
+                    'session_data'  => session()->all(),
                 ]);
                 return redirect()->route('login')->with('error', 'Произошла ошибка при загрузке данных пользователя');
             }
 
             return view('properties.become_landlord', compact('user'));
         } catch (\Exception $e) {
-            \Log::error('Ошибка при отображении формы подачи заявки арендодателя', [
+            Log::error('Ошибка при отображении формы подачи заявки арендодателя', [
                 'error' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
+                'file'  => $e->getFile(),
+                'line'  => $e->getLine(),
                 'trace' => $e->getTraceAsString(),
             ]);
             return redirect()->back()->with('error', 'Произошла ошибка при загрузке формы');
         }
     }
 
-    /**
-     * Сохраняет заявку на роль арендодателя.
-     */
+    // Сохранение заявки на роль арендодателя
     public function storeAsLandlord(Request $request)
     {
         try {
@@ -243,7 +285,8 @@ class PropertyController extends Controller
 
             $user = Auth::user();
 
-            if (\App\Models\LandlordApplication::where('user_id', $user->id)
+            // Проверка наличия предыдущей заявки на арендодателя для данного пользователя
+            if (LandlordApplication::where('user_id', $user->id)
                 ->whereIn('status', ['pending', 'approved'])
                 ->exists()) {
                 return redirect()->back()
@@ -251,20 +294,22 @@ class PropertyController extends Controller
                     ->withInput();
             }
 
+            // Формирование даты действия паспорта в формате mm/yy
             $expirationDate = sprintf('%02d/%02d',
                 $validated['passport_expiration_month'],
                 $validated['passport_expiration_year']
             );
 
             $user->update([
-                'first_name'               => $validated['first_name'],
-                'middle_name'              => $validated['middle_name'],
-                'last_name'                => $validated['last_name'],
-                'passport_number'          => $validated['passport_number'],
-                'passport_expiration_date' => $expirationDate,
+                'first_name'                => $validated['first_name'],
+                'middle_name'               => $validated['middle_name'],
+                'last_name'                 => $validated['last_name'],
+                'passport_number'           => $validated['passport_number'],
+                'passport_expiration_date'  => $expirationDate,
             ]);
 
-            \App\Models\LandlordApplication::create([
+            // Создание заявки
+            LandlordApplication::create([
                 'user_id' => $user->id,
                 'status'  => 'pending',
                 'message' => 'Заявка на роль арендодателя',
@@ -272,7 +317,7 @@ class PropertyController extends Controller
 
             return redirect()->route('home')->with('success', 'Ваша заявка успешно подана на рассмотрение.');
         } catch (\Exception $e) {
-            \Log::error('Ошибка обработки заявки арендодателя: ' . $e->getMessage(), [
+            Log::error('Ошибка обработки заявки арендодателя: ' . $e->getMessage(), [
                 'exception' => $e,
                 'user_id'   => Auth::id(),
                 'input'     => $request->all()
@@ -284,9 +329,7 @@ class PropertyController extends Controller
         }
     }
 
-    /**
-     * Получение недоступных дат для бронирования объекта.
-     */
+    // Получение недоступных дат для бронирования объекта
     public function getUnavailableDates($propertyId)
     {
         $bookings = Booking::where('property_id', $propertyId)
@@ -301,6 +344,7 @@ class PropertyController extends Controller
 
             $interval = new \DateInterval('P1D');
             $period = new \DatePeriod($start, $interval, $end);
+
             foreach ($period as $date) {
                 $unavailableDates[] = $date->format('Y-m-d');
             }

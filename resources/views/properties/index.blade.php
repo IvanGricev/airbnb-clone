@@ -75,8 +75,5 @@
             </div>
         @endforeach
     </div>
-
-    <!-- Пагинация -->
-    {{ $properties->links() }}
 @endif
 @endsection

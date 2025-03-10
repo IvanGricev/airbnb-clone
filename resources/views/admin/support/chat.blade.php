@@ -44,7 +44,6 @@
     </ul>
 @endif
 
-<!-- Переписка в тикете -->
 <div id="chat-messages" style="border: 1px solid #ccc; padding: 20px; height: 400px; overflow-y: scroll;">
     @foreach($messages as $message)
     <div class="mb-2">
@@ -67,22 +66,4 @@
     </div>
     <button type="submit" class="btn btn-primary">Отправить</button>
 </form>
-
-<!-- Реальное обновление сообщений -->
-<script src="{{ mix('js/app.js') }}"></script>
-<script>
-    Echo.channel('ticket.{{ $ticket->id }}')
-        .listen('SupportMessageSent', (e) => {
-            let messageContainer = document.getElementById('chat-messages');
-            messageContainer.innerHTML += `
-                <div class="mb-2">
-                    <strong>${e.message.user.name} (${e.message.user.role}):</strong><br>
-                    ${e.message.message}<br>
-                    <small class="text-muted">${new Date(e.message.created_at).toLocaleString()}</small>
-                </div>
-                <hr>
-            `;
-            messageContainer.scrollTop = messageContainer.scrollHeight;
-        });
-</script>
 @endsection

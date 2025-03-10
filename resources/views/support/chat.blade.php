@@ -14,27 +14,11 @@
     @csrf
     <div class="mb-3">
         <label for="message" class="form-label">Сообщение</label>
-        <textarea name="message" class="form-control" required></textarea>
+        <textarea name="message" class="form-control"></textarea>
         @error('message')
         <div class="text-danger">{{ $message }}</div>
         @enderror
     </div>
     <button type="submit" class="btn btn-primary">Отправить</button>
 </form>
-
-<!-- Логика обновления сообщений в реальном времени -->
-<script src="{{ mix('js/app.js') }}"></script>
-<script>
-    Echo.private('ticket.{{ $ticket->id }}')
-        .listen('SupportMessageSent', (e) => {
-            let messageContainer = document.getElementById('chat-messages');
-            messageContainer.innerHTML += `
-                <div>
-                    <strong>${e.message.user.name}:</strong> ${e.message.message}
-                    <small class="text-muted">${new Date(e.message.created_at).toLocaleString()}</small>
-                </div>
-            `;
-            messageContainer.scrollTop = messageContainer.scrollHeight;
-        });
-</script>
 @endsection

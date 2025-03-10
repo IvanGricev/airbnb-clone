@@ -12,10 +12,13 @@ class SupportTicketController extends Controller
 {
     /**
      * Отображает список тикетов поддержки для администратора.
+     *
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
      */
     public function index()
     {
         try {
+            // Получаем все тикеты, сортируя их по дате последнего обновления (от новых к старым)
             $tickets = SupportTicket::orderBy('updated_at', 'desc')->get();
             return view('admin.support.index', compact('tickets'));
         } catch (\Exception $e) {
@@ -25,7 +28,9 @@ class SupportTicketController extends Controller
     }
 
     /**
-     * Отображает список тикетов поддержки для текущего пользователя.
+     * Отображает тикеты поддержки, принадлежащие текущему пользователю.
+     *
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
      */
     public function userTickets()
     {
@@ -42,6 +47,8 @@ class SupportTicketController extends Controller
 
     /**
      * Отображает форму создания нового тикета поддержки.
+     *
+     * @return \Illuminate\View\View
      */
     public function create()
     {
@@ -50,28 +57,35 @@ class SupportTicketController extends Controller
 
     /**
      * Сохраняет новый тикет поддержки и создает начальное сообщение.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function store(Request $request)
     {
+        // Валидация входящих данных с ограничением максимальной длины для subject
         $request->validate([
             'subject' => 'required|string|max:255',
             'message' => 'required|string',
         ]);
 
         try {
+            // Создание тикета с присвоением статус "open"
             $ticket = SupportTicket::create([
                 'user_id' => Auth::id(),
                 'subject' => $request->subject,
                 'status'  => 'open',
             ]);
 
+            // Создание начального сообщения тикета
             SupportMessage::create([
                 'ticket_id' => $ticket->id,
                 'user_id'   => Auth::id(),
                 'message'   => $request->message,
             ]);
 
-            return redirect()->route('support.show', $ticket->id)->with('success', 'Тикет создан.');
+            return redirect()->route('support.show', $ticket->id)
+                             ->with('success', 'Тикет создан.');
         } catch (\Exception $e) {
             Log::error('Ошибка при создании тикета', ['error' => $e->getMessage()]);
             return redirect()->back()->with('error', 'Не удалось создать тикет.');
@@ -79,14 +93,17 @@ class SupportTicketController extends Controller
     }
 
     /**
-     * Отображает тикет и чат (сообщения) поддержки.
+     * Отображает тикет поддержки и связанный с ним чат (сообщения).
+     *
+     * @param int $id Идентификатор тикета
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
      */
     public function show($id)
     {
         try {
             $ticket = SupportTicket::findOrFail($id);
 
-            // Проверка доступа (администратор или владелец тикета)
+            // Проверяем доступ: тикет может быть просмотрен администратором или владельцем тикета
             if (Auth::user()->role === 'admin' || $ticket->user_id == Auth::id()) {
                 $messages = $ticket->messages()->orderBy('created_at', 'asc')->get();
                 return view('support.chat', compact('ticket', 'messages'));
@@ -100,10 +117,16 @@ class SupportTicketController extends Controller
     }
 
     /**
-     * Отправляет новое сообщение в тикете поддержки и обновляет статус.
+     * Отправляет новое сообщение в тикете поддержки.
+     * Обновляет статус тикета в зависимости от роли отправителя.
+     *
+     * @param Request $request
+     * @param int $id Идентификатор тикета
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function sendMessage(Request $request, $id)
     {
+        // Валидация входящих данных
         $request->validate([
             'message' => 'required|string',
         ]);
@@ -111,7 +134,7 @@ class SupportTicketController extends Controller
         try {
             $ticket = SupportTicket::findOrFail($id);
 
-            // Проверка доступа (администратор или владелец тикета)
+            // Проверка доступа: сообщение может быть отправлено администратором или владельцем тикета
             if (Auth::user()->role === 'admin' || $ticket->user_id == Auth::id()) {
                 SupportMessage::create([
                     'ticket_id' => $ticket->id,
@@ -119,7 +142,8 @@ class SupportTicketController extends Controller
                     'message'   => $request->message,
                 ]);
 
-                // Обновление статуса
+                // Обновление статуса тикета.
+                // Если отправитель — администратор, статус меняется на "answered", иначе остается "open"
                 if (Auth::user()->role === 'admin') {
                     $ticket->status = 'answered';
                 } else {

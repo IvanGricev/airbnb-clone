@@ -35,7 +35,4 @@
         @endforeach
     </tbody>
 </table>
-
-<!-- Пагинация -->
-{{ $data->links() }}
 @endsection

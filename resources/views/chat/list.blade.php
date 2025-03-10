@@ -30,18 +30,4 @@
         @endforeach
     </ul>
 @endif
-
-<!-- Логика обновления сообщений в реальном времени -->
-<script src="{{ mix('js/app.js') }}"></script>
-<script>
-    Echo.private('user.{{ Auth::id() }}')
-        .listen('MessageSent', (e) => {
-            // Логика обновления списка чатов или уведомлений
-        });
-
-    Echo.private('support.{{ Auth::id() }}')
-        .listen('SupportMessageSent', (e) => {
-            // Логика обновления списка тикетов или уведомлений
-        });
-</script>
 @endsection

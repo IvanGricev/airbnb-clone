@@ -1,7 +1,6 @@
 @extends('layouts.main')
 
 @section('title', 'Мои тикеты в поддержку')
-
 @section('content')
 <h1>Мои тикеты в поддержку</h1>
 
@@ -37,14 +36,4 @@
         </tbody>
     </table>
 @endif
-
-<!-- Логика обновления сообщений в реальном времени -->
-<script src="{{ mix('js/app.js') }}"></script>
-<script>
-    Echo.private('support.{{ Auth::id() }}')
-        .listen('SupportTicketUpdated', (e) => {
-            alert('Статус вашего тикета был обновлён. Пожалуйста, проверьте обновления.');
-            location.reload(); // Обновляет страницу для показа актуальных данных
-        });
-</script>
 @endsection
