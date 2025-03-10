@@ -11,6 +11,7 @@ use App\Models\SupportTicket;
 use App\Models\SupportMessage;
 use App\Models\Booking;
 use App\Models\Message;
+
 class AdminController extends Controller
 {
     public function __construct()
@@ -25,8 +26,8 @@ class AdminController extends Controller
         } catch (\Exception $e) {
             Log::error('Ошибка при отображении админ-панели', [
                 'error' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
+                'file'  => $e->getFile(),
+                'line'  => $e->getLine(),
             ]);
 
             return redirect()->route('admin.landlord.applications')
@@ -37,15 +38,16 @@ class AdminController extends Controller
     public function landlordApplications(Request $request)
     {
         try {
-            $status = $request->query('status', 'pending');
-            $search = $request->query('search', '');
+            // Ограничим длину query-параметров, чтобы не выйти за границы (пример: не более 255 символов)
+            $status = substr($request->query('status', 'pending'), 0, 255);
+            $search = substr($request->query('search', ''), 0, 255);
 
             $applications = LandlordApplication::with('user')
-                ->when($status, function($query) use ($status) {
+                ->when($status, function ($query) use ($status) {
                     return $query->where('status', $status);
                 })
-                ->when($search, function($query) use ($search) {
-                    return $query->whereHas('user', function($q) use ($search) {
+                ->when($search, function ($query) use ($search) {
+                    return $query->whereHas('user', function ($q) use ($search) {
                         $q->where('name', 'like', "%$search%")
                           ->orWhere('email', 'like', "%$search%");
                     });
@@ -54,7 +56,7 @@ class AdminController extends Controller
                 ->paginate(10);
 
             $statuses = [
-                'pending' => 'На рассмотрении',
+                'pending'  => 'На рассмотрении',
                 'approved' => 'Одобрено',
                 'rejected' => 'Отклонено'
             ];
@@ -63,8 +65,8 @@ class AdminController extends Controller
         } catch (\Exception $e) {
             Log::error('Ошибка при получении списка заявок арендодателей', [
                 'error' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
+                'file'  => $e->getFile(),
+                'line'  => $e->getLine(),
             ]);
 
             return redirect()->back()->with('error', 'Произошла ошибка при загрузке списка заявок');
@@ -86,8 +88,8 @@ class AdminController extends Controller
         } catch (\Exception $e) {
             Log::error('Ошибка при одобрении заявки арендодателя', [
                 'error' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
+                'file'  => $e->getFile(),
+                'line'  => $e->getLine(),
             ]);
 
             return redirect()->back()->with('error', 'Произошла ошибка при одобрении заявки');
@@ -105,65 +107,67 @@ class AdminController extends Controller
         } catch (\Exception $e) {
             Log::error('Ошибка при отклонении заявки арендодателя', [
                 'error' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
+                'file'  => $e->getFile(),
+                'line'  => $e->getLine(),
             ]);
 
             return redirect()->back()->with('error', 'Произошла ошибка при отклонении заявки');
         }
     }
 
-     // Отображение списка тикетов поддержки
-     public function supportTickets()
-     {
-         $tickets = SupportTicket::orderBy('updated_at', 'desc')->get();
-         return view('admin.support.index', compact('tickets'));
-     }
- 
-     // Отображение конкретного тикета поддержки
-     public function showSupportTicket($id)
-     {
-         $ticket = SupportTicket::findOrFail($id);
-         $messages = $ticket->messages()->orderBy('created_at', 'asc')->get();
-         $user = $ticket->user;
-     
-         // Получаем активные бронирования пользователя
-         $bookings = Booking::where('user_id', $user->id)
-             ->where('status', 'confirmed')
-             ->with('property')
-             ->get();
-     
-         return view('admin.support.chat', compact('ticket', 'messages', 'user', 'bookings'));
-     }     
- 
-     // Отправка сообщения в тикете поддержки
-     public function sendSupportMessage(Request $request, $id)
-     {
-         $request->validate([
-             'message' => 'required|string',
-         ]);
- 
-         $ticket = SupportTicket::findOrFail($id);
- 
-         SupportMessage::create([
-             'ticket_id' => $ticket->id,
-             'user_id' => auth()->id(),
-             'message' => $request->message,
-         ]);
- 
-         // Обновляем статус тикета, если необходимо
-         if ($ticket->status !== 'answered') {
-             $ticket->status = 'answered';
-             $ticket->save();
-         }
- 
-         return redirect()->back()->with('success', 'Сообщение отправлено.');
+    // Отображение списка тикетов поддержки
+    public function supportTickets()
+    {
+        $tickets = SupportTicket::orderBy('updated_at', 'desc')->get();
+        return view('admin.support.index', compact('tickets'));
     }
 
+    // Отображение конкретного тикета поддержки
+    public function showSupportTicket($id)
+    {
+        $ticket = SupportTicket::findOrFail($id);
+        $messages = $ticket->messages()->orderBy('created_at', 'asc')->get();
+        $user = $ticket->user;
+
+        // Получаем активные бронирования пользователя
+        $bookings = Booking::where('user_id', $user->id)
+            ->where('status', 'confirmed')
+            ->with('property')
+            ->get();
+
+        return view('admin.support.chat', compact('ticket', 'messages', 'user', 'bookings'));
+    }
+
+    // Отправка сообщения в тикете поддержки
+    public function sendSupportMessage(Request $request, $id)
+    {
+        // Ограничиваем длину сообщения – например, не более 5000 символов
+        $request->validate([
+            'message' => 'required|string|max:5000',
+        ]);
+
+        $ticket = SupportTicket::findOrFail($id);
+
+        SupportMessage::create([
+            'ticket_id' => $ticket->id,
+            'user_id'   => auth()->id(),
+            'message'   => $request->message,
+        ]);
+
+        // Обновляем статус тикета, если необходимо
+        if ($ticket->status !== 'answered') {
+            $ticket->status = 'answered';
+            $ticket->save();
+        }
+
+        return redirect()->back()->with('success', 'Сообщение отправлено.');
+    }
+
+    // Обновление статуса тикета поддержки с проверкой, что статус по длине не превышает 255 символов
     public function updateSupportTicketStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|string|in:open,answered,closed',
+            'status' => 'required|string|in:open,answered,closed|max:255',
         ]);
 
         $ticket = SupportTicket::findOrFail($id);
@@ -173,6 +177,7 @@ class AdminController extends Controller
         return redirect()->back()->with('success', 'Статус тикета обновлён.');
     }
 
+    // Просмотр чата между пользователями
     public function viewChatBetweenUsers($user1, $user2)
     {
         // Проверяем, что текущий пользователь - администратор
@@ -183,15 +188,14 @@ class AdminController extends Controller
         $userOne = User::findOrFail($user1);
         $userTwo = User::findOrFail($user2);
 
-        $messages = Message::where(function($query) use ($user1, $user2) {
+        $messages = Message::where(function ($query) use ($user1, $user2) {
             $query->where('from_user_id', $user1)
-                ->where('to_user_id', $user2);
-        })->orWhere(function($query) use ($user1, $user2) {
+                  ->where('to_user_id', $user2);
+        })->orWhere(function ($query) use ($user1, $user2) {
             $query->where('from_user_id', $user2)
-                ->where('to_user_id', $user1);
+                  ->where('to_user_id', $user1);
         })->orderBy('created_at', 'asc')->get();
 
         return view('admin.chat.between_users', compact('userOne', 'userTwo', 'messages'));
     }
-
 }

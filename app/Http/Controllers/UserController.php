@@ -12,51 +12,61 @@ use Carbon\Carbon;
 
 class UserController extends Controller
 {
+    /**
+     * Отображение профиля пользователя.
+     * Данная функция формирует общую картину бронирований,
+     * избранных объектов, а также, если пользователь является арендодателем,
+     * дополнительно предоставляет статистику объектов и бронирований.
+     *
+     * @return \Illuminate\View\View
+     */
     public function profile()
     {
+        // Получаем текущего пользователя
         $user = Auth::user();
 
-        // Получение бронирований пользователя
+        // Получение всех бронирований данного пользователя с загрузкой данных об объекте недвижимости.
         $bookings = Booking::where('user_id', $user->id)
             ->with('property')
             ->get();
 
-        // Получение избранных объектов
+        // Получение избранных объектов пользователя с информацией об объектах недвижимости.
         $favorites = Favorite::where('user_id', $user->id)
             ->with('property')
             ->get();
 
-        // Получение ранее арендованных объектов (завершенных бронирований)
+        // Фильтрация завершенных бронирований: 
+        // бронирования, где дата выезда меньше текущей даты, выбираем первые 3.
         $pastBookings = $bookings->where('end_date', '<', Carbon::now())->take(3);
 
-        // Если пользователь - арендодатель
+        // Если пользователь является арендодателем
         if ($user->role === 'landlord') {
-            // Получение объектов пользователя
+            // Извлекаем все объекты, принадлежащие данному пользователю.
             $properties = Property::where('user_id', $user->id)->get();
 
-            // Общая статистика
+            // Общая статистика по объектам: общее количество бронирований и суммарная выручка.
             $totalBookings = Booking::whereIn('property_id', $properties->pluck('id'))->count();
             $totalRevenue = Booking::whereIn('property_id', $properties->pluck('id'))->sum('total_price');
 
-            // Бронирования по каждому объекту
+            // Формируем статистику по каждому объекту.
             $propertyBookings = [];
             foreach ($properties as $property) {
                 $propertyBookingCount = Booking::where('property_id', $property->id)->count();
                 $propertyRevenue = Booking::where('property_id', $property->id)->sum('total_price');
 
                 $propertyBookings[] = [
-                    'property' => $property,
+                    'property'      => $property,
                     'booking_count' => $propertyBookingCount,
-                    'revenue' => $propertyRevenue,
+                    'revenue'       => $propertyRevenue,
                 ];
             }
 
-            // Получение бронирований по объектам арендодателя
+            // Получение всех бронирований по объектам арендодателя с информацией об объекте.
             $ownerBookings = Booking::whereIn('property_id', $properties->pluck('id'))
                 ->with('property')
                 ->get();
 
-            // Передаём $ownerBookings в представление
+            // Передаём все собранные данные в представление профиля для арендодателя.
             return view('user.profile', compact(
                 'user',
                 'bookings',
@@ -69,7 +79,7 @@ class UserController extends Controller
             ));
         }
 
-        // Для обычных пользователей
+        // Для обычных пользователей возвращаем профиль с основными данными.
         return view('user.profile', compact('user', 'bookings', 'favorites', 'pastBookings'));
     }
 }

@@ -9,21 +9,24 @@ use Illuminate\Support\Facades\Auth;
 class PaymentController extends Controller
 {
     /**
-     * Отображаем форму оплаты для бронирования.
+     * Отображает форму оплаты для бронирования.
      *
      * @param int $bookingId
-     * @return \Illuminate\View\View
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
      */
     public function showPaymentForm($bookingId)
     {
         $booking = Booking::findOrFail($bookingId);
 
-        // Проверяем, что текущий пользователь является владельцем бронирования
+        // Проверяем, что текущий пользователь является владельцем бронирования.
         if (Auth::id() !== $booking->user_id) {
             return redirect()->back()->with('error', 'У вас нет прав для оплаты этого бронирования.');
         }
 
-        // Здесь можно добавить проверку: если уже оплачено, выводить сообщение
+        // При необходимости добавьте проверку для уже оплаченных бронирований:
+        // if ($booking->payment_status === 'paid') {
+        //     return redirect()->back()->with('info', 'Бронирование уже оплачено.');
+        // }
 
         return view('payments.payment_form', compact('booking'));
     }
@@ -39,26 +42,29 @@ class PaymentController extends Controller
     {
         $booking = Booking::findOrFail($bookingId);
 
+        // Проверяем, что текущий пользователь является владельцем бронирования.
         if (Auth::id() !== $booking->user_id) {
             return redirect()->back()->with('error', 'У вас нет прав для оплаты этого бронирования.');
         }
 
+        // Валидация входных данных.
+        // Требования: номер карты должен состоять ровно из 16 цифр, дата в формате "м/гг" и CVV из 3 цифр.
         $request->validate([
             'card_number'     => 'required|digits:16',
             'expiration_date' => 'required|date_format:m/y',
             'cvv'             => 'required|digits:3',
         ]);
 
-        // Симулируем процесс оплаты.
-        //
-        // В реальном приложении здесь вы бы интегрировали платежный шлюз.
-        // Для симуляции считаем, что плата прошла успешно.
-
-        // Если у вас есть поле payment_status в таблице bookings, можно его обновить:
+        // Симуляция процесса оплаты:
+        // Здесь можно интегрировать платежный шлюз. На данном этапе симулируется успешная оплата.
+        
+        // Обновляем статус платежа. Если в таблице bookings есть поле payment_status, используем его.
         if (isset($booking->payment_status)) {
             $booking->payment_status = 'paid';
         }
-        // Если нет, можно, например, добавить лог или уведомление.
+
+        // Дополнительно, можно обновить статус бронирования на "confirmed", если требуется:
+        $booking->status = 'confirmed';
         $booking->save();
 
         return redirect()->route('bookings.history')
