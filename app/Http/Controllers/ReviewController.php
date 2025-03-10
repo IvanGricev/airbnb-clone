@@ -11,44 +11,44 @@ use Illuminate\Support\Facades\Auth;
 class ReviewController extends Controller
 {
     /**
-     * Отображает форму создания отзыва для конкретного объекта недвижимости.
+     * Отображает форму создания отзыва для указанного объекта.
      *
-     * @param int $propertyId Идентификатор объекта недвижимости.
+     * @param int $propertyId
      * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
      */
     public function create($propertyId)
     {
         $property = Property::findOrFail($propertyId);
         $userId = Auth::id();
-        
-        // Проверяем, имеет ли пользователь завершенное бронирование объекта.
+
+        // Проверяем, имеет ли пользователь завершённое бронирование
         $hasCompletedBooking = Booking::where('property_id', $propertyId)
             ->where('user_id', $userId)
             ->where('end_date', '<', now())
             ->where('status', 'confirmed')
             ->exists();
-        
+
         if (!$hasCompletedBooking) {
             return redirect()->back()->with('error', 'Вы не можете оставить отзыв для этого жилья.');
         }
-        
-        // Проверяем, не оставлял ли уже пользователь отзыв для этого объекта.
+
+        // Проверяем, не оставлял ли пользователь уже отзыв
         $alreadyReviewed = Review::where('property_id', $propertyId)
             ->where('user_id', $userId)
             ->exists();
-        
+
         if ($alreadyReviewed) {
             return redirect()->back()->with('error', 'Вы уже оставили отзыв для этого жилья.');
         }
-        
+
         return view('reviews.create', compact('property'));
     }
 
     /**
-     * Сохраняет новый отзыв для объекта недвижимости.
+     * Сохраняет новый отзыв.
      *
      * @param Request $request
-     * @param int $propertyId Идентификатор объекта недвижимости.
+     * @param int $propertyId
      * @return \Illuminate\Http\RedirectResponse
      */
     public function store(Request $request, $propertyId)
@@ -56,15 +56,12 @@ class ReviewController extends Controller
         $property = Property::findOrFail($propertyId);
         $userId = Auth::id();
 
-        // Валидация входных данных.
-        // Поле rating должно содержать целое число от 1 до 5.
-        // Поле comment является необязательным, но если задано, то должно быть строкой.
         $request->validate([
             'rating'  => 'required|integer|between:1,5',
             'comment' => 'nullable|string',
         ]);
 
-        // Проверяем, имеет ли пользователь завершенное бронирование для этого объекта.
+        // Повторная проверка завершённого бронирования
         $hasCompletedBooking = Booking::where('property_id', $propertyId)
             ->where('user_id', $userId)
             ->where('end_date', '<', now())
@@ -74,8 +71,8 @@ class ReviewController extends Controller
         if (!$hasCompletedBooking) {
             return redirect()->back()->with('error', 'Вы не можете оставить отзыв для этого жилья.');
         }
-        
-        // Проверяем, что пользователь еще не оставил отзыв для этого объекта.
+
+        // Проверка, что отзыв еще не создан
         $alreadyReviewed = Review::where('property_id', $propertyId)
             ->where('user_id', $userId)
             ->exists();
@@ -84,7 +81,6 @@ class ReviewController extends Controller
             return redirect()->back()->with('error', 'Вы уже оставили отзыв для этого жилья.');
         }
 
-        // Создаем новый отзыв.
         Review::create([
             'property_id' => $propertyId,
             'user_id'     => $userId,
@@ -92,7 +88,6 @@ class ReviewController extends Controller
             'comment'     => $request->comment,
         ]);
 
-        return redirect()->route('properties.show', $propertyId)
-                         ->with('success', 'Ваш отзыв успешно добавлен.');
+        return redirect()->route('properties.show', $propertyId)->with('success', 'Ваш отзыв успешно добавлен.');
     }
 }

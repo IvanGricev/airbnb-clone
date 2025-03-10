@@ -95,8 +95,8 @@
         document.addEventListener('DOMContentLoaded', function() {
             var calendarEl = document.getElementById('calendar');
 
-            if(isset($bookings))
-                var userBookings = json($bookings);
+            @if(isset($bookings))
+                var userBookings = @json($bookings);
 
                 var colors = ['#FF5733', '#33FF57', '#3357FF', '#F333FF', '#FF33A8']; 
 
@@ -121,7 +121,7 @@
                 });
 
                 calendar.render();
-            endif
+            @endif
         });
     </script>
 
@@ -130,8 +130,8 @@
             document.addEventListener('DOMContentLoaded', function() {
                 var ownerCalendarEl = document.getElementById('owner-calendar');
 
-                if(isset($ownerBookings))
-                    var ownerBookings = json($ownerBookings);
+                @if(isset($ownerBookings))
+                    var ownerBookings = @json($ownerBookings);
 
                     console.log('Owner Bookings:', ownerBookings);
 
@@ -154,7 +154,7 @@
                     });
 
                     ownerCalendar.render();
-                endif
+                @endif
             });
         </script>
     @endif

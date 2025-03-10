@@ -41,5 +41,8 @@
             @endforeach
         </tbody>
     </table>
+
+    <!-- Пагинация -->
+    {{ $applications->links() }}
 @endif
 @endsection
