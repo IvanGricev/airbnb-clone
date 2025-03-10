@@ -49,10 +49,8 @@ Route::middleware('auth')->group(function () {
     /**
      * Управление жильём
      */
-    Route::resource('properties', PropertyController::class);
     Route::get('/properties/{propertyId}/unavailable-dates', [PropertyController::class, 'getUnavailableDates'])->name('properties.unavailableDates');
     Route::get('properties/{property}/edit', [PropertyController::class, 'edit'])->name('properties.edit');
-    Route::put('properties/{property}', [PropertyController::class, 'update'])->name('properties.update');
 
     /**
      * Бронирования
@@ -130,9 +128,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     /**
      * Управление тикетами поддержки
      */
-     Route::get('/support', [AdminController::class, 'supportTickets'])->name('support.index');
-     Route::get('/support/{id}', [AdminController::class, 'showSupportTicket'])->name('support.show');
-     Route::post('/support/{id}/message', [AdminController::class, 'sendSupportMessage'])->name('support.message.send');
-     Route::put('/support/{id}/update-status', [AdminController::class, 'updateSupportTicketStatus'])->name('support.updateStatus');
-     Route::get('/chat/{user1}/{user2}', [AdminController::class, 'viewChatBetweenUsers'])->name('chat.between');
+    Route::get('/support', [AdminController::class, 'supportTickets'])->name('support.index');
+    Route::get('/support/{id}', [AdminController::class, 'showSupportTicket'])->name('support.show');
+    Route::post('/support/{id}/message', [AdminController::class, 'sendSupportMessage'])->name('support.message.send');
+    Route::put('/support/{id}/update-status', [AdminController::class, 'updateSupportTicketStatus'])->name('support.updateStatus');
+    Route::get('/chat/{user1}/{user2}', [AdminController::class, 'viewChatBetweenUsers'])->name('chat.between');
 });

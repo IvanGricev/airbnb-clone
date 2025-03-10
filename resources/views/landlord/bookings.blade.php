@@ -58,5 +58,8 @@
             @endforeach
         </tbody>
     </table>
+
+    <!-- Пагинация -->
+    {{ $bookings->links() }}
 @endif
 @endsection

@@ -9,64 +9,56 @@ use App\Models\Property;
 use App\Models\Favorite;
 use App\Models\Review;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 
 class UserController extends Controller
 {
     /**
-     * Отображение профиля пользователя.
-     * Данная функция формирует общую картину бронирований,
-     * избранных объектов, а также, если пользователь является арендодателем,
-     * дополнительно предоставляет статистику объектов и бронирований.
+     * Отображает профиль пользователя с историей бронирований, избранными объектами
+     * и, если пользователь – арендодатель, статистикой по объектам.
      *
      * @return \Illuminate\View\View
      */
     public function profile()
     {
-        // Получаем текущего пользователя
         $user = Auth::user();
 
-        // Получение всех бронирований данного пользователя с загрузкой данных об объекте недвижимости.
-        $bookings = Booking::where('user_id', $user->id)
-            ->with('property')
-            ->get();
+        // Кэширование бронирований пользователя
+        $bookings = Cache::remember('user_bookings_' . $user->id, now()->addMinutes(10), function () use ($user) {
+            return Booking::where('user_id', $user->id)
+                ->with('property')
+                ->get();
+        });
 
-        // Получение избранных объектов пользователя с информацией об объектах недвижимости.
-        $favorites = Favorite::where('user_id', $user->id)
-            ->with('property')
-            ->get();
+        $favorites = Cache::remember('user_favorites_' . $user->id, now()->addMinutes(10), function () use ($user) {
+            return Favorite::where('user_id', $user->id)
+                ->with('property')
+                ->get();
+        });
 
-        // Фильтрация завершенных бронирований: 
-        // бронирования, где дата выезда меньше текущей даты, выбираем первые 3.
         $pastBookings = $bookings->where('end_date', '<', Carbon::now())->take(3);
 
-        // Если пользователь является арендодателем
         if ($user->role === 'landlord') {
-            // Извлекаем все объекты, принадлежащие данному пользователю.
             $properties = Property::where('user_id', $user->id)->get();
 
-            // Общая статистика по объектам: общее количество бронирований и суммарная выручка.
             $totalBookings = Booking::whereIn('property_id', $properties->pluck('id'))->count();
-            $totalRevenue = Booking::whereIn('property_id', $properties->pluck('id'))->sum('total_price');
+            $totalRevenue  = Booking::whereIn('property_id', $properties->pluck('id'))->sum('total_price');
 
-            // Формируем статистику по каждому объекту.
             $propertyBookings = [];
             foreach ($properties as $property) {
-                $propertyBookingCount = Booking::where('property_id', $property->id)->count();
-                $propertyRevenue = Booking::where('property_id', $property->id)->sum('total_price');
-
                 $propertyBookings[] = [
                     'property'      => $property,
-                    'booking_count' => $propertyBookingCount,
-                    'revenue'       => $propertyRevenue,
+                    'booking_count' => Booking::where('property_id', $property->id)->count(),
+                    'revenue'       => Booking::where('property_id', $property->id)->sum('total_price'),
                 ];
             }
 
-            // Получение всех бронирований по объектам арендодателя с информацией об объекте.
-            $ownerBookings = Booking::whereIn('property_id', $properties->pluck('id'))
-                ->with('property')
-                ->get();
+            $ownerBookings = Cache::remember('owner_bookings_' . $user->id, now()->addMinutes(10), function () use ($properties) {
+                return Booking::whereIn('property_id', $properties->pluck('id'))
+                    ->with('property')
+                    ->get();
+            });
 
-            // Передаём все собранные данные в представление профиля для арендодателя.
             return view('user.profile', compact(
                 'user',
                 'bookings',
@@ -79,7 +71,6 @@ class UserController extends Controller
             ));
         }
 
-        // Для обычных пользователей возвращаем профиль с основными данными.
         return view('user.profile', compact('user', 'bookings', 'favorites', 'pastBookings'));
     }
 }

@@ -67,8 +67,7 @@
     @endif
 @endauth
 
-<!--
-Карта с использованием Google Maps
+<!-- Карта с использованием Google Maps -->
 @if($property->latitude && $property->longitude)
     <div id="map" style="height: 400px; width: 100%;"></div>
 
@@ -91,7 +90,6 @@
     </script>
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap"></script>
 @endif
--->
 
 <!-- Форма бронирования -->
 @auth
