@@ -2,7 +2,7 @@
 @section('title', 'Таблица: ' . $tableName)
 @section('content')
 <h1>Таблица: {{ $tableName }}</h1>
-<a href="{{ route('admin.database.create', $tableName) }}" class="btn btn-success">Добавить запись</a>
+<a href="{{ route('admin.database.create', ['table' => $tableName]) }}" class="btn btn-success">Добавить запись</a>
 
 @if(session('success'))
     <div class="alert alert-success">{{ session('success') }}</div>
@@ -24,8 +24,8 @@
                     <td>{{ $row->{$column->Field} }}</td>
                 @endforeach
                 <td>
-                    <a href="{{ route('admin.database.edit', [$tableName, $row->id]) }}" class="btn btn-primary">Редактировать</a>
-                    <form action="{{ route('admin.database.delete', [$tableName, $row->id]) }}" method="POST" style="display:inline-block;">
+                    <a href="{{ route('admin.database.edit', ['table' => $tableName, 'id' => $row->id]) }}" class="btn btn-primary">Редактировать</a>
+                    <form action="{{ route('admin.database.delete', ['table' => $tableName, 'id' => $row->id]) }}" method="POST" style="display:inline-block;">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="btn btn-danger">Удалить</button>
