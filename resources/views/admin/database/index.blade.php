@@ -3,9 +3,11 @@
 @section('content')
 <h1>Таблицы базы данных</h1>
 <ul>
-    @foreach($tables as $table)
+    @foreach($tables as $currentTable)
         <li>
-            <a href="{{ route('admin.database.table', ['table' => $table]) }}">{{ $table }}</a>
+            <a href="{{ route('admin.database.table', ['table' => $currentTable]) }}">
+                {{ $currentTable }}
+            </a>
         </li>
     @endforeach
 </ul>

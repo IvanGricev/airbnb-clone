@@ -1,8 +1,8 @@
 @extends('layouts.main')
-@section('title', 'Таблица: ' . $tableName)
+@section('title', 'Таблица: ' . $table) <!-- Исправлено $tableName → $table -->
 @section('content')
-<h1>Таблица: {{ $tableName }}</h1>
-<a href="{{ route('admin.database.create', ['table' => $tableName]) }}" class="btn btn-success">Добавить запись</a>
+<h1>Таблица: {{ $table }}</h1> <!-- Исправлено $tableName → $table -->
+<a href="{{ route('admin.database.create', ['table' => $table]) }}" class="btn btn-success">Добавить запись</a>
 
 @if(session('success'))
     <div class="alert alert-success">{{ session('success') }}</div>
@@ -24,8 +24,8 @@
                     <td>{{ $row->{$column->Field} }}</td>
                 @endforeach
                 <td>
-                    <a href="{{ route('admin.database.edit', ['table' => $tableName, 'id' => $row->id]) }}" class="btn btn-primary">Редактировать</a>
-                    <form action="{{ route('admin.database.delete', ['table' => $tableName, 'id' => $row->id]) }}" method="POST" style="display:inline-block;">
+                    <a href="{{ route('admin.database.edit', ['table' => $table, 'id' => $row->id]) }}" class="btn btn-primary">Редактировать</a>
+                    <form action="{{ route('admin.database.delete', ['table' => $table, 'id' => $row->id]) }}" method="POST" style="display:inline-block;">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="btn btn-danger">Удалить</button>
@@ -36,6 +36,5 @@
     </tbody>
 </table>
 
-<!-- Пагинация -->
-{{ $data->links() }}
+{{ $data->links() }} <!-- Пагинация -->
 @endsection

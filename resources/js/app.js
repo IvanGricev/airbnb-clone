@@ -14,6 +14,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     const newMessages = doc.getElementById('chat-messages').innerHTML;
                     chatMessages.innerHTML = newMessages;
                 });
-        }, 5000);
+        }, 1000);
     }
 });

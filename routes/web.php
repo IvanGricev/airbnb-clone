@@ -119,7 +119,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
      * Управление базой данных
      */
     Route::get('/database', [DatabaseController::class, 'index'])->name('database.index');
-    Route::get('/database/{table}', [DatabaseController::class, 'table'])->name('database.table');
+    Route::get('/database/{table?}', [DatabaseController::class, 'table'])->name('database.table');    
     Route::get('/database/{table}/create', [DatabaseController::class, 'createRow'])->name('database.create');
     Route::post('/database/{table}/store', [DatabaseController::class, 'storeRow'])->name('database.store');
     Route::get('/database/{table}/edit/{id}', [DatabaseController::class, 'editRow'])->name('database.edit');

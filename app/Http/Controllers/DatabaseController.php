@@ -11,17 +11,22 @@ class DatabaseController extends Controller
     public function index()
     {
         $tables = collect(DB::select('SHOW TABLES'))
-            ->pluck('Tables_in_' . env('DB_DATABASE'))
-            ->all();
+            ->pluck('Tables_in_' . env('DB_DATABASE'));
+    
         return view('admin.database.index', compact('tables'));
     }
-
-    public function table($tableName)
+    
+    public function table($table = null)
     {
-        $columns = DB::select("DESCRIBE $tableName");
-        $data    = DB::table($tableName)->paginate(10);
-        return view('admin.database.table', compact('tableName', 'columns', 'data'));
-    }
+        if (!$table) {
+            return redirect()->route('admin.database.index');
+        }
+    
+        $columns = DB::select("DESCRIBE $table");
+        $data = DB::table($table)->paginate(20); 
+
+        return view('admin.database.table', compact('table', 'columns', 'data'));
+    }    
 
     public function editRow(Request $request, $tableName, $id)
     {
