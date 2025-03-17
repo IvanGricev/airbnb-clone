@@ -12,19 +12,17 @@
 @endauth
 
 @if($property->reviews->count() > 0)
-    <p><strong>Средний рейтинг:</strong>
-        @php
-            $averageRating = round($property->reviews->avg('rating'), 1);
-        @endphp
+    <p>
+        <strong>Средний рейтинг:</strong>
+        @php $averageRating = round($property->reviews->avg('rating'), 1); @endphp
         {{ $averageRating }} из 5
     </p>
 @endif
 
 <p>{{ $property->description }}</p>
-
 <p><strong>Адрес:</strong> {{ $property->address }}</p>
-
 <p><strong>Цена за ночь:</strong> {{ $property->price_per_night }} руб.</p>
+
 @if($property->tags->isNotEmpty())
     <p><strong>Теги:</strong>
         @foreach($property->tags as $tag)
@@ -33,72 +31,37 @@
     </p>
 @endif
 
-@auth
-    @php
-        $isFavorite = \App\Models\Favorite::where('user_id', Auth::id())
-            ->where('property_id', $property->id)
-            ->exists();
-    @endphp
-
-    <form action="{{ $isFavorite ? route('favorites.remove', $property->id) : route('favorites.add', $property->id) }}" method="POST" style="display:inline-block;">
-        @csrf
-        <button type="submit" class="btn btn-{{ $isFavorite ? 'danger' : 'success' }}">
-            {{ $isFavorite ? 'Убрать из избранного' : 'В избранное' }}
+<!-- Карусель изображений -->
+@if($property->images->count() > 1)
+    <div id="propertyCarousel" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner">
+            @foreach($property->images as $index => $image)
+                <div class="carousel-item @if($index == 0) active @endif">
+                    <img src="{{ asset('storage/' . $image->image_path) }}" class="d-block w-100" alt="Изображение жилья">
+                </div>
+            @endforeach
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#propertyCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Предыдущий</span>
         </button>
-    </form>
-@endauth
-
-@auth
-    @php
-        $userId = Auth::id();
-        $hasCompletedBooking = \App\Models\Booking::where('property_id', $property->id)
-            ->where('user_id', $userId)
-            ->where('end_date', '<', now())
-            ->where('status', 'confirmed')
-            ->exists();
-
-        $alreadyReviewed = \App\Models\Review::where('property_id', $property->id)
-            ->where('user_id', $userId)
-            ->exists();
-    @endphp
-
-    @if($hasCompletedBooking && !$alreadyReviewed)
-        <a href="{{ route('reviews.create', $property->id) }}" class="btn btn-secondary">Оставить отзыв</a>
-    @endif
-@endauth
-
-<!-- Карта с использованием Google Maps -->
-@if($property->latitude && $property->longitude)
-    <div id="map" style="height: 400px; width: 100%;"></div>
-
-    <script>
-    function initMap() {
-        var location = {
-            lat: @json($property->latitude),
-            lng: @json($property->longitude)
-        };
-
-        var map = new google.maps.Map(document.getElementById('map'), {
-            zoom: 15,
-            center: location
-        });
-        var marker = new google.maps.Marker({
-            position: location,
-            map: map
-        });
-    }
-    </script>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap"></script>
+        <button class="carousel-control-next" type="button" data-bs-target="#propertyCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Следующий</span>
+        </button>
+    </div>
+@elseif($property->images->count() == 1)
+    <img src="{{ asset('storage/' . $property->images->first()->image_path) }}" class="img-fluid" alt="Изображение жилья">
+@else
+    <img src="{{ asset('storage/default-placeholder.png') }}" class="img-fluid" alt="Нет изображения">
 @endif
 
-<!-- Форма бронирования -->
+<!-- Остальной контент объекта (например, форма бронирования) -->
 @auth
     <h2>Бронирование</h2>
-
     @if(session('error'))
         <div class="alert alert-danger">{{ session('error') }}</div>
     @endif
-
     <form action="{{ route('bookings.store') }}" method="POST">
         @csrf
         <input type="hidden" name="property_id" value="{{ $property->id }}">
@@ -117,25 +80,19 @@
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
-
     <script>
         $(function() {
             var propertyId = @json($property->id);
             var unavailableDates = [];
-
-            // Function to disable unavailable dates
             function disableDates(date) {
                 var string = jQuery.datepicker.formatDate('yy-mm-dd', date);
                 return [ unavailableDates.indexOf(string) == -1 ];
             }
-
-            // Fetch unavailable dates via AJAX
             $.ajax({
                 url: '/properties/' + propertyId + '/unavailable-dates',
                 method: 'GET',
                 success: function(dates) {
                     unavailableDates = dates;
-
                     $('#start_date, #end_date').datepicker({
                         dateFormat: 'yy-mm-dd',
                         minDate: 0,
@@ -145,7 +102,6 @@
             });
         });
     </script>
-
 @endauth
 
 @endsection

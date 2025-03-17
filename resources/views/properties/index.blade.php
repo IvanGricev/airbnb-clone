@@ -31,7 +31,8 @@
                     <div>
                         @foreach($tagsGroup as $tag)
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" name="tags[]" id="tag{{ $tag->id }}" value="{{ $tag->id }}" {{ in_array($tag->id, $selectedTags) ? 'checked' : '' }}>
+                                <input class="form-check-input" type="checkbox" name="tags[]" id="tag{{ $tag->id }}" value="{{ $tag->id }}" 
+                                    {{ in_array($tag->id, $selectedTags) ? 'checked' : '' }}>
                                 <label class="form-check-label" for="tag{{ $tag->id }}">{{ $tag->name }}</label>
                             </div>
                         @endforeach
@@ -50,7 +51,12 @@
         @foreach($properties as $property)
             <div class="col-md-4">
                 <div class="card mb-4">
-                    <!-- Здесь можно добавить изображение жилья -->
+                    <!-- Отображение изображения -->
+                    @if($property->images->count() > 0)
+                        <img src="{{ asset('storage/' . $property->images->first()->image_path) }}" class="card-img-top" alt="Превью">
+                    @else
+                        <img src="{{ asset('storage/default-placeholder.png') }}" class="card-img-top" alt="Нет изображения">
+                    @endif
                     <div class="card-body">
                         <h5 class="card-title">{{ $property->title }}</h5>
                         <p>
