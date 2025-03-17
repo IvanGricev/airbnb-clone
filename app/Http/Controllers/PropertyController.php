@@ -204,7 +204,7 @@ class PropertyController extends Controller
             }
             $user = Auth::user();
             if (!$user) {
-                \Log::error('Пользователь не найден после авторизации', [
+                Log::error('Пользователь не найден после авторизации', [
                     'auth_id' => Auth::id(),
                     'session_data' => session()->all(),
                 ]);
@@ -212,7 +212,7 @@ class PropertyController extends Controller
             }
             return view('properties.become_landlord', compact('user'));
         } catch (\Exception $e) {
-            \Log::error('Ошибка при отображении формы подачи заявки арендодателя', [
+            Log::error('Ошибка при отображении формы подачи заявки арендодателя', [
                 'error' => $e->getMessage(),
                 'file'  => $e->getFile(),
                 'line'  => $e->getLine(),
@@ -282,7 +282,7 @@ class PropertyController extends Controller
 
             return redirect()->route('home')->with('success', 'Ваша заявка успешно подана на рассмотрение.');
         } catch (\Exception $e) {
-            \Log::error('Ошибка обработки заявки арендодателя: ' . $e->getMessage(), [
+            Log::error('Ошибка обработки заявки арендодателя: ' . $e->getMessage(), [
                 'exception' => $e,
                 'user_id'   => Auth::id(),
                 'input'     => $request->all()

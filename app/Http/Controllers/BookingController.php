@@ -7,10 +7,13 @@ use App\Models\Booking;
 use App\Models\Property;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class BookingController extends Controller
 {
-    // Создание бронирования с проверкой пересечений и расчётом стоимости
+    /**
+     * Метод для создания бронирования.
+     */
     public function store(Request $request)
     {
         $request->validate([
@@ -21,24 +24,26 @@ class BookingController extends Controller
 
         $property = Property::findOrFail($request->property_id);
 
+        // Проверка пересечения дат бронирования
         $overlappingBookings = Booking::where('property_id', $property->id)
-            ->where(function($query) use ($request) {
+            ->where(function ($query) use ($request) {
                 $query->whereBetween('start_date', [$request->start_date, $request->end_date])
                       ->orWhereBetween('end_date', [$request->start_date, $request->end_date])
-                      ->orWhere(function($q) use ($request) {
+                      ->orWhere(function ($q) use ($request) {
                           $q->where('start_date', '<', $request->start_date)
                             ->where('end_date', '>', $request->end_date);
                       });
-            })->exists();
+            })
+            ->exists();
 
         if ($overlappingBookings) {
             return redirect()->back()->with('error', 'Выбранные даты уже заняты. Пожалуйста, выберите другие даты.');
         }
 
-        $startDate = new \DateTime($request->start_date);
-        $endDate   = new \DateTime($request->end_date);
-        $interval  = $startDate->diff($endDate);
-        $days      = $interval->days;
+        $startDate  = new \DateTime($request->start_date);
+        $endDate    = new \DateTime($request->end_date);
+        $interval   = $startDate->diff($endDate);
+        $days       = $interval->days;
         $totalPrice = $property->price_per_night * $days;
 
         if ($totalPrice > 99999999.99) {
@@ -58,10 +63,12 @@ class BookingController extends Controller
                          ->with('success', 'Бронирование создано. Пожалуйста, оплатите его.');
     }
 
-    // История бронирований с использованием кэширования и пагинации
+    /**
+     * Отображение истории бронирований пользователя с пагинацией и кэшированием.
+     */
     public function history()
     {
-        $bookings = Cache::remember('user_bookings_' . Auth::id(), now()->addMinutes(10), function() {
+        $bookings = Cache::remember('user_bookings_' . Auth::id(), now()->addMinutes(10), function(){
             return Booking::where('user_id', Auth::id())
                 ->with('property')
                 ->paginate(10);
@@ -70,43 +77,68 @@ class BookingController extends Controller
         return view('bookings.history', compact('bookings'));
     }
 
+    /**
+     * Отмена бронирования пользователем.
+     */
     public function cancelBooking($id)
     {
         $booking = Booking::findOrFail($id);
+
+        // Логгирование текущего статуса для отладки
+        Log::info("Пользователь " . Auth::id() . " пытается отменить бронирование #" . $booking->id . ", текущий статус: " . $booking->status);
+
         if ($booking->user_id !== Auth::id()) {
             return redirect()->back()->with('error', 'У вас нет прав для отмены этого бронирования.');
         }
+
         if (!$booking->canBeCancelled()) {
             return redirect()->back()->with('error', 'Невозможно отменить бронирование после даты начала.');
         }
+
         $booking->status = 'cancelled_by_user';
+        Log::info("Устанавливаем статус бронирования #" . $booking->id . " в 'cancelled_by_user'");
         $booking->save();
+        Log::info("После сохранения, новый статус бронирования #" . $booking->id . ": " . $booking->status);
 
         return redirect()->back()->with('success', 'Бронирование успешно отменено.');
     }
 
+    /**
+     * Отмена бронирования арендодателем.
+     */
     public function cancelBookingByLandlord($id)
     {
-        $booking = Booking::findOrFail($id);
+        $booking  = Booking::findOrFail($id);
         $property = $booking->property;
+
+        Log::info("Арендодатель " . Auth::id() . " пытается отменить бронирование #" . $booking->id . " для объекта #" . $property->id);
+
         if ($property->user_id !== Auth::id()) {
             return redirect()->back()->with('error', 'У вас нет прав для отмены этого бронирования.');
         }
+
         if (!$booking->canBeCancelled()) {
             return redirect()->back()->with('error', 'Невозможно отменить бронирование после даты начала.');
         }
+
         $booking->status = 'cancelled_by_landlord';
+        Log::info("Устанавливаем статус бронирования #" . $booking->id . " в 'cancelled_by_landlord'");
         $booking->save();
+        Log::info("После сохранения, новый статус бронирования #" . $booking->id . ": " . $booking->status);
 
         return redirect()->back()->with('success', 'Бронирование успешно отменено.');
     }
 
+    /**
+     * Отображает бронирования для арендодателя с пагинацией и кэшированием.
+     */
     public function landlordBookings()
     {
         $bookings = Cache::remember('landlord_bookings_' . Auth::id(), now()->addMinutes(10), function () {
-            return Booking::whereHas('property', function($query) {
+            return Booking::whereHas('property', function ($query) {
                 $query->where('user_id', Auth::id());
-            })->with(['property', 'user'])->paginate(10);
+            })->with(['property', 'user'])
+              ->paginate(10);
         });
 
         return view('landlord.bookings', compact('bookings'));

@@ -14,6 +14,7 @@ class Booking extends Model
         'end_date',
         'total_price',
         'status',
+        'payment_status'
     ];
 
     public function user()
@@ -28,6 +29,6 @@ class Booking extends Model
 
     public function canBeCancelled()
     {
-        return Carbon::now()->lt(Carbon::parse($this->start_date));
-    }
+        return strtotime($this->start_date) > time();
+    }    
 }
