@@ -3,14 +3,15 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use App\Models\Property;
 use App\Models\PropertyImage;
 use App\Models\Booking;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use App\Models\LandlordApplication;
 use App\Models\Tag;
-use Illuminate\Support\Facades\Cache;
 
 class PropertyController extends Controller
 {
@@ -181,6 +182,24 @@ class PropertyController extends Controller
         }
 
         return redirect()->route('properties.show', $property->id)->with('success', 'Жильё успешно обновлено.');
+    }
+
+    public function deleteImage($id)
+    {
+        $image = PropertyImage::findOrFail($id);
+
+        // Проверяем, что текущий пользователь — владелец объекта
+        if (Auth::id() !== $image->property->user_id) {
+            return redirect()->back()->with('error', 'У вас нет прав для удаления этого изображения.');
+        }
+
+        // Удаляем файл из хранилища
+        Storage::disk('public')->delete($image->image_path);
+
+        // Удаляем запись из базы данных
+        $image->delete();
+
+        return redirect()->back()->with('success', 'Изображение успешно удалено.');
     }
 
     /**

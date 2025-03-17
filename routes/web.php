@@ -51,6 +51,7 @@ Route::middleware('auth')->group(function () {
      */
     Route::get('/properties/{propertyId}/unavailable-dates', [PropertyController::class, 'getUnavailableDates'])->name('properties.unavailableDates');
     Route::get('properties/{property}/edit', [PropertyController::class, 'edit'])->name('properties.edit');
+    Route::delete('properties/images/{id}', [PropertyController::class, 'deleteImage'])->name('properties.images.delete');
 
     /**
      * Бронирования
