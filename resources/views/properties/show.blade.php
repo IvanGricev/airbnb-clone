@@ -67,11 +67,11 @@
         <input type="hidden" name="property_id" value="{{ $property->id }}">
         <div class="mb-3">
             <label for="start_date" class="form-label">Дата заезда</label>
-            <input type="text" name="start_date" id="start_date" class="form-control" autocomplete="off" required>
+            <input type="date" name="start_date" id="start_date" class="form-control" autocomplete="off" required>
         </div>
         <div class="mb-3">
             <label for="end_date" class="form-label">Дата выезда</label>
-            <input type="text" name="end_date" id="end_date" class="form-control" autocomplete="off" required>
+            <input type="date" name="end_date" id="end_date" class="form-control" autocomplete="off" required>
         </div>
         <button type="submit" class="btn btn-success">Забронировать</button>
     </form>
