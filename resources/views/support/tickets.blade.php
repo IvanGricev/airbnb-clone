@@ -1,50 +1,37 @@
 @extends('layouts.main')
 
-@section('title', 'Мои тикеты в поддержку')
+@section('title', 'Поддержка')
 
 @section('content')
-<h1>Мои тикеты в поддержку</h1>
+    <h1>Обратиться в поддержку</h1>
+    @if(session('error'))
+        <div class="alert alert-danger">{{ session('error') }}</div>
+    @endif
+    @if(session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
 
-@if($tickets->isEmpty())
-    <p>У вас пока нет тикетов.</p>
-@else
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Тема</th>
-                <th>Дата создания</th>
-                <th>Статус</th>
-                <th>Статус заявки арендодателя</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($tickets as $ticket)
-            <tr>
-                <td>{{ $ticket->subject }}</td>
-                <td>{{ $ticket->created_at->format('d.m.Y H:i') }}</td>
-                <td>{{ $ticket->status }}</td>
-                <td>
-                    @if($ticket->landlordApplication)
-                        <span class="badge @if($ticket->landlordApplication->status == 'pending') badge-warning
-                            @elseif($ticket->landlordApplication->status == 'approved') badge-success
-                            @else badge-danger @endif">
-                            {{ $ticket->landlordApplication->status }}
-                        </span>
-                    @endif
-                </td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
-@endif
+    <form action="{{ route('support.store') }}" method="POST">
+        @csrf
+        <div class="mb-3">
+            <label for="subject" class="form-label">Тема</label>
+            <input type="text" name="subject" class="form-control" value="{{ old('subject') }}" required>
+            @error('subject') <div class="text-danger">{{ $message }}</div> @enderror
+        </div>
+        <div class="mb-3">
+            <label for="message" class="form-label">Сообщение</label>
+            <textarea name="message" class="form-control" required>{{ old('message') }}</textarea>
+            @error('message') <div class="text-danger">{{ $message }}</div> @enderror
+        </div>
+        <button type="submit" class="btn btn-primary">Отправить</button>
+    </form>
 
-<!-- Логика обновления сообщений в реальном времени -->
-<script src="{{ mix('js/app.js') }}"></script>
-<script>
-    Echo.private('support.{{ Auth::id() }}')
-        .listen('SupportTicketUpdated', (e) => {
-            alert('Статус вашего тикета был обновлён. Пожалуйста, проверьте обновления.');
-            location.reload(); // Обновляет страницу для показа актуальных данных
-        });
-</script>
+    <!-- Логика обновления сообщений в реальном времени -->
+    <script src="{{ mix('js/app.js') }}"></script>
+    <script>
+        Echo.private('support.{{ Auth::id() }}')
+            .listen('SupportTicketCreated', (e) => {
+                alert('Ваш тикет успешно создан. Пожалуйста, ожидайте ответа.');
+            });
+    </script>
 @endsection

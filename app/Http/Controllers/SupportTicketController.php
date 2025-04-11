@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\SupportTicketCreated;
 use App\Models\SupportTicket;
 use App\Models\SupportMessage;
 use Illuminate\Http\Request;
@@ -71,6 +72,9 @@ class SupportTicketController extends Controller
                 'message'   => $request->message,
             ]);
 
+            // Генерация события для обновления сообщений в реальном времени
+            event(new SupportTicketCreated($ticket));
+
             return redirect()->route('support.show', $ticket->id)->with('success', 'Тикет создан.');
         } catch (\Exception $e) {
             Log::error('Ошибка при создании тикета', ['error' => $e->getMessage()]);
@@ -119,7 +123,7 @@ class SupportTicketController extends Controller
                     'message'   => $request->message,
                 ]);
 
-                // Обновление статуса
+                // Обновление статуса тикета
                 if (Auth::user()->role === 'admin') {
                     $ticket->status = 'answered';
                 } else {
