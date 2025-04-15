@@ -15,11 +15,16 @@ class SupportController extends Controller
      */
     public function myTickets()
     {
-        $tickets = SupportTicket::where('user_id', Auth::id())
-                    ->orderBy('created_at', 'desc')
-                    ->get();
+        try {
+            $tickets = SupportTicket::where('user_id', Auth::id())
+                        ->orderBy('created_at', 'desc')
+                        ->get();
 
-        return view('support.tickets', compact('tickets'));
+            return view('support.index', compact('tickets'));
+        } catch (\Exception $e) {
+            Log::error('Ошибка при получении тикетов пользователя', ['error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Не удалось загрузить ваши тикеты.');
+        }
     }
 
     /**
@@ -27,7 +32,7 @@ class SupportController extends Controller
      */
     public function create()
     {
-        return view('support.index');
+        return view('support.create');
     }
 
     /**
@@ -66,20 +71,26 @@ class SupportController extends Controller
      */
     public function show($id)
     {
-        $ticket = SupportTicket::findOrFail($id);
+        try {
+            $ticket = SupportTicket::findOrFail($id);
 
-        // Проверка доступа: тикет должен принадлежать текущему пользователю.
-        if ($ticket->user_id !== Auth::id()) {
-            return redirect()->route('support.index')->with('error', 'У вас нет доступа к этому тикету.');
+            // Проверка доступа: тикет должен принадлежать текущему пользователю.
+            if ($ticket->user_id !== Auth::id()) {
+                return redirect()->route('support.index')
+                        ->with('error', 'У вас нет доступа к этому тикету.');
+            }
+
+            $messages = $ticket->messages()->orderBy('created_at', 'asc')->get();
+
+            return view('support.chat', compact('ticket', 'messages'));
+        } catch (\Exception $e) {
+            Log::error('Ошибка при отображении тикета', ['error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Не удалось загрузить тикет.');
         }
-
-        $messages = $ticket->messages()->orderBy('created_at', 'asc')->get();
-
-        return view('support.chat', compact('ticket', 'messages'));
     }
 
     /**
-     * Отправка нового сообщения в тикете поддержки.
+     * Отправляет новое сообщение в тикете поддержки.
      */
     public function sendMessage(Request $request, $id)
     {
@@ -87,18 +98,24 @@ class SupportController extends Controller
             'message' => 'required|string|max:5000',
         ]);
 
-        $ticket = SupportTicket::findOrFail($id);
+        try {
+            $ticket = SupportTicket::findOrFail($id);
 
-        if ($ticket->user_id !== Auth::id()) {
-            return redirect()->route('support.index')->with('error', 'У вас нет доступа к этому тикету.');
+            if ($ticket->user_id !== Auth::id()) {
+                return redirect()->route('support.index')
+                        ->with('error', 'У вас нет доступа к этому тикету.');
+            }
+
+            SupportMessage::create([
+                'ticket_id' => $ticket->id,
+                'user_id'   => Auth::id(),
+                'message'   => $request->message,
+            ]);
+
+            return redirect()->back()->with('success', 'Сообщение отправлено.');
+        } catch (\Exception $e) {
+            Log::error('Ошибка при отправке сообщения в тикете', ['error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Не удалось отправить сообщение.');
         }
-
-        SupportMessage::create([
-            'ticket_id' => $ticket->id,
-            'user_id'   => Auth::id(),
-            'message'   => $request->message,
-        ]);
-
-        return redirect()->back()->with('success', 'Сообщение отправлено.');
     }
 }

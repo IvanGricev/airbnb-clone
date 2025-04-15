@@ -1,30 +1,49 @@
 @extends('layouts.main')
 
-@section('title', 'Поддержка')
+@section('title', 'Мои тикеты поддержки')
 
 @section('content')
-<h1>Обратиться в поддержку</h1>
-<form action="{{ route('support.store') }}" method="POST">
-    @csrf
-    <div class="mb-3">
-        <label for="subject" class="form-label">Тема</label>
-        <input type="text" name="subject" class="form-control" value="{{ old('subject') }}" required>
-        @error('subject') <div class="text-danger">{{ $message }}</div> @enderror
-    </div>
-    <div class="mb-3">
-        <label for="message" class="form-label">Сообщение</label>
-        <textarea name="message" class="form-control" required>{{ old('message') }}</textarea>
-        @error('message') <div class="text-danger">{{ $message }}</div> @enderror
-    </div>
-    <button type="submit" class="btn btn-primary">Отправить</button>
-</form>
+    <h1>Мои тикеты поддержки</h1>
 
-<!-- Логика обновления сообщений в реальном времени -->
-<script src="{{ mix('js/app.js') }}"></script>
-<script>
-    Echo.private('support.{{ Auth::id() }}')
-        .listen('SupportTicketCreated', (e) => {
-            alert('Ваш тикет успешно создан. Пожалуйста, ожидайте ответа.');
-        });
-</script>
+    @if(session('error'))
+        <div class="alert alert-danger">{{ session('error') }}</div>
+    @endif
+
+    @if(session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
+
+    @if($tickets->isEmpty())
+        <p>
+            У вас пока нет тикетов. Вы можете создать новый, перейдя на 
+            <a href="{{ route('support.create') }}">страницу создания тикета</a>.
+        </p>
+    @else
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Тема</th>
+                    <th>Статус</th>
+                    <th>Последнее обновление</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($tickets as $ticket)
+                    <tr>
+                        <td>{{ $ticket->id }}</td>
+                        <td>{{ $ticket->subject }}</td>
+                        <td>{{ ucfirst($ticket->status) }}</td>
+                        <td>{{ $ticket->updated_at->format('d.m.Y H:i') }}</td>
+                        <td>
+                            <a href="{{ route('support.show', $ticket->id) }}" class="btn btn-primary btn-sm">
+                                Просмотреть
+                            </a>
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    @endif
 @endsection
