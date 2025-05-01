@@ -39,6 +39,8 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/profile', [UserController::class, 'profile'])->name('user.profile');
+    Route::put('/profile/update-name-email', [UserController::class, 'updateNameEmail'])->name('user.update.name-email');
+    Route::put('/profile/update-password', [UserController::class, 'updatePassword'])->name('user.update.password');
 
     // Маршруты для симуляции оплаты бронирования
     Route::get('/payments/{booking}/checkout', [PaymentController::class, 'showPaymentForm'])

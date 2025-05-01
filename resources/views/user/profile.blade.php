@@ -5,6 +5,74 @@
 @section('content')
 <h1>Профиль пользователя</h1>
 
+<!-- Кнопка "Редактировать имя и email" -->
+<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editNameEmailModal">Редактировать имя и email</button>
+
+<!-- Модальное окно для редактирования имени и email -->
+<div class="modal fade" id="editNameEmailModal" tabindex="-1" aria-labelledby="editNameEmailModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editNameEmailModalLabel">Редактировать имя и email</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+      </div>
+      <form action="{{ route('user.update.name-email') }}" method="POST">
+        @csrf
+        @method('PUT')
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="name" class="form-label">Имя</label>
+            <input type="text" name="name" id="name" class="form-control" value="{{ Auth::user()->name }}" required>
+          </div>
+          <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" name="email" id="email" class="form-control" value="{{ Auth::user()->email }}" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Сохранить изменения</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Кнопка "Изменить пароль" -->
+<button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#editPasswordModal">Изменить пароль</button>
+
+<!-- Модальное окно для изменения пароля -->
+<div class="modal fade" id="editPasswordModal" tabindex="-1" aria-labelledby="editPasswordModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editPasswordModalLabel">Изменить пароль</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+      </div>
+      <form action="{{ route('user.update.password') }}" method="POST">
+        @csrf
+        @method('PUT')
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="current_password" class="form-label">Текущий пароль</label>
+            <input type="password" name="current_password" id="current_password" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label for="new_password" class="form-label">Новый пароль</label>
+            <input type="password" name="new_password" id="new_password" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label for="new_password_confirmation" class="form-label">Подтвердите новый пароль</label>
+            <input type="password" name="new_password_confirmation" id="new_password_confirmation" class="form-control" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Сохранить изменения</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 <!-- Календарь бронирований -->
 <h2>Мои бронирования</h2>
 <!-- <div id="calendar"></div> -->
@@ -88,7 +156,7 @@
 
 @endif
 @endsection
-
+<!-- Инфогрфика (не работает) -->
 <!-- 
 @push('scripts')
     <script>
