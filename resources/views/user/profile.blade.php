@@ -3,7 +3,7 @@
 @section('title', 'Профиль пользователя')
 
 @section('content')
-<h1>Профиль пользователя</h1>
+<h1>Профиль {{ Auth::user()->name }}</h1>
 
 <!-- Кнопка "Редактировать имя и email" -->
 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editNameEmailModal">Редактировать имя и email</button>

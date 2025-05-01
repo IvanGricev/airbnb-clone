@@ -8,7 +8,7 @@ use App\Models\Property;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
-
+use Illuminate\Support\Collection;
 class BookingController extends Controller
 {
     /**
@@ -73,7 +73,7 @@ class BookingController extends Controller
                 ->with('property')
                 ->paginate(10);
         });
-
+    
         return view('bookings.history', compact('bookings'));
     }
 
