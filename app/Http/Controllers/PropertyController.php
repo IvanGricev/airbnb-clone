@@ -33,7 +33,7 @@ class PropertyController extends Controller
 
         $cacheKey = 'properties_' . md5(json_encode($request->all()));
 
-        $properties = Cache::remember($cacheKey, now()->addMinutes(10), function () use ($query, $selectedTags, $minPrice, $maxPrice, $sortOrder) {
+        $properties = Cache::remember($cacheKey, now()->addMinutes(1), function () use ($query, $selectedTags, $minPrice, $maxPrice, $sortOrder) {
             $queryBuilder = Property::with(['tags', 'reviews']);
 
             if ($query) {
@@ -335,5 +335,14 @@ class PropertyController extends Controller
         }
 
         return response()->json($unavailableDates);
+    }
+
+    public function destroy(Property $property)
+    {
+        $property->delete();
+    
+        Cache::flush();
+    
+        return redirect()->route('home')->with('success', 'Жильё удалено.');
     }
 }
