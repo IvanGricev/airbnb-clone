@@ -1,6 +1,8 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
+<nav class="navbar navbar-expand-lg ">
     <div class="container-fluid container">
-        <a class="navbar-brand" href="{{ route('home') }}">Airbnb Clone</a>
+        <a class="navbar-brand" href="{{ route('home') }}">
+        <img src="{{ asset('images/logo.svg') }}" alt="Airbnb Clone" height="40">
+        </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
