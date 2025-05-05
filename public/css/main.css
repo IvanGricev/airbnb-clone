@@ -612,3 +612,171 @@ form .btn.btn-primary:hover {
     margin-right: 0;
     box-shadow: 0 2px 8px rgba(60,60,60,0.08);
 }
+
+/* --- Промо-блок --- */
+
+.property-promo {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 60px;
+    max-width: 1400px;
+    margin: 80px auto 0 auto;
+    padding: 40px 0 60px 0;
+  }
+  
+  .promo-left {
+    flex: 1.1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    max-width: 420px;
+    padding-left: 24px;
+  }
+  
+  .promo-label {
+    color: #ffb43a;
+    font-size: 1rem;
+    margin-bottom: 8px;
+    letter-spacing: 0.01em;
+    position: relative;
+    display: inline-block;
+  }
+  .promo-label:before {
+    content: "";
+    display: inline-block;
+    width: 40px;
+    height: 2px;
+    background: #ffb43a;
+    vertical-align: middle;
+    margin-right: 10px;
+    margin-bottom: 3px;
+  }
+  
+  .promo-left h2 {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #23235f;
+    margin: 0 0 18px 0;
+  }
+  
+  .promo-desc {
+    color: #6c6c8a;
+    font-size: 1.08rem;
+    margin-bottom: 24px;
+    line-height: 1.6;
+  }
+  
+  .promo-details-title {
+    font-weight: 700;
+    color: #23235f;
+    margin-bottom: 10px;
+    font-size: 1.08rem;
+  }
+  
+  .promo-details-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px 32px;
+    margin-bottom: 24px;
+  }
+  
+  .promo-detail {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #23235f;
+    font-size: 1.08rem;
+    font-weight: 600;
+  }
+  
+  .promo-detail img {
+    width: 28px;
+    height: 28px;
+    opacity: 0.7;
+  }
+  
+  .promo-owner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 18px;
+    border-top: 1px solid #e6e6e6;
+    padding-top: 18px;
+  }
+  
+  .promo-owner img {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  
+  .promo-owner-role {
+    font-weight: 700;
+    color: #23235f;
+    font-size: 1.08rem;
+  }
+  
+  .promo-owner-name {
+    color: #6c6c8a;
+    font-size: 0.98rem;
+  }
+  
+  .promo-contact-btn {
+    background: #ffb43a;
+    color: #fff;
+    border: none;
+    border-radius: 28px;
+    padding: 12px 32px;
+    font-size: 1.08rem;
+    font-weight: 700;
+    margin-left: auto;
+    cursor: pointer;
+    transition: background 0.2s;
+    box-shadow: 0 2px 8px rgba(255,180,58,0.10);
+  }
+  .promo-contact-btn:hover {
+    background: #ffa600;
+  }
+  
+  .promo-right {
+    flex: 1.5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .promo-browser {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 8px 48px rgba(60,60,60,0.10);
+    padding: 32px 32px 24px 32px;
+    position: relative;
+    min-width: 600px;
+    max-width: 900px;
+  }
+  
+  .promo-browser-dots {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+  
+  .promo-browser-dots .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .promo-browser-dots .red { background: #ff5f56; }
+  .promo-browser-dots .yellow { background: #ffbd2e; }
+  .promo-browser-dots .green { background: #27c93f; }
+  
+  .promo-browser img {
+    width: 680px;
+    height: 380px;
+    object-fit: cover;
+    border-radius: 18px;
+    display: block;
+  }

@@ -240,7 +240,54 @@
   </div>
 </section>
 
-
+<section class="property-promo">
+  <div class="promo-left">
+    <div class="promo-label">Готов К Аренде</div>
+    <h2>Давайте Посмотрим!</h2>
+    <p class="promo-desc">
+      Дома, рекомендованные нашими партнерами, которые были отобраны специально для того, чтобы стать домом вашей мечты!
+    </p>
+    <div class="promo-details">
+      <div class="promo-details-title">Детали</div>
+      <div class="promo-details-list">
+        <div class="promo-detail">
+          <img src="{{ asset('images/bed 1.svg')}}" alt="">
+          <span>4 Спальни</span>
+        </div>
+        <div class="promo-detail">
+          <img src="{{ asset('images/bath 1.svg')}}" alt="">
+          <span>2 Санузла</span>
+        </div>
+        <div class="promo-detail">
+          <img src="{{ asset('images/car-garage 1.svg')}}" alt="">
+          <span>1 Гараж</span>
+        </div>
+        <div class="promo-detail">
+          <img src="{{ asset('images/stairs-with-handrail 1.svg')}}" alt="">
+          <span>2 Этажа</span>
+        </div>
+      </div>
+    </div>
+    <div class="promo-owner">
+      <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Арендатор">
+      <div>
+        <div class="promo-owner-role">Арендатор</div>
+        <div class="promo-owner-name">Юлия Иванова</div>
+      </div>
+      <button class="promo-contact-btn">Связаться</button>
+    </div>
+  </div>
+  <div class="promo-right">
+    <div class="promo-browser">
+      <div class="promo-browser-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <img src="{{ asset('images/house.jpg')}}" alt="Дом мечты">
+    </div>
+  </div>
+</section>
 
 @endif
 @endsection
