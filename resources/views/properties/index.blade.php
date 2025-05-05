@@ -158,5 +158,89 @@
 
     <!-- Пагинация -->
     {{ $properties->links() }}
+
+<section class="reviews-section">
+  <div class="reviews-header">
+    <div class="reviews-link">Посмотреть Отзывы</div>
+    <h2>Что Говорят Наши Клиенты?</h2>
+  </div>
+  <div class="reviews-slider">
+    <!-- Левая карточка -->
+    <div class="review-slide">
+      <img src="{{ asset('images/otz1.jpg')}}" class="review-img" alt="">
+      <div class="review-bubble">
+        <div class="review-title">Мой дом быстро сдали в аренду!</div>
+        <div class="review-text">
+        Я наконец смог быстро сдать свой дом через Housing Hub, который немедленно познакомил меня с людьми, которые хотели арендовать мой дом. Потрясающе!
+        </div>
+        <div class="review-footer">
+          <div class="review-user">
+          <span class="avatar-placeholder">КГ</span>
+            <div>
+              <div class="user-name">Кортни Генри</div>
+              <div class="user-role">Арендодатель</div>
+            </div>
+          </div>
+          <div class="review-rating">
+            <span class="star">&#9733;</span> 4.3
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Центральная карточка -->
+    <div class="review-slide active">
+      <img src="{{ asset('images/otz2.jpg')}}" class="review-img" alt="">
+      <div class="review-bubble">
+        <div class="review-title">Лучший сайт для поиска дома!</div>
+        <div class="review-text">
+          Через этот сайт я смогла легко получить дом с типом и особенностями, которые я хочу, без сложного процесса.
+        </div>
+        <div class="review-footer">
+          <div class="review-user">
+                <span class="avatar-placeholder">ДР</span>
+            <div>
+              <div class="user-name">Диана Расселл</div>
+              <div class="user-role">Клиент</div>
+            </div>
+          </div>
+          <div class="review-rating">
+            <span class="star">&#9733;</span> 4.6
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Правая карточка -->
+    <div class="review-slide">
+      <img src="{{ asset('images/otz3.jpg')}}" class="review-img" alt="">
+      <div class="review-bubble">
+        <div class="review-title">Через Housing Hub я смог арендовать дом для себя</div>
+        <div class="review-text">
+          Поиск информации о том, какой дом мы хотим мы хотели очень быстро. Прямо связались с арендодателем, чтобы спросить о деталях, очень полезно!
+        </div>
+        <div class="review-footer">
+          <div class="review-user">
+            <span class="avatar-placeholder">ЭГ</span>
+            <div>
+              <div class="user-name">Эстер Говард</div>
+              <div class="user-role">Клиент</div>
+            </div>
+          </div>
+          <div class="review-rating">
+            <span class="star">&#9733;</span> 4.6
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Точки-слайдер -->
+  <div class="reviews-dots">
+    <span class="dot"></span>
+    <span class="dot active"></span>
+    <span class="dot"></span>
+  </div>
+</section>
+
+
+
 @endif
 @endsection
