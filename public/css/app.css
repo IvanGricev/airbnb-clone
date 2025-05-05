@@ -1,11 +1,31 @@
 @import 'bootstrap';
+@import url('https://fonts.googleapis.com/css2?family=Lexend&display=swap');
+body {
+    font-family: 'Lexend', sans-serif;
+}
+
 
 body {
     background-color: #f8f9fa;
 }
 
-nav-link{
+.navbar-nav{
+    margin: 50 px;
+    height: max-content;
+}
+
+.nav-item{
     background-color: #c8c8c8;
-    border-radius: 32;
+    border-radius: 32 px;
+    padding: 10 px;
+}
+
+.dropdown{
+    background-color: #F59E0B;
     
 }
+
+.dropdown-menu{
+    background-color: #F59E0B;
+}
+

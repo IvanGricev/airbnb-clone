@@ -1,8 +1,36 @@
+<link rel="stylesheet" href="{{ url('/css/main.css') }}">
 @extends('layouts.main')
 
 @section('title', 'Список жилья')
 
 @section('content')
+<div class="hero">
+    <div class="hero-image">
+        <img src="{{ asset('images/path_to_hero_image.jpg')}}" alt="Жилое пространство">
+    </div>
+    <div class="hero-text">
+        <h1>Good Living Better Live</h1>
+        <p>Ваши мечты легко здесь!</p>
+        <form action="{{ route('properties.index') }}" method="GET" class="search-form">
+            <input type="text" name="query" placeholder="Что ищем?" class="form-control">
+            <button type="submit" class="btn-search">Поиск</button>
+        </form>
+    </div>
+</div>
+
+<div class="property-cards">
+    <div class="card">
+        <img src="{{ asset('images/path_to_image_1.jpg')}}" alt="Манхэттен Стайл">
+        <h2>Манхэттен Стайл</h2>
+        <p>4.8 ⭐️ (400+ отзывов)</p>
+    </div>
+    <div class="card">
+        <img src="{{ asset('images/path_to_image_2.jpg')}}" alt="Будущее">
+        <h2>Будущее</h2>
+        <p>4.5 ⭐️ (320+ отзывов)</p>
+    </div>
+</div>
+
 <h1>Список жилья</h1>
 
 <form action="{{ route('properties.index') }}" method="GET" class="mb-4">

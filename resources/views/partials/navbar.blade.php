@@ -1,3 +1,4 @@
+<link rel="stylesheet" href="{{ url('/css/app.css') }}">
 <nav class="navbar navbar-expand-lg ">
     <div class="container-fluid container">
         <a class="navbar-brand" href="{{ route('home') }}">
@@ -23,6 +24,7 @@
                         <div class="dropdown text-end">
                             <a href="#" class="d-block link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                                 <img src="https://github.com/mdo.png" alt="mdo" width="32" height="32" class="rounded-circle">
+                                <a>Админка</a>
                             </a>
                             <ul class="dropdown-menu text-small">
                                 <li><a class="dropdown-item" href="{{ route('user.profile') }}">Мой профиль</a></li>
