@@ -30,9 +30,9 @@
                                 @else
                                     <li><a class="dropdown-item" href="{{ route('become-landlord.form') }}">Стать арендодателем</a></li>
                                 @endif
-                                <li><a class="dropdown-item" href="#">Настройки</a></li>
                                 <li><a class="dropdown-item" href="{{ route('support.index') }}">Мои запросы в поддержку</a></li>
                                 <li><a class="dropdown-item" href="{{ route('support.create') }}">Обратиться в поддержку</a></li>
+                                <li><a class="dropdown-item" href="#">Настройки</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <form action="{{ route('logout') }}" method="POST" class="d-inline">
