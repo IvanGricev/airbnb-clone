@@ -7,16 +7,21 @@
 <div class="hero-main">
     <div class="hero-left">
         <h1>
-            <span class="bold">Good Living</span> <span class="bold">Better Live</span><br>
-            <span class="dreams">Your Dreams</span> <span class="bold">Easily Here</span>
+            <span class="bold">Хороший вид</span> <span class="bold">Лучшее место</span><br>
+            <span class="dreams">Ваши мечты</span> <span class="bold">Прямо здесь</span>
         </h1>
         <p class="desc">
             Всё, что вам нужно для поиска места для аренды, будет здесь.<br>
             Наши предложения сделаны из отборных и лучших вариантов, которые подходят для аренды вашей мечты
         </p>
         <form class="search-form" action="{{ route('properties.index') }}" method="GET">
-            <input type="text" name="query" placeholder="Что вы ищете?" />
-            <button type="submit" class="search-btn">Поиск</button>
+            <span class="search-icon">
+                <img src="{{ asset('images/search-location.svg') }}" alt="Поиск" />
+            </span>
+            <input type="text" name="query" class="form-control" placeholder="Что ищем?" value="{{ request('query') }}">
+            <button type="submit" class="search-btn">
+                Поиск <span class="arrow">&rarr;</span>
+            </button>
         </form>
     </div>
     <div class="hero-right">
@@ -24,19 +29,42 @@
             <img src="{{ asset('images/path_to_hero_image.jpg')}}" alt="Жилое пространство">
             <div class="mini-cards">
                 <div class="mini-card active">
-                    <img src="{{ asset('images/path_to_image_1.jpg')}}" alt="Manhattan Style">
-                    <div>
-                        <h3>Manhattan Style</h3>
-                        <p>Lorem ipsum dolor sit amet, conser adipiscing elit</p>
-                        <span class="rating">4.8 (400+ Review)</span>
+                    <div class="mini-card-img">
+                        <img src="{{ asset('images/path_to_image_1.jpg')}}" alt="Manhattan Style">
+                    </div>
+                    <div class="mini-card-content">
+                        <h3>Манхэттенский стиль</h3>
+                        <p>Стиль, который подчеркивает индивидуальность и уют</p>
+                        <span class="rating">
+                            <span class="star">&#9733;</span>
+                            4.8 <span class="reviews">(400+ Review)</span>
+                        </span>
                     </div>
                 </div>
                 <div class="mini-card">
-                    <img src="{{ asset('images/path_to_image_2.jpg')}}" alt="New Future">
-                    <div>
-                        <h3>New Future</h3>
-                        <p>Lorem ipsum dolor sit amet, conser adipiscing elit</p>
-                        <span class="rating">4.5 (320+ Review)</span>
+                    <div class="mini-card-img">
+                        <img src="{{ asset('images/path_to_image_2.jpg')}}" alt="New Future">
+                    </div>
+                    <div class="mini-card-content">
+                        <h3>Новый будущий</h3>
+                        <p>Стиль, который подчеркивает индивидуальность и уют</p>
+                        <span class="rating">
+                            <span class="star">&#9733;</span>
+                            4.5 <span class="reviews">(320+ Review)</span>
+                        </span>
+                    </div>
+                </div>
+                <div class="mini-card">
+                    <div class="mini-card-img">
+                        <img src="{{ asset('images/path_to_image_3.jpg')}}" alt="Modern Loft">
+                    </div>
+                    <div class="mini-card-content">
+                        <h3>Современный лофт</h3>
+                        <p>Стиль, который подчеркивает индивидуальность и уют</p>
+                        <span class="rating">
+                            <span class="star">&#9733;</span>
+                            4.7 <span class="reviews">(210+ Review)</span>
+                        </span>
                     </div>
                 </div>
             </div>
@@ -48,24 +76,25 @@
         </div>
     </div>
 </div>
-<h1>Список жилья</h1>
+
+<h1>Наши предложения</h1>
 
 <form action="{{ route('properties.index') }}" method="GET" class="mb-4">
     <div class="row">
-        <div class="col-md-4 mb-3">
-            <input type="text" name="query" class="form-control" placeholder="Что ищем?" value="{{ request('query') }}">
+        <div class="col-md-2 mb-4">
+            <input type="number" name="min_price" class="form-control" placeholder="Мин. цена" value="{{ request('min_price') }}">
         </div>
-        <div class="col-md-2 mb-3">
-            <input type="number" name="min_price" class="form-control" placeholder="Минимальная цена" value="{{ request('min_price') }}">
+        <div class="col-md-2 mb-4">
+            <input type="number" name="max_price" class="form-control" placeholder="Макс. цена" value="{{ request('max_price') }}">
         </div>
-        <div class="col-md-2 mb-3">
-            <input type="number" name="max_price" class="form-control" placeholder="Максимальная цена" value="{{ request('max_price') }}">
-        </div>
-        <div class="col-md-4 mb-3">
+        <div class="col-md-3 mb-4">
             <select name="sort_order" class="form-control">
                 <option value="asc" {{ request('sort_order') == 'asc' ? 'selected' : '' }}>От дешевого к дорогому</option>
                 <option value="desc" {{ request('sort_order') == 'desc' ? 'selected' : '' }}>От дорогого к дешевому</option>
             </select>
+        </div>
+        <div class="col-md-2 mb-4">
+        <button type="submit" class="btn btn-primary">Найти</button>
         </div>
     </div>
     <div class="row">
@@ -86,7 +115,7 @@
             @endforeach
         </div>
     </div>
-    <button type="submit" class="btn btn-primary">Найти</button>
+    
 </form>
 
 @if($properties->isEmpty())
@@ -94,7 +123,7 @@
 @else
     <div class="row">
         @foreach($properties as $property)
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="card mb-4">
                     <!-- Отображение изображения -->
                     @if($property->images->count() > 0)
