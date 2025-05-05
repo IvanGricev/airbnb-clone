@@ -1,5 +1,5 @@
 <link rel="stylesheet" href="{{ url('/css/app.css') }}">
-<nav class="navbar navbar-expand-lg ">
+<nav class="navbar navbar-expand-lg navbar-transparent ">
     <div class="container-fluid container">
         <a class="navbar-brand" href="{{ route('home') }}">
         <img src="{{ asset('images/logo.svg') }}" alt="Airbnb Clone" height="40">
@@ -22,10 +22,10 @@
 
                     <li class="nav-item">
                         <div class="dropdown text-end">
-                            <a href="#" class="d-block link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                                <img src="https://github.com/mdo.png" alt="mdo" width="32" height="32" class="rounded-circle">
-                                <a>Админка</a>
-                            </a>
+                            <div class="user-btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                            <img src="https://github.com/mdo.png" alt="mdo" width="32" height="32" class="rounded-circle">
+                            <span>Иван Грицев</span>
+                            </div>
                             <ul class="dropdown-menu text-small">
                                 <li><a class="dropdown-item" href="{{ route('user.profile') }}">Мой профиль</a></li>
                                 <li><a class="dropdown-item" href="{{ route('chat.conversations') }}">Мои чаты</a></li>

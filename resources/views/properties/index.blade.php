@@ -4,33 +4,50 @@
 @section('title', 'Список жилья')
 
 @section('content')
-<div class="hero">
-    <div class="hero-image">
-        <img src="{{ asset('images/path_to_hero_image.jpg')}}" alt="Жилое пространство">
-    </div>
-    <div class="hero-text">
-        <h1>Good Living Better Live</h1>
-        <p>Ваши мечты легко здесь!</p>
-        <form action="{{ route('properties.index') }}" method="GET" class="search-form">
-            <input type="text" name="query" placeholder="Что ищем?" class="form-control">
-            <button type="submit" class="btn-search">Поиск</button>
+<div class="hero-main">
+    <div class="hero-left">
+        <h1>
+            <span class="bold">Good Living</span> <span class="bold">Better Live</span><br>
+            <span class="dreams">Your Dreams</span> <span class="bold">Easily Here</span>
+        </h1>
+        <p class="desc">
+            Всё, что вам нужно для поиска места для аренды, будет здесь.<br>
+            Наши предложения сделаны из отборных и лучших вариантов, которые подходят для аренды вашей мечты
+        </p>
+        <form class="search-form" action="{{ route('properties.index') }}" method="GET">
+            <input type="text" name="query" placeholder="Что вы ищете?" />
+            <button type="submit" class="search-btn">Поиск</button>
         </form>
     </div>
-</div>
-
-<div class="property-cards">
-    <div class="card">
-        <img src="{{ asset('images/path_to_image_1.jpg')}}" alt="Манхэттен Стайл">
-        <h2>Манхэттен Стайл</h2>
-        <p>4.8 ⭐️ (400+ отзывов)</p>
+    <div class="hero-right">
+        <div class="main-image">
+            <img src="{{ asset('images/path_to_hero_image.jpg')}}" alt="Жилое пространство">
+            <div class="mini-cards">
+                <div class="mini-card active">
+                    <img src="{{ asset('images/path_to_image_1.jpg')}}" alt="Manhattan Style">
+                    <div>
+                        <h3>Manhattan Style</h3>
+                        <p>Lorem ipsum dolor sit amet, conser adipiscing elit</p>
+                        <span class="rating">4.8 (400+ Review)</span>
+                    </div>
+                </div>
+                <div class="mini-card">
+                    <img src="{{ asset('images/path_to_image_2.jpg')}}" alt="New Future">
+                    <div>
+                        <h3>New Future</h3>
+                        <p>Lorem ipsum dolor sit amet, conser adipiscing elit</p>
+                        <span class="rating">4.5 (320+ Review)</span>
+                    </div>
+                </div>
+            </div>
+            <div class="slider-dots">
+                <span class="dot active"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+            </div>
+        </div>
     </div>
-    <div class="card">
-        <img src="{{ asset('images/path_to_image_2.jpg')}}" alt="Будущее">
-        <h2>Будущее</h2>
-        <p>4.5 ⭐️ (320+ отзывов)</p>
-    </div>
 </div>
-
 <h1>Список жилья</h1>
 
 <form action="{{ route('properties.index') }}" method="GET" class="mb-4">
