@@ -1,5 +1,7 @@
 @extends('layouts.main')
+
 @section('title', $property->title)
+
 @section('content')
     <h1>{{ $property->title }}</h1>
 
@@ -52,6 +54,30 @@
         <img src="{{ asset('storage/' . $property->images->first()->image_path) }}" class="img-fluid" alt="Изображение жилья">
     @else
         <img src="{{ asset('storage/default-placeholder.png') }}" class="img-fluid" alt="Нет изображения">
+    @endif
+
+    <!-- Вывод отзывов -->
+    <hr>
+    <h2>Отзывы</h2>
+    @if($property->reviews->count() > 0)
+        @foreach($property->reviews as $review)
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        {{ $review->user->name }}
+                        <small class="text-muted">{{ $review->created_at->format('d.m.Y H:i') }}</small>
+                    </h5>
+                    <p class="card-text">
+                        <strong>Оценка:</strong> {{ $review->rating }} из 5
+                    </p>
+                    @if($review->comment)
+                        <p class="card-text">{{ $review->comment }}</p>
+                    @endif
+                </div>
+            </div>
+        @endforeach
+    @else
+        <p>Этот объект пока не имеет отзывов.</p>
     @endif
 
     <!-- Форма бронирования объекта -->

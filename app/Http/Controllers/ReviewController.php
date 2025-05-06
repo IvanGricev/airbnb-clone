@@ -12,7 +12,6 @@ class ReviewController extends Controller
 {
     /**
      * Отображает форму создания отзыва для указанного объекта.
-     *
      * @param int $propertyId
      * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
      */
@@ -32,21 +31,11 @@ class ReviewController extends Controller
             return redirect()->back()->with('error', 'Вы не можете оставить отзыв для этого жилья.');
         }
 
-        // Проверяем, не оставлял ли пользователь уже отзыв
-        $alreadyReviewed = Review::where('property_id', $propertyId)
-            ->where('user_id', $userId)
-            ->exists();
-
-        if ($alreadyReviewed) {
-            return redirect()->back()->with('error', 'Вы уже оставили отзыв для этого жилья.');
-        }
-
         return view('reviews.create', compact('property'));
     }
 
     /**
      * Сохраняет новый отзыв.
-     *
      * @param Request $request
      * @param int $propertyId
      * @return \Illuminate\Http\RedirectResponse
@@ -70,15 +59,6 @@ class ReviewController extends Controller
 
         if (!$hasCompletedBooking) {
             return redirect()->back()->with('error', 'Вы не можете оставить отзыв для этого жилья.');
-        }
-
-        // Проверка, что отзыв еще не создан
-        $alreadyReviewed = Review::where('property_id', $propertyId)
-            ->where('user_id', $userId)
-            ->exists();
-
-        if ($alreadyReviewed) {
-            return redirect()->back()->with('error', 'Вы уже оставили отзыв для этого жилья.');
         }
 
         Review::create([
