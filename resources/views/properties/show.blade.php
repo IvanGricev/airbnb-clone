@@ -47,12 +47,12 @@
                             <form action="{{ route('favorites.remove', $property->id) }}" method="POST" class="property-action-btn" title="Убрать из избранного">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="property-action-btn"><span class="action-label">В избранном</span></button>
+                                <button  class="property-action-btn"><span class="action-label">В избранном</span></button>
                             </form>
                         @else
                             <form action="{{ route('favorites.add', $property->id) }}" method="POST" class="property-action-btn" title="Добавить в избранное">
                                 @csrf
-                                <button type="submit" class="property-action-btn"><span class="action-label">В избранное</span></button>
+                                <button  class="property-action-btn"><span class="action-label">В избранное</span></button>
                             </form>
                         @endif
                     @endauth
@@ -87,6 +87,7 @@
                         @endif
                         <form action="{{ route('bookings.store') }}" method="POST" class="booking-form-row wide-booking-form">
                             @csrf
+                            <input type="hidden" name="property_id" value="{{ $property->id }}">
                             <div class="booking-date-group wide-booking-date-group">
                                 <span class="booking-date-field">
                                     <span class="booking-date-label">c</span>
@@ -106,61 +107,13 @@
         </div>
     </div>
 
-    <!-- Вывод отзывов -->
-    <div class="property-reviews-block">
-        <hr>
-        <h2>Отзывы</h2>
-        @if($property->reviews->count() > 0)
-            @foreach($property->reviews as $review)
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <h5 class="card-title">
-                            {{ $review->user->name }}
-                            <small class="text-muted">{{ $review->created_at->format('d.m.Y H:i') }}</small>
-                        </h5>
-                        <p class="card-text">
-                            <strong>Оценка:</strong> {{ $review->rating }} из 5
-                        </p>
-                        @if($review->comment)
-                            <p class="card-text">{{ $review->comment }}</p>
-                        @endif
-                    </div>
-                </div>
-            @endforeach
-        @else
-            <p>Этот объект пока не имеет отзывов.</p>
-        @endif
-    </div>
-
-    <!-- Форма оставления отзыва (отображается только если бронирование завершено) -->
-    @auth
-        @php
-            $hasCompletedBooking = \App\Models\Booking::where('property_id', $property->id)
-                ->where('user_id', Auth::id())
-                ->where('end_date', '<', now())
-                ->where('status', 'confirmed')
-                ->exists();
-        @endphp
-        @if($hasCompletedBooking)
-            <h2>Оставить отзыв</h2>
-            @if(session('error_review'))
-                <div class="alert alert-danger">{{ session('error_review') }}</div>
-            @endif
-            @if(session('success_review'))
-                <div class="alert alert-success">{{ session('success_review') }}</div>
-            @endif
-            <a href="{{ route('reviews.create', $property->id) }}" class="btn btn-secondary">Добавить отзыв</a>
-        @endif
-    @endauth
-
     <!-- Табы -->
     <div class="property-tabs-block">
         <div class="property-tabs">
-            <button class="property-tab active">Описание</button>
-            <button class="property-tab">Отзывы ({{ $property->reviews->count() }})</button>
+            <button class="property-tab active" id="tab-desc-btn" type="button">Описание</button>
         </div>
         <div class="property-tabs-content-row">
-            <div class="property-tab-description">
+            <div class="property-tab-description property-tab-pane active" id="tab-desc">
                 <p>Уютная квартира в самом сердце города, идеально подходящая как для краткосрочного, так и для длительного проживания. Современный ремонт, полностью меблированные комнаты и прекрасный вид из окна создают атмосферу домашнего уюта. В шаговой доступности находятся магазины, кафе и остановки общественного транспорта.</p>
                 <div style="margin-top: 18px;">
                     <div style="color:#888; font-size:1.04rem; margin-bottom: 6px;">Характеристики:</div>
@@ -183,6 +136,55 @@
                     <div class="property-additional-value">4</div>
                 </div>
             </aside>
+        </div>
+    </div>
+
+    <div class="property-tabs-block">
+        <div class="property-tabs">
+            <button class="property-tab active" type="button" disabled>Отзывы ({{ $property->reviews->count() }})</button>
+        </div>
+        <div class="property-tabs-content-row">
+            <div class="property-tab-reviews property-tab-pane active" id="tab-reviews-static">
+                @if($property->reviews->count() > 0)
+                    @php $shownReviews = 2; @endphp
+                    @foreach($property->reviews as $i => $review)
+                        <div class="review-card" style="@if($i >= $shownReviews) display:none; @endif">
+                            <div class="review-text">{{ $review->comment }}</div>
+                            <div class="review-author">{{ $review->user->name }}</div>
+                            <div class="review-rating">
+                                <span style="color:#b0b0b0; font-size:1.01rem; font-weight:400; margin-right:10px;">{{ $review->created_at->format('d.m.Y H:i') }}</span>
+                                <span class="material-icons review-star">&#11088;</span>
+                                <span style="font-weight:800; color:#1e2351; font-size:1.25rem;">{{ number_format($review->rating, 1) }}</span>
+                            </div>
+                        </div>
+                    @endforeach
+                    @if($property->reviews->count() > $shownReviews)
+                        <button class="show-more-reviews-btn" onclick="
+                            var cards = document.querySelectorAll('.review-card');
+                            for(let i = $shownReviews; i < cards.length; i++) { cards[i].style.display = 'block'; }
+                            this.style.display = 'none';
+                        ">Показать ещё</button>
+                    @endif
+                @else
+                    <p>Этот объект пока не имеет отзывов.</p>
+                @endif
+                @auth
+                    @php
+                        $hasCompletedBooking = \App\Models\Booking::where('property_id', $property->id)
+                            ->where('user_id', Auth::id())
+                            ->where('end_date', '<', now())
+                            ->where('status', 'confirmed')
+                            ->exists();
+                        $alreadyReviewed = $property->reviews->where('user_id', Auth::id())->count() > 0;
+                    @endphp
+                    @if($hasCompletedBooking && !$alreadyReviewed)
+                        <div class="property-add-review-block" style="margin-top:24px;">
+                            <a href="{{ route('reviews.create', $property->id) }}" class="btn btn-secondary">Оставить отзыв</a>
+                        </div>
+                    @endif
+                @endauth
+            </div>
+            <aside class="property-tab-additional-info"></aside>
         </div>
     </div>
 
@@ -212,5 +214,7 @@
                 }
             });
         });
+
+        
     </script>
 @endsection
