@@ -196,6 +196,36 @@ class AdminController extends Controller
                   ->where('to_user_id', $user1);
         })->orderBy('created_at', 'asc')->get();
 
-        return view('admin.chat.between_users', compact('userOne', 'userTwo', 'messages'));
+        return view('admin.support.between_users', compact('userOne', 'userTwo', 'messages'));
+    }
+
+    public function sendChatMessageBetweenUsers(Request $request, $user1, $user2)
+    {
+        // Проверить, что текущий пользователь — администратор (дополнительная защита, хотя в middleware уже проверяется)
+        if (Auth::user()->role !== 'admin') {
+            return redirect()->route('home')->with('error', 'У вас нет доступа к этому чату.');
+        }
+
+        // Валидация входящего сообщения
+        $request->validate([
+            'content' => 'required|string|max:5000',
+        ]);
+
+        try {
+            $message = new \App\Models\Message();
+            $message->from_user_id = Auth::id(); // отправитель — администратор
+            $message->to_user_id = $user2; 
+            $message->content = $request->content;
+            $message->save();
+
+            return redirect()->back()->with('success', 'Сообщение отправлено.');
+        } catch (\Exception $e) {
+            Log::error('Ошибка при отправке сообщения в чате между пользователями', [
+                'error' => $e->getMessage(),
+                'file'  => $e->getFile(),
+                'line'  => $e->getLine(),
+            ]);
+            return redirect()->back()->with('error', 'Не удалось отправить сообщение.');
+        }
     }
 }

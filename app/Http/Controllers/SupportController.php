@@ -7,6 +7,7 @@ use App\Models\SupportMessage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class SupportController extends Controller
 {
@@ -16,9 +17,10 @@ class SupportController extends Controller
     public function myTickets()
     {
         try {
+            // Используем пагинацию для удобства
             $tickets = SupportTicket::where('user_id', Auth::id())
                         ->orderBy('created_at', 'desc')
-                        ->get();
+                        ->paginate(10);
 
             return view('support.index', compact('tickets'));
         } catch (\Exception $e) {
@@ -46,6 +48,8 @@ class SupportController extends Controller
         ]);
 
         try {
+            DB::beginTransaction();
+
             $ticket = SupportTicket::create([
                 'user_id' => Auth::id(),
                 'subject' => $request->subject,
@@ -58,10 +62,13 @@ class SupportController extends Controller
                 'message'   => $request->message,
             ]);
 
+            DB::commit();
+
             return redirect()->route('support.show', $ticket->id)
                              ->with('success', 'Ваша заявка отправлена в поддержку.');
         } catch (\Exception $e) {
-            Log::error('Ошибка при создании тикета', ['error' => $e->getMessage()]);
+            DB::rollBack();
+            Log::error('Ошибка при создании тикета поддержки', ['error' => $e->getMessage()]);
             return redirect()->back()->with('error', 'Не удалось создать тикет.');
         }
     }

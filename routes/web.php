@@ -83,7 +83,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/support/store', [SupportController::class, 'store'])->name('support.store');
     Route::get('/support/{id}', [SupportController::class, 'show'])->name('support.show');
     Route::post('/support/{id}/message', [SupportController::class, 'sendMessage'])->name('support.message.send');
-
     /**
      * Стать арендодателем и добавить жильё
      */
@@ -135,5 +134,6 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/support/{id}', [AdminController::class, 'showSupportTicket'])->name('support.show');
     Route::post('/support/{id}/message', [AdminController::class, 'sendSupportMessage'])->name('support.message.send');
     Route::put('/support/{id}/update-status', [AdminController::class, 'updateSupportTicketStatus'])->name('support.updateStatus');
-    Route::get('/chat/{user1}/{user2}', [AdminController::class, 'viewChatBetweenUsers'])->name('chat.between');
+    Route::get('/support/{user1}/{user2}', [AdminController::class, 'viewChatBetweenUsers'])->name('support.between');
+    Route::post('/chat/{user1}/{user2}/send', [AdminController::class, 'sendChatMessageBetweenUsers'])->name('chat.sendMessage');
 });

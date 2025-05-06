@@ -38,7 +38,7 @@
                 <strong>Период:</strong> {{ $booking->start_date }} - {{ $booking->end_date }}<br>
                 <strong>Статус бронирования:</strong> {{ $booking->status }}<br>
                 <!-- Кнопка для перехода в чат между арендатором и арендодателем -->
-                <a href="{{ route('admin.chat.between', ['user1' => $booking->user_id, 'user2' => $booking->property->user_id]) }}" class="btn btn-info mt-2">Перейти в чат с арендодателем</a>
+                <a href="{{ route('admin.support.between', ['user1' => $booking->user_id, 'user2' => $booking->property->user_id]) }}" class="btn btn-info mt-2">Перейти в чат с арендодателем</a>
             </li>
         @endforeach
     </ul>
