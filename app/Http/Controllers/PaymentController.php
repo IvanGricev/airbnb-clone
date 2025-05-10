@@ -33,6 +33,12 @@ class PaymentController extends Controller
         $booking = Booking::findOrFail($bookingId);
 
         if (Auth::id() !== $booking->user_id) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'У вас нет прав для оплаты этого бронирования.'
+                ]);
+            }
             return redirect()->back()->with('error', 'У вас нет прав для оплаты этого бронирования.');
         }
 
@@ -48,6 +54,13 @@ class PaymentController extends Controller
         }
         $booking->status = 'confirmed';
         $booking->save();
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'redirectUrl' => route('bookings.history')
+            ]);
+        }
 
         return redirect()->route('bookings.history')
                          ->with('success', 'Платеж успешно произведен (симуляция).');

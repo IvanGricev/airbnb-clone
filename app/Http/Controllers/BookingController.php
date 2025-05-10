@@ -37,6 +37,12 @@ class BookingController extends Controller
             ->exists();
 
         if ($overlappingBookings) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Выбранные даты уже заняты. Пожалуйста, выберите другие даты.'
+                ]);
+            }
             return redirect()->back()->with('error', 'Выбранные даты уже заняты. Пожалуйста, выберите другие даты.');
         }
 
@@ -47,6 +53,12 @@ class BookingController extends Controller
         $totalPrice = $property->price_per_night * $days;
 
         if ($totalPrice > 99999999.99) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Общая стоимость бронирования превышает максимально допустимое значение.'
+                ]);
+            }
             return redirect()->back()->with('error', 'Общая стоимость бронирования превышает максимально допустимое значение.');
         }
 
@@ -59,6 +71,15 @@ class BookingController extends Controller
             'status'      => 'pending_payment',
         ]);
     
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'bookingId' => $booking->id,
+                'totalPrice' => $totalPrice,
+                'paymentUrl' => route('payments.process', $booking->id)
+            ]);
+        }
+
         return redirect()->route('payments.checkout', $booking->id)
                          ->with('success', 'Бронирование создано. Пожалуйста, оплатите его.');
     }
