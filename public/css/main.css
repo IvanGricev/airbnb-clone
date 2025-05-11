@@ -424,7 +424,9 @@ form .btn.btn-primary:hover {
     color: #fff;
 }
 
-
+form .row + .row {
+    margin-top: 18px;
+}
 
 /* --- Карточка отзыва --- */
 .reviews-section {
@@ -780,3 +782,55 @@ form .btn.btn-primary:hover {
     border-radius: 18px;
     display: block;
   }
+
+.form-check-inline {
+    display: flex;
+    align-items: center;
+    margin-right: 1.5rem;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    user-select: none;
+}
+
+.form-check-input[type="checkbox"] {
+    appearance: none;
+    width: 22px;
+    height: 22px;
+    border: 2px solid #ffb43a;
+    border-radius: 50%;
+    background: #fff;
+    margin-right: 10px;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+    outline: none;
+    cursor: pointer;
+}
+
+.form-check-input[type="checkbox"]:checked {
+    background: #ffb43a;
+    border-color: #ffb43a;
+}
+
+.form-check-input[type="checkbox"]:checked::after {
+    content: '';
+    display: block;
+    width: 10px;
+    height: 10px;
+    background: #fff;
+    border-radius: 50%;
+    position: absolute;
+    top: 4px;
+    left: 4px;
+}
+
+.form-check-label {
+    font-size: 1.1rem;
+    color: #222;
+    transition: color 0.2s;
+    cursor: pointer;
+}
+
+.form-check-input[type="checkbox"]:checked + .form-check-label {
+    color: #ffb43a;
+    font-weight: bold;
+}
