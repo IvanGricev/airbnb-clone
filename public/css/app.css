@@ -18,8 +18,8 @@ nav.navbar {
 .navbar .container,
 .navbar .container-fluid {
     max-width: 100vw;
-    padding-left: 32px;
-    padding-right: 32px;
+    padding-left: 100px;
+    padding-right: 60px;
     display: flex;
     align-items: center;
     justify-content: space-between;
