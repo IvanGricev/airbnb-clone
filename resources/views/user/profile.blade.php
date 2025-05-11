@@ -94,7 +94,7 @@
                         <div class="booking-card">
                             <div class="booking-info">
                                 <h3 class="booking-title">
-                                    <a href="{{ route('bookings.show', $booking->id) }}">{{ $booking->property->title }}</a>
+                                    <a href="{{ route('properties.show', $booking->property->id) }}">{{ $booking->property->title }}</a>
                                 </h3>
                                 <p class="booking-dates">
                                     <i class="far fa-calendar-alt"></i>
