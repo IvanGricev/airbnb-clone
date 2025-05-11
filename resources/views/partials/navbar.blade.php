@@ -24,7 +24,7 @@
                         <div class="dropdown text-end">
                             <div class="user-btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                             <img src="https://github.com/mdo.png" alt="mdo" width="32" height="32" class="rounded-circle">
-                            <span>Иван Грицев</span>
+                            <span>{{ Auth::user()->name }}</span>
                             </div>
                             <ul class="dropdown-menu text-small">
                                 <li><a class="dropdown-item" href="{{ route('user.profile') }}">Мой профиль</a></li>
