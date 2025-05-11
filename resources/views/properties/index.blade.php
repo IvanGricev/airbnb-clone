@@ -77,6 +77,7 @@
     </div>
 </div>
 
+<div class="reviews-link">Посмотреть Объекты</div>
 <h1>Наши предложения</h1>
 
 <form action="{{ route('properties.index') }}" method="GET" class="mb-4">

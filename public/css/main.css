@@ -19,7 +19,7 @@ body {
     background-color: #ffffff;
     border-radius: 24px;
     margin: 0 auto 40px auto;
-    padding: 0 0 0 30px; /* уменьшил левый паддинг */
+    padding: 40 0 150 100px; /* уменьшил левый паддинг */
     position: relative;
     overflow: visible;
     gap: 10px; /* уменьшил расстояние между блоками */
@@ -428,7 +428,7 @@ form .btn.btn-primary:hover {
 
 /* --- Карточка отзыва --- */
 .reviews-section {
-    margin: 80px auto 0 auto;
+    margin: 150px auto 0 auto;
     max-width: 1400px;
     padding: 0 24px 60px 24px;
     text-align: center;
@@ -621,7 +621,7 @@ form .btn.btn-primary:hover {
     align-items: flex-start;
     gap: 60px;
     max-width: 1400px;
-    margin: 80px auto 0 auto;
+    margin: 100px auto 0 auto;
     padding: 40px 0 60px 0;
   }
   
