@@ -1,0 +1,245 @@
+.booking-history {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.booking-history h1 {
+    color: #2c3e50;
+    margin-bottom: 30px;
+    font-size: 2.5rem;
+    text-align: center;
+}
+
+.booking-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+    padding: 20px 0;
+}
+
+.booking-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    overflow: hidden;
+}
+
+.booking-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.booking-card-image {
+    width: 100%;
+    height: 300px;
+    overflow: hidden;
+    position: relative;
+    background: #f8f9fa;
+}
+
+.booking-card-image::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.1);
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.booking-card:hover .booking-card-image::before {
+    opacity: 1;
+}
+
+.booking-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+    display: block;
+}
+
+.booking-card:hover .booking-card-image img {
+    transform: scale(1.05);
+}
+
+.booking-card-image .no-image {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fa;
+    color: #999;
+    font-size: 0.9rem;
+}
+
+.booking-card-header {
+    padding: 20px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #eee;
+}
+
+.booking-card-header h3 {
+    margin: 0;
+    color: #2c3e50;
+    font-size: 1.2rem;
+}
+
+.booking-card-header h3 a {
+    color: #2c3e50;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.booking-card-header h3 a:hover {
+    color: #3498db;
+}
+
+.booking-card-body {
+    padding: 20px;
+}
+
+.booking-info {
+    margin-bottom: 15px;
+}
+
+.booking-info p {
+    margin: 7px 0;
+    color: #555;
+    display: flex;
+    align-items: left;
+}
+
+.booking-info i {
+    margin-right: 0px;
+    color: #3498db;
+    width: 20px;
+}
+
+.booking-price {
+    font-size: 1.2rem;
+    color: #2c3e50;
+    font-weight: bold;
+    margin: 15px 0;
+}
+
+.booking-status {
+    display: inline-block;
+    padding: 6px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 15px;
+}
+
+.status-confirmed {
+    background: #e3fcef;
+    color: #00a854;
+}
+
+.status-cancelled {
+    background: #fff1f0;
+    color: #f5222d;
+}
+
+.status-pending {
+    background: #e6f7ff;
+    color: #1890ff;
+}
+
+.booking-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.booking-actions .btn {
+    flex: 1;
+    text-align: center;
+    padding: 8px 15px;
+    border-radius: 20px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn-info {
+    background: #ffb43a;
+    color: white;
+    border: none;
+}
+
+.btn-info:hover {
+    background: #ff870f;
+    color: white;
+}
+
+.btn-danger {
+    background: #e74c3c;
+    color: white;
+    border: none;
+}
+
+.btn-danger:hover {
+    background: #c0392b;
+    color: white;
+}
+
+.alert {
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.alert-success {
+    background: #e3fcef;
+    color: #00a854;
+    border: 1px solid #b7eb8f;
+}
+
+.alert-danger {
+    background: #fff1f0;
+    color: #f5222d;
+    border: 1px solid #ffccc7;
+}
+
+.no-bookings {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+    font-size: 1.1rem;
+}
+
+.pagination {
+    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.pagination .page-item {
+    list-style: none;
+}
+
+.pagination .page-link {
+    padding: 8px 16px;
+    border-radius: 6px;
+    color: #3498db;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.pagination .page-link:hover {
+    background: #f8f9fa;
+}
+
+.pagination .active .page-link {
+    background: #3498db;
+    color: white;
+}
