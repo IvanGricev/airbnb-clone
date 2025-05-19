@@ -23,7 +23,7 @@
                     <li class="nav-item">
                         <div class="dropdown text-end">
                             <div class="user-btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                            <img src="https://github.com/mdo.png" alt="mdo" width="32" height="32" class="rounded-circle">
+                            <img src="{{ asset('images/user-placeholder.svg') }}" alt="user" width="32" height="32" class="rounded-circle">
                             <span>{{ Auth::user()->name }}</span>
                             </div>
                             <ul class="dropdown-menu text-small">
@@ -34,7 +34,6 @@
                                 @else
                                     <li><a class="dropdown-item" href="{{ route('become-landlord.form') }}">Стать арендодателем</a></li>
                                 @endif
-                                <li><a class="dropdown-item" href="{{ route('support.index') }}">Мои запросы в поддержку</a></li>
                                 <li><a class="dropdown-item" href="{{ route('support.create') }}">Обратиться в поддержку</a></li>                                
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
