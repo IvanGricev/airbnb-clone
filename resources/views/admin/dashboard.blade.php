@@ -3,30 +3,39 @@
 @section('title', 'Административная панель')
 
 @section('content')
-    <h1>Административная панель</h1>
-    
-    <div class="row">
-        <div class="col-md-3">
-            <div class="card">
-                <div class="card-header">Меню</div>
-                <div class="card-body">
-                    <ul class="nav flex-column">
-                        <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('admin.landlord.applications') ? 'active' : '' }}" href="{{ route('admin.landlord.applications') }}">Заявки арендодателей</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('admin.database.index') ? 'active' : '' }}" href="{{ route('admin.database.index') }}">Управление БД</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('admin.support.index') ? 'active' : '' }}" href="{{ route('admin.support.index') }}">Тикеты поддержки</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-9">
-            @yield('admin-content')
-        </div>
+<link rel="stylesheet" href="{{ url('/css/dashboard.admin.css') }}">
+
+<div class="admin-dashboard">
+    <div class="admin-header">
+        <h1>Административная панель</h1>
     </div>
+    
+    <div class="admin-menu">
+        <a href="{{ route('admin.landlord.applications') }}" class="admin-menu-item {{ request()->routeIs('admin.landlord.applications') ? 'active' : '' }}">
+            <span class="menu-icon">🏠</span>
+            <div class="menu-content">
+                <div class="menu-title">Заявки арендодателей</div>
+                <p class="menu-description">Управление заявками на размещение объектов</p>
+            </div>
+        </a>
+
+        <a href="{{ route('admin.database.index') }}" class="admin-menu-item {{ request()->routeIs('admin.database.index') ? 'active' : '' }}">
+            <span class="menu-icon">⭐</span>
+            <div class="menu-content">
+                <div class="menu-title">Управление БД</div>
+                <p class="menu-description">Управление данными и настройками системы</p>
+            </div>
+        </a>
+
+        <a href="{{ route('admin.support.index') }}" class="admin-menu-item {{ request()->routeIs('admin.support.index') ? 'active' : '' }}">
+            <span class="menu-icon">💬</span>
+            <div class="menu-content">
+                <div class="menu-title">Тикеты поддержки</div>
+                <p class="menu-description">Обработка обращений пользователей</p>
+            </div>
+        </a>
+    </div>
+
+    @yield('admin-content')
+</div>
 @endsection
