@@ -26,56 +26,55 @@
     </div>
     <div class="hero-right">
         <div class="main-image">
-            <img src="{{ asset('images/path_to_hero_image.jpg')}}" alt="Жилое пространство">
+            @php
+                $sliderProperties = $properties->take(3);
+                $first = $sliderProperties->first();
+            @endphp
+            <img id="hero-main-image" src="{{ $first && $first->images->count() > 0 ? asset('storage/' . $first->images->first()->image_path) : asset('storage/default-placeholder.png') }}" alt="{{ $first ? $first->title : 'Жилое пространство' }}">
             <div class="mini-cards">
-                <div class="mini-card active">
-                    <div class="mini-card-img">
-                        <img src="{{ asset('images/path_to_image_1.jpg')}}" alt="Manhattan Style">
+                @foreach($sliderProperties as $i => $property)
+                    <div class="mini-card{{ $i === 0 ? ' active' : '' }}" data-index="{{ $i }}" data-image="{{ $property->images->count() > 0 ? asset('storage/' . $property->images->first()->image_path) : asset('storage/default-placeholder.png') }}">
+                        <div class="mini-card-img">
+                            <img src="{{ $property->images->count() > 0 ? asset('storage/' . $property->images->first()->image_path) : asset('storage/default-placeholder.png') }}" alt="{{ $property->title }}">
+                        </div>
+                        <div class="mini-card-content">
+                            <h3>{{ $property->title }}</h3>
+                            <p>{{ Str::limit($property->description, 50) }}</p>
+                            <span class="rating">
+                                <span class="star">&#9733;</span>
+                                {{ $property->average_rating ?? '—' }} <span class="reviews">({{ $property->reviews->count() }} Review)</span>
+                            </span>
+                        </div>
                     </div>
-                    <div class="mini-card-content">
-                        <h3>Манхэттенский стиль</h3>
-                        <p>Стиль, который подчеркивает индивидуальность и уют</p>
-                        <span class="rating">
-                            <span class="star">&#9733;</span>
-                            4.8 <span class="reviews">(400+ Review)</span>
-                        </span>
-                    </div>
-                </div>
-                <div class="mini-card">
-                    <div class="mini-card-img">
-                        <img src="{{ asset('images/path_to_image_2.jpg')}}" alt="New Future">
-                    </div>
-                    <div class="mini-card-content">
-                        <h3>Новый будущий</h3>
-                        <p>Стиль, который подчеркивает индивидуальность и уют</p>
-                        <span class="rating">
-                            <span class="star">&#9733;</span>
-                            4.5 <span class="reviews">(320+ Review)</span>
-                        </span>
-                    </div>
-                </div>
-                <div class="mini-card">
-                    <div class="mini-card-img">
-                        <img src="{{ asset('images/path_to_image_3.jpg')}}" alt="Modern Loft">
-                    </div>
-                    <div class="mini-card-content">
-                        <h3>Современный лофт</h3>
-                        <p>Стиль, который подчеркивает индивидуальность и уют</p>
-                        <span class="rating">
-                            <span class="star">&#9733;</span>
-                            4.7 <span class="reviews">(210+ Review)</span>
-                        </span>
-                    </div>
-                </div>
+                @endforeach
             </div>
             <div class="slider-dots">
-                <span class="dot active"></span>
-                <span class="dot"></span>
-                <span class="dot"></span>
+                @foreach($sliderProperties as $i => $property)
+                    <span class="dot{{ $i === 0 ? ' active' : '' }}" data-index="{{ $i }}"></span>
+                @endforeach
             </div>
         </div>
     </div>
 </div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(function() {
+    function setActive(index) {
+        var card = $('.mini-card[data-index="'+index+'"]').addClass('active');
+        $('.mini-card').not(card).removeClass('active');
+        var dot = $('.slider-dots .dot[data-index="'+index+'"]').addClass('active');
+        $('.slider-dots .dot').not(dot).removeClass('active');
+        var img = $('.mini-card[data-index="'+index+'"]').data('image');
+        $('#hero-main-image').attr('src', img);
+    }
+    $('.mini-card').on('mouseenter click', function() {
+        setActive($(this).data('index'));
+    });
+    $('.slider-dots .dot').on('mouseenter click', function() {
+        setActive($(this).data('index'));
+    });
+});
+</script>
 
 <div class="reviews-link">Посмотреть Объекты</div>
 <h1>Наши предложения</h1>

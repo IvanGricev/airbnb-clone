@@ -834,3 +834,33 @@ form .row + .row {
     color: #ffb43a;
     font-weight: bold;
 }
+
+.slider-arrows {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    transform: translateY(-50%);
+    display: flex;
+    justify-content: space-between;
+    padding: 0 20px;
+    z-index: 20;
+}
+
+.slider-arrow {
+    background: rgba(255, 255, 255, 0.8);
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.slider-arrow:hover {
+    background: rgba(255, 255, 255, 1);
+}
