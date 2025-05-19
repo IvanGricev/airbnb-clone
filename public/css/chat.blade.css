@@ -1,0 +1,177 @@
+@import url('https://fonts.googleapis.com/css2?family=Lexend&display=swap');
+
+.ticket-chat-wrapper {
+    max-width: 800px;
+    min-width: 700px;
+    width: 100%;
+    margin: 40px auto;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 4px 32px 0 rgba(30,64,175,0.10);
+    padding: 32px 24px 24px 24px;
+    display: flex;
+    flex-direction: row;
+    gap: 32px;
+    align-items: flex-start;
+    flex-wrap: nowrap;
+}
+.ticket-chat-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #1e2351;
+    margin-bottom: 10px;
+    text-align: center;
+}
+.ticket-chat-userinfo {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin-bottom: 0;
+    font-size: 1.05rem;
+    color: #232323;
+}
+.ticket-status-info {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin-top: 180px;
+    font-size: 1.01rem;
+    color: #232323;
+}
+.ticket-chat-bookings {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin-bottom: 0;
+    color: #232323;
+}
+.ticket-chat-messages {
+    background: #f8f8f8;
+    border-radius: 14px;
+    padding: 24px 12px 24px 12px;
+    height: 340px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+.ticket-chat-message-row {
+    display: flex;
+    width: 100%;
+}
+.ticket-chat-message-own {
+    justify-content: flex-end;
+}
+.ticket-chat-message-other {
+    justify-content: flex-start;
+}
+.ticket-chat-message-bubble {
+    max-width: 70%;
+    padding: 14px 18px;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px 0 rgba(0,0,0,0.04);
+    font-size: 1.05rem;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    word-break: break-word;
+}
+.ticket-chat-message-own .ticket-chat-message-bubble {
+    background: #ffb43a;
+    color: #fff;
+    border-bottom-right-radius: 6px;
+    align-items: flex-end;
+}
+.ticket-chat-message-other .ticket-chat-message-bubble {
+    background: #fff;
+    color: #232323;
+    border-bottom-left-radius: 6px;
+    align-items: flex-start;
+}
+.ticket-chat-message-content {
+    font-size: 1.05rem;
+    margin-bottom: 2px;
+}
+.ticket-chat-message-meta {
+    font-size: 0.92rem;
+    color: #888;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+.ticket-chat-message-author {
+    font-weight: 500;
+}
+.ticket-chat-form {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.ticket-chat-form-row {
+    display: flex;
+    gap: 10px;
+}
+.ticket-chat-form-input {
+    flex: 1 1 0;
+    border-radius: 12px;
+    border: 1.5px solid #ececec;
+    background: #fafafa;
+    font-size: 1rem;
+    padding: 12px 14px;
+    transition: border 0.2s, box-shadow 0.2s;
+    font-family: 'Lexend', 'Arial', sans-serif;
+    resize: none;
+}
+.ticket-chat-form-input:focus {
+    border: 1.5px solid #ffb43a;
+    outline: none;
+    box-shadow: 0 0 0 2px #ffdb3a33;
+}
+.ticket-chat-form-send {
+    background: #ffb43a;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding: 0 28px;
+    transition: background 0.2s, color 0.2s;
+    box-shadow: 0 2px 12px 0 rgba(255,180,58,0.08);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+.ticket-chat-form-send:hover {
+    background: #ffa500;
+    color: #fff;
+}
+.ticket-chat-form-error {
+    color: #d32f2f;
+    font-size: 0.98rem;
+    margin-top: 2px;
+}
+.ticket-chat-message-own .ticket-chat-message-meta {
+    color: rgba(255,255,255,0.8);
+}
+@media (max-width: 900px) {
+    .ticket-chat-wrapper {
+        flex-direction: column;
+        max-width: 100%;
+        min-width: unset;
+        padding: 10px 2px 8px 2px;
+        gap: 18px;
+    }
+    .ticket-chat-messages {
+        padding: 10px 2px 10px 2px;
+        height: 220px;
+    }
+    .ticket-chat-message-bubble {
+        font-size: 0.97rem;
+        padding: 10px 8px;
+    }
+    .ticket-chat-title {
+        font-size: 1.1rem;
+    }
+}
