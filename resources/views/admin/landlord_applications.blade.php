@@ -3,46 +3,51 @@
 @section('title', 'Заявки на роль арендодателя')
 
 @section('content')
-<h1>Заявки на роль арендодателя</h1>
+<link rel="stylesheet" href="{{ url('/css/landlord_applications.admin.css') }}">
 
-@if(session('success'))
-    <div class="alert alert-success">{{ session('success') }}</div>
-@endif
+<div class="landlord-applications">
+    <div class="applications-header">
+        <h1>Заявки на роль арендодателя</h1>
+    </div>
 
-@if($applications->isEmpty())
-    <p>Нет новых заявок.</p>
-@else
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Пользователь</th>
-                <th>Сообщение</th>
-                <th>Дата подачи</th>
-                <th>Действия</th>
-            </tr>
-        </thead>
-        <tbody>
+    @if(session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
+
+    @if($applications->isEmpty())
+        <p>Нет новых заявок.</p>
+    @else
+        <div class="applications-grid">
             @foreach($applications as $application)
-            <tr>
-                <td>{{ $application->user->name }} ({{ $application->user->email }})</td>
-                <td>{{ $application->message }}</td>
-                <td>{{ $application->created_at->format('d.m.Y H:i') }}</td>
-                <td>
-                    <form action="{{ route('admin.landlord.applications.approve', $application) }}" method="POST" class="d-inline">
-                        @csrf
-                        <button class="btn btn-success btn-sm">Одобрить</button>
-                    </form>
-                    <form action="{{ route('admin.landlord.applications.reject', $application) }}" method="POST" class="d-inline">
-                        @csrf
-                        <button class="btn btn-danger btn-sm">Отклонить</button>
-                    </form>
-                </td>
-            </tr>
+                <div class="application-card modern-card">
+                    <div class="application-image-block">
+                        <img src="{{ asset('images/user-placeholder.svg') }}" alt="User avatar" class="application-user-image">
+                    </div>
+                    <div class="application-card-content">
+                        <div class="application-title">{{ $application->user->name }}</div>
+                        <div class="application-email">{{ $application->user->email }}</div>
+                        <div class="application-message">{{ $application->message }}</div>
+                        <div class="application-dates">
+                            <div>Дата подачи: <b>{{ $application->created_at->format('d.m.Y H:i') }}</b></div>
+                        </div>
+                        <div class="application-status application-status-pending">На рассмотрении</div>
+                        <div class="application-actions-wide">
+                            <form action="{{ route('admin.landlord.applications.approve', $application) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="btn-wide btn-approve">Одобрить</button>
+                            </form>
+                            <form action="{{ route('admin.landlord.applications.reject', $application) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="btn-wide btn-reject">Отклонить</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             @endforeach
-        </tbody>
-    </table>
-
-    <!-- Пагинация -->
-    {{ $applications->links() }}
-@endif
+        </div>
+        <div class="pagination-container" style="margin-top: 32px; display: flex; justify-content: center;">
+            {{ $applications->links() }}
+        </div>
+    @endif
+</div>
 @endsection
