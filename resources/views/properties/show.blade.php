@@ -146,9 +146,8 @@
         <div class="property-tabs-content-row">
             <div class="property-tab-reviews property-tab-pane active" id="tab-reviews-static">
                 @if($property->reviews->count() > 0)
-                    @php $shownReviews = 2; @endphp
-                    @foreach($property->reviews as $i => $review)
-                        <div class="review-card" style="@if($i >= $shownReviews) display:none; @endif">
+                    @foreach($property->reviews as $review)
+                        <div class="review-card">
                             <div class="review-text">{{ $review->comment }}</div>
                             <div class="review-author">{{ $review->user->name }}</div>
                             <div class="review-rating">
@@ -158,13 +157,6 @@
                             </div>
                         </div>
                     @endforeach
-                    @if($property->reviews->count() > $shownReviews)
-                        <button class="show-more-reviews-btn" onclick="
-                            var cards = document.querySelectorAll('.review-card');
-                            for(let i = $shownReviews; i < cards.length; i++) { cards[i].style.display = 'block'; }
-                            this.style.display = 'none';
-                        ">Показать ещё</button>
-                    @endif
                 @else
                     <p>Этот объект пока не имеет отзывов.</p>
                 @endif
@@ -194,13 +186,16 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
     <script>
-        $(function() {
+        $(document).ready(function() {
+            // Datepicker initialization
             var propertyId = @json($property->id);
             var unavailableDates = [];
+            
             function disableDates(date) {
                 var string = jQuery.datepicker.formatDate('yy-mm-dd', date);
                 return [ unavailableDates.indexOf(string) == -1 ];
             }
+            
             $.ajax({
                 url: '/properties/' + propertyId + '/unavailable-dates',
                 method: 'GET',
@@ -215,4 +210,5 @@
             });
         });
     </script>
+
 @endsection
