@@ -42,32 +42,60 @@ class ReviewController extends Controller
      */
     public function store(Request $request, $propertyId)
     {
-        $property = Property::findOrFail($propertyId);
-        $userId = Auth::id();
+        try {
+            $property = Property::findOrFail($propertyId);
+            $userId = Auth::id();
 
-        $request->validate([
-            'rating'  => 'required|integer|between:1,5',
-            'comment' => 'nullable|string',
-        ]);
+            $messages = [
+                'rating.required' => 'Оценка обязательна для заполнения.',
+                'rating.integer' => 'Оценка должна быть целым числом.',
+                'rating.between' => 'Оценка должна быть от 1 до 5.',
+                'comment.string' => 'Комментарий должен быть текстом.',
+                'comment.max' => 'Комментарий не должен превышать 1000 символов.',
+            ];
 
-        // Повторная проверка завершённого бронирования
-        $hasCompletedBooking = Booking::where('property_id', $propertyId)
-            ->where('user_id', $userId)
-            ->where('end_date', '<', now())
-            ->where('status', 'confirmed')
-            ->exists();
+            $validatedData = $request->validate([
+                'rating' => 'required|integer|between:1,5',
+                'comment' => 'nullable|string|max:1000',
+            ], $messages);
 
-        if (!$hasCompletedBooking) {
-            return redirect()->back()->with('error', 'Вы не можете оставить отзыв для этого жилья.');
+            // Проверяем, не оставлял ли пользователь уже отзыв
+            $existingReview = Review::where('property_id', $propertyId)
+                ->where('user_id', $userId)
+                ->exists();
+
+            if ($existingReview) {
+                return redirect()->back()
+                    ->withErrors(['error' => 'Вы уже оставили отзыв для этого жилья.'])
+                    ->withInput();
+            }
+
+            // Повторная проверка завершённого бронирования
+            $hasCompletedBooking = Booking::where('property_id', $propertyId)
+                ->where('user_id', $userId)
+                ->where('end_date', '<', now())
+                ->where('status', 'confirmed')
+                ->exists();
+
+            if (!$hasCompletedBooking) {
+                return redirect()->back()
+                    ->withErrors(['error' => 'Вы не можете оставить отзыв для этого жилья.'])
+                    ->withInput();
+            }
+
+            Review::create([
+                'property_id' => $propertyId,
+                'user_id' => $userId,
+                'rating' => $validatedData['rating'],
+                'comment' => $validatedData['comment'],
+            ]);
+
+            return redirect()->route('properties.show', $propertyId)
+                ->with('success', 'Ваш отзыв успешно добавлен.');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->withErrors(['error' => 'Произошла ошибка при сохранении отзыва. Пожалуйста, попробуйте снова.'])
+                ->withInput();
         }
-
-        Review::create([
-            'property_id' => $propertyId,
-            'user_id'     => $userId,
-            'rating'      => $request->rating,
-            'comment'     => $request->comment,
-        ]);
-
-        return redirect()->route('properties.show', $propertyId)->with('success', 'Ваш отзыв успешно добавлен.');
     }
 }

@@ -40,19 +40,21 @@
                             </a>
                         @endif
                         @php
-                            $favorites = Auth::user()->favorites;
-                            $isFavorite = $favorites ? $favorites->contains('property_id', $property->id) : false;
+                            $isFavorite = Auth::user()->favorites()->where('property_id', $property->id)->exists();
                         @endphp
                         @if ($isFavorite)
                             <form action="{{ route('favorites.remove', $property->id) }}" method="POST" class="property-action-btn" title="Убрать из избранного">
                                 @csrf
-                                @method('DELETE')
-                                <button  class="property-action-btn"><span class="action-label">В избранном</span></button>
+                                <button type="submit" class="property-action-btn favorite-btn active">
+                                    <span class="action-label">Убрать из избранного</span>
+                                </button>
                             </form>
                         @else
                             <form action="{{ route('favorites.add', $property->id) }}" method="POST" class="property-action-btn" title="Добавить в избранное">
                                 @csrf
-                                <button  class="property-action-btn"><span class="action-label">В избранное</span></button>
+                                <button type="submit" class="property-action-btn favorite-btn">
+                                    <span class="action-label">Добавить в избранное</span>
+                                </button>
                             </form>
                         @endif
                     @endauth
@@ -91,14 +93,26 @@
                             <div class="booking-date-group wide-booking-date-group">
                                 <span class="booking-date-field">
                                     <span class="booking-date-label">c</span>
-                                    <input type="date" name="start_date" id="start_date" class="booking-date-input" autocomplete="off" required placeholder="ДД.ММ.ГГГГ">
+                                    <input type="date" name="start_date" id="start_date" class="booking-date-input @error('start_date') is-invalid @enderror" autocomplete="off" required placeholder="ДД.ММ.ГГГГ" value="{{ old('start_date') }}">
+                                    @error('start_date')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </span>
                                 <span class="booking-date-sep">—</span>
                                 <span class="booking-date-field">
                                     <span class="booking-date-label">по</span>
-                                    <input type="date" name="end_date" id="end_date" class="booking-date-input" autocomplete="off" required placeholder="ДД.ММ.ГГГГ">
+                                    <input type="date" name="end_date" id="end_date" class="booking-date-input @error('end_date') is-invalid @enderror" autocomplete="off" required placeholder="ДД.ММ.ГГГГ" value="{{ old('end_date') }}">
+                                    @error('end_date')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </span>
                             </div>
+                            @error('dates')
+                                <div class="alert alert-danger mt-2">{{ $message }}</div>
+                            @enderror
+                            @error('price')
+                                <div class="alert alert-danger mt-2">{{ $message }}</div>
+                            @enderror
                             <button type="submit" class="booking-btn wide-booking-btn">Забронировать</button>
                         </form>
                     @endauth

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Favorite;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class FavoriteController extends Controller
 {
@@ -19,13 +20,26 @@ class FavoriteController extends Controller
 
             $userId = Auth::id();
 
-            // Создаем запись в избранном, если такой еще нет
-            Favorite::firstOrCreate([
-                'user_id'     => $userId,
+            // Проверяем, существует ли уже запись
+            $exists = Favorite::where([
+                'user_id' => $userId,
                 'property_id' => $propertyId,
-            ]);
+            ])->exists();
 
-            return redirect()->back()->with('success', 'Жильё добавлено в избранное.');
+            if (!$exists) {
+                // Создаем запись в избранном
+                Favorite::create([
+                    'user_id' => $userId,
+                    'property_id' => $propertyId,
+                ]);
+
+                // Очищаем кэш избранных объектов пользователя
+                Cache::forget('user_favorites_' . $userId);
+
+                return redirect()->back()->with('success', 'Жильё добавлено в избранное.');
+            }
+
+            return redirect()->back()->with('info', 'Жильё уже в избранном.');
         } catch (\Exception $e) {
             Log::error("Ошибка при добавлении в избранное: " . $e->getMessage());
             return redirect()->back()->with('error', 'Произошла ошибка при добавлении в избранное.');
@@ -42,13 +56,23 @@ class FavoriteController extends Controller
 
             $userId = Auth::id();
 
-            // Удаление записи из избранного
-            Favorite::where([
-                'user_id'     => $userId,
+            // Проверяем, существует ли запись
+            $favorite = Favorite::where([
+                'user_id' => $userId,
                 'property_id' => $propertyId,
-            ])->delete();
+            ])->first();
 
-            return redirect()->back()->with('success', 'Жильё удалено из избранного.');
+            if ($favorite) {
+                // Удаляем запись из избранного
+                $favorite->delete();
+
+                // Очищаем кэш избранных объектов пользователя
+                Cache::forget('user_favorites_' . $userId);
+
+                return redirect()->back()->with('success', 'Жильё удалено из избранного.');
+            }
+
+            return redirect()->back()->with('info', 'Жильё не было в избранном.');
         } catch (\Exception $e) {
             Log::error("Ошибка при удалении из избранного: " . $e->getMessage());
             return redirect()->back()->with('error', 'Произошла ошибка при удалении из избранного.');

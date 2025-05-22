@@ -88,42 +88,63 @@ class PropertyController extends Controller
             return redirect()->route('home')->with('error', 'У вас нет прав для создания жилья.');
         }
 
-        $request->validate([
-            'title'           => 'required|string|max:255',
-            'description'     => 'required|string',
-            'address'         => 'required|string',
-            'price_per_night' => 'required|numeric',
-            'tags'            => 'array|nullable',
-            'tags.*'          => 'exists:tags,id',
-            'images'          => 'nullable|array|max:12', // максимум 12 изображений
-            'images.*'        => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        ]);
+        $messages = [
+            'title.required' => 'Название жилья обязательно для заполнения.',
+            'title.max' => 'Название не должно превышать 255 символов.',
+            'description.required' => 'Описание жилья обязательно для заполнения.',
+            'description.min' => 'Описание должно содержать минимум 50 символов.',
+            'address.required' => 'Адрес обязателен для заполнения.',
+            'price_per_night.required' => 'Цена за ночь обязательна для заполнения.',
+            'price_per_night.numeric' => 'Цена должна быть числом.',
+            'price_per_night.min' => 'Цена не может быть отрицательной.',
+            'images.max' => 'Можно загрузить не более 12 изображений.',
+            'images.*.image' => 'Файл должен быть изображением.',
+            'images.*.mimes' => 'Изображение должно быть в формате: jpeg, png, jpg, gif или svg.',
+            'images.*.max' => 'Размер изображения не должен превышать 2MB.',
+            'tags.*.exists' => 'Выбранный тег не существует.',
+        ];
 
-        $property = Property::create([
-            'user_id'         => Auth::id(),
-            'title'           => $request->title,
-            'description'     => $request->description,
-            'address'         => $request->address,
-            'price_per_night' => $request->price_per_night,
-            'latitude'        => null,
-            'longitude'       => null,
-        ]);
+        $validatedData = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string|min:50',
+            'address' => 'required|string',
+            'price_per_night' => 'required|numeric|min:0',
+            'tags' => 'array|nullable',
+            'tags.*' => 'exists:tags,id',
+            'images' => 'nullable|array|max:12',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ], $messages);
 
-        if ($request->has('tags')) {
-            $property->tags()->sync($request->input('tags'));
-        }
+        try {
+            $property = Property::create([
+                'user_id' => Auth::id(),
+                'title' => $validatedData['title'],
+                'description' => $validatedData['description'],
+                'address' => $validatedData['address'],
+                'price_per_night' => $validatedData['price_per_night'],
+                'latitude' => null,
+                'longitude' => null,
+            ]);
 
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
-                $path = $image->store('properties', 'public');
-                $property->images()->create([
-                    'image_path' => $path,
-                ]);
+            if ($request->has('tags')) {
+                $property->tags()->sync($request->input('tags'));
             }
-        }
 
-        return redirect()->route('properties.show', $property->id)
-                         ->with('success', 'Жильё успешно добавлено.');
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $image) {
+                    $path = $image->store('properties', 'public');
+                    $property->images()->create([
+                        'image_path' => $path,
+                    ]);
+                }
+            }
+
+            return redirect()->route('properties.show', $property->id)
+                           ->with('success', 'Жильё успешно добавлено.');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Произошла ошибка при создании жилья. Пожалуйста, попробуйте снова.'])
+                        ->withInput();
+        }
     }
 
     /**
@@ -153,35 +174,57 @@ class PropertyController extends Controller
             return redirect()->route('home')->with('error', 'Вы можете обновлять только свои объекты.');
         }
 
-        $request->validate([
-            'title'           => 'required|string|max:255',
-            'description'     => 'required|string',
-            'address'         => 'required|string',
-            'price_per_night' => 'required|numeric',
-            'tags'            => 'array|nullable',
-            'tags.*'          => 'exists:tags,id',
-            'images'          => 'nullable|array|max:12', // Если загружаются изображения, максимум 12
-            'images.*'        => 'sometimes|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        ]);
+        $messages = [
+            'title.required' => 'Название жилья обязательно для заполнения.',
+            'title.max' => 'Название не должно превышать 255 символов.',
+            'description.required' => 'Описание жилья обязательно для заполнения.',
+            'description.min' => 'Описание должно содержать минимум 50 символов.',
+            'address.required' => 'Адрес обязателен для заполнения.',
+            'price_per_night.required' => 'Цена за ночь обязательна для заполнения.',
+            'price_per_night.numeric' => 'Цена должна быть числом.',
+            'price_per_night.min' => 'Цена не может быть отрицательной.',
+            'images.max' => 'Можно загрузить не более 12 изображений.',
+            'images.*.image' => 'Файл должен быть изображением.',
+            'images.*.mimes' => 'Изображение должно быть в формате: jpeg, png, jpg, gif или svg.',
+            'images.*.max' => 'Размер изображения не должен превышать 2MB.',
+            'tags.*.exists' => 'Выбранный тег не существует.',
+        ];
 
-        $property->update($request->only('title', 'description', 'address', 'price_per_night'));
+        $validatedData = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string|min:50',
+            'address' => 'required|string',
+            'price_per_night' => 'required|numeric|min:0',
+            'tags' => 'array|nullable',
+            'tags.*' => 'exists:tags,id',
+            'images' => 'nullable|array|max:12',
+            'images.*' => 'sometimes|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ], $messages);
 
-        if ($request->has('tags')) {
-            $property->tags()->sync($request->input('tags'));
-        } else {
-            $property->tags()->detach();
-        }
+        try {
+            $property->update($validatedData);
 
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
-                $path = $image->store('properties', 'public');
-                $property->images()->create([
-                    'image_path' => $path,
-                ]);
+            if ($request->has('tags')) {
+                $property->tags()->sync($request->input('tags'));
+            } else {
+                $property->tags()->detach();
             }
-        }
 
-        return redirect()->route('properties.show', $property->id)->with('success', 'Жильё успешно обновлено.');
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $image) {
+                    $path = $image->store('properties', 'public');
+                    $property->images()->create([
+                        'image_path' => $path,
+                    ]);
+                }
+            }
+
+            return redirect()->route('properties.show', $property->id)
+                           ->with('success', 'Жильё успешно обновлено.');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Произошла ошибка при обновлении жилья. Пожалуйста, попробуйте снова.'])
+                        ->withInput();
+        }
     }
 
     public function deleteImage($id)

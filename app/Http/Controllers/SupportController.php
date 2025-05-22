@@ -42,34 +42,50 @@ class SupportController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $messages = [
+            'subject.required' => 'Тема обращения обязательна для заполнения.',
+            'subject.string' => 'Тема должна быть текстом.',
+            'subject.max' => 'Тема не должна превышать 255 символов.',
+            'message.required' => 'Сообщение обязательно для заполнения.',
+            'message.string' => 'Сообщение должно быть текстом.',
+            'message.min' => 'Сообщение должно содержать минимум 10 символов.',
+            'message.max' => 'Сообщение не должно превышать 5000 символов.',
+        ];
+
+        $validatedData = $request->validate([
             'subject' => 'required|string|max:255',
-            'message' => 'required|string',
-        ]);
+            'message' => 'required|string|min:10|max:5000',
+        ], $messages);
 
         try {
             DB::beginTransaction();
 
             $ticket = SupportTicket::create([
                 'user_id' => Auth::id(),
-                'subject' => $request->subject,
-                'status'  => 'open',
+                'subject' => $validatedData['subject'],
+                'status' => 'open',
             ]);
 
             SupportMessage::create([
                 'ticket_id' => $ticket->id,
-                'user_id'   => Auth::id(),
-                'message'   => $request->message,
+                'user_id' => Auth::id(),
+                'message' => $validatedData['message'],
             ]);
 
             DB::commit();
 
             return redirect()->route('support.show', $ticket->id)
-                             ->with('success', 'Ваша заявка отправлена в поддержку.');
+                ->with('success', 'Ваша заявка отправлена в поддержку.');
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Ошибка при создании тикета поддержки', ['error' => $e->getMessage()]);
-            return redirect()->back()->with('error', 'Не удалось создать тикет.');
+            Log::error('Ошибка при создании тикета поддержки', [
+                'error' => $e->getMessage(),
+                'user_id' => Auth::id(),
+                'subject' => $request->subject
+            ]);
+            return redirect()->back()
+                ->withErrors(['error' => 'Не удалось создать тикет. Пожалуйста, попробуйте снова.'])
+                ->withInput();
         }
     }
 
@@ -101,28 +117,47 @@ class SupportController extends Controller
      */
     public function sendMessage(Request $request, $id)
     {
-        $request->validate([
-            'message' => 'required|string|max:5000',
-        ]);
+        $messages = [
+            'message.required' => 'Сообщение обязательно для заполнения.',
+            'message.string' => 'Сообщение должно быть текстом.',
+            'message.min' => 'Сообщение должно содержать минимум 10 символов.',
+            'message.max' => 'Сообщение не должно превышать 5000 символов.',
+        ];
+
+        $validatedData = $request->validate([
+            'message' => 'required|string|min:10|max:5000',
+        ], $messages);
 
         try {
             $ticket = SupportTicket::findOrFail($id);
 
             if ($ticket->user_id !== Auth::id()) {
                 return redirect()->route('support.index')
-                        ->with('error', 'У вас нет доступа к этому тикету.');
+                    ->withErrors(['error' => 'У вас нет доступа к этому тикету.']);
+            }
+
+            if ($ticket->status === 'closed') {
+                return redirect()->back()
+                    ->withErrors(['error' => 'Этот тикет закрыт. Вы не можете отправлять сообщения.']);
             }
 
             SupportMessage::create([
                 'ticket_id' => $ticket->id,
-                'user_id'   => Auth::id(),
-                'message'   => $request->message,
+                'user_id' => Auth::id(),
+                'message' => $validatedData['message'],
             ]);
 
-            return redirect()->back()->with('success', 'Сообщение отправлено.');
+            return redirect()->back()
+                ->with('success', 'Сообщение отправлено.');
         } catch (\Exception $e) {
-            Log::error('Ошибка при отправке сообщения в тикете', ['error' => $e->getMessage()]);
-            return redirect()->back()->with('error', 'Не удалось отправить сообщение.');
+            Log::error('Ошибка при отправке сообщения в тикете', [
+                'error' => $e->getMessage(),
+                'ticket_id' => $id,
+                'user_id' => Auth::id()
+            ]);
+            return redirect()->back()
+                ->withErrors(['error' => 'Не удалось отправить сообщение. Пожалуйста, попробуйте снова.'])
+                ->withInput();
         }
     }
 }

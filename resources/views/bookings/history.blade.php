@@ -73,8 +73,10 @@
                                     Отменено вами
                                 @elseif($booking->status === 'cancelled_by_landlord')
                                     Отменено арендодателем
+                                @elseif($booking->status === 'pending_payment')
+                                    <a href="{{ route('payments.checkout', $booking->id) }}" class="status-link">В ожидании оплаты</a>
                                 @else
-                                    В ожидании оплаты
+                                    {{ $booking->status }}
                                 @endif
                             </div>
 

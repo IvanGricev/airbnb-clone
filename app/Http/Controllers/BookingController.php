@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Collection;
+use Carbon\Carbon;
+
 class BookingController extends Controller
 {
     /**
@@ -16,72 +18,93 @@ class BookingController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $messages = [
+            'property_id.required' => 'Необходимо указать объект недвижимости.',
+            'property_id.exists' => 'Выбранный объект недвижимости не существует.',
+            'start_date.required' => 'Дата заезда обязательна для заполнения.',
+            'start_date.date' => 'Некорректный формат даты заезда.',
+            'start_date.after_or_equal' => 'Дата заезда не может быть в прошлом.',
+            'end_date.required' => 'Дата выезда обязательна для заполнения.',
+            'end_date.date' => 'Некорректный формат даты выезда.',
+            'end_date.after' => 'Дата выезда должна быть позже даты заезда.',
+        ];
+
+        $validatedData = $request->validate([
             'property_id' => 'required|exists:properties,id',
-            'start_date'  => 'required|date|after_or_equal:today',
-            'end_date'    => 'required|date|after:start_date',
-        ]);
+            'start_date' => 'required|date|after_or_equal:today',
+            'end_date' => 'required|date|after:start_date',
+        ], $messages);
 
-        $property = Property::findOrFail($request->property_id);
+        try {
+            $property = Property::findOrFail($validatedData['property_id']);
 
-        // Проверка пересечения дат бронирования
-        $overlappingBookings = Booking::where('property_id', $property->id)
-            ->where(function ($query) use ($request) {
-                $query->whereBetween('start_date', [$request->start_date, $request->end_date])
-                      ->orWhereBetween('end_date', [$request->start_date, $request->end_date])
-                      ->orWhere(function ($q) use ($request) {
-                          $q->where('start_date', '<', $request->start_date)
-                            ->where('end_date', '>', $request->end_date);
-                      });
-            })
-            ->exists();
+            // Проверка пересечения с другими бронированиями
+            $overlappingBookings = Booking::where('property_id', $property->id)
+                ->whereNotIn('status', ['cancelled_by_user', 'cancelled_by_landlord'])
+                ->where(function ($query) use ($validatedData) {
+                    $query->whereBetween('start_date', [$validatedData['start_date'], $validatedData['end_date']])
+                          ->orWhereBetween('end_date', [$validatedData['start_date'], $validatedData['end_date']])
+                          ->orWhere(function ($q) use ($validatedData) {
+                              $q->where('start_date', '<', $validatedData['start_date'])
+                                ->where('end_date', '>', $validatedData['end_date']);
+                          });
+                })
+                ->exists();
 
-        if ($overlappingBookings) {
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'error' => 'Выбранные даты уже заняты. Пожалуйста, выберите другие даты.'
-                ]);
+            if ($overlappingBookings) {
+                return redirect()->back()
+                    ->withErrors(['dates' => 'Выбранные даты уже заняты. Пожалуйста, выберите другие даты.'])
+                    ->withInput();
             }
-            return redirect()->back()->with('error', 'Выбранные даты уже заняты. Пожалуйста, выберите другие даты.');
-        }
 
-        $startDate  = new \DateTime($request->start_date);
-        $endDate    = new \DateTime($request->end_date);
-        $interval   = $startDate->diff($endDate);
-        $days       = $interval->days;
-        $totalPrice = $property->price_per_night * $days;
-
-        if ($totalPrice > 99999999.99) {
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'error' => 'Общая стоимость бронирования превышает максимально допустимое значение.'
-                ]);
+            $startDate = Carbon::parse($validatedData['start_date']);
+            $endDate = Carbon::parse($validatedData['end_date']);
+            $days = $endDate->diffInDays($startDate);
+            
+            // Убедимся, что количество дней положительное
+            if ($days < 0) {
+                $days = abs($days);
             }
-            return redirect()->back()->with('error', 'Общая стоимость бронирования превышает максимально допустимое значение.');
-        }
+            
+            // Убедимся, что цена за ночь положительная
+            $pricePerNight = abs($property->price_per_night);
+            $totalPrice = $pricePerNight * $days;
 
-        $booking = Booking::create([
-            'user_id'     => Auth::id(),
-            'property_id' => $property->id,
-            'start_date'  => $request->start_date,
-            'end_date'    => $request->end_date,
-            'total_price' => $totalPrice,
-            'status'      => 'pending_payment',
-        ]);
-    
-        if ($request->expectsJson()) {
-            return response()->json([
-                'success' => true,
-                'bookingId' => $booking->id,
-                'totalPrice' => $totalPrice,
-                'paymentUrl' => route('payments.process', $booking->id)
+            if ($totalPrice > 99999999.99) {
+                return redirect()->back()
+                    ->withErrors(['price' => 'Общая стоимость бронирования превышает максимально допустимое значение.'])
+                    ->withInput();
+            }
+
+            $booking = Booking::create([
+                'user_id' => Auth::id(),
+                'property_id' => $property->id,
+                'start_date' => $validatedData['start_date'],
+                'end_date' => $validatedData['end_date'],
+                'total_price' => $totalPrice,
+                'status' => 'pending_payment',
             ]);
-        }
 
-        return redirect()->route('payments.checkout', $booking->id)
-                         ->with('success', 'Бронирование создано. Пожалуйста, оплатите его.');
+            // Очищаем кэш бронирований пользователя
+            Cache::forget('user_bookings_' . Auth::id());
+
+            return redirect()->route('payments.checkout', $booking->id)
+                           ->with('success', 'Бронирование создано. Пожалуйста, оплатите его.');
+        } catch (\Exception $e) {
+            Log::error('Ошибка при создании бронирования', [
+                'error' => $e->getMessage(),
+                'user_id' => Auth::id(),
+                'property_id' => $request->property_id,
+                'dates' => [
+                    'start' => $request->start_date,
+                    'end' => $request->end_date
+                ]
+            ]);
+
+            return redirect()->back()
+                ->withErrors(['error' => 'Произошла ошибка при создании бронирования. Пожалуйста, попробуйте снова.'])
+                ->withInput();
+        }
     }
 
     /**
@@ -89,11 +112,13 @@ class BookingController extends Controller
      */
     public function history()
     {
-        $bookings = Cache::remember('user_bookings_' . Auth::id(), now()->addMinutes(10), function(){
-            return Booking::where('user_id', Auth::id())
-                ->with('property')
-                ->paginate(10);
-        });
+        // Очищаем кэш перед получением данных
+        Cache::forget('user_bookings_' . Auth::id());
+        
+        $bookings = Booking::where('user_id', Auth::id())
+            ->with('property')
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
     
         return view('bookings.history', compact('bookings'));
     }

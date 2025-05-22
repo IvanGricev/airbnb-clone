@@ -31,11 +31,10 @@ class UserController extends Controller
                 ->get();
         });
 
-        $favorites = Cache::remember('user_favorites_' . $user->id, now()->addMinutes(10), function () use ($user) {
-            return Favorite::where('user_id', $user->id)
-                ->with('property')
-                ->get();
-        });
+        // Получаем избранные объекты без кэширования для актуальности
+        $favorites = Favorite::where('user_id', $user->id)
+            ->with('property')
+            ->get();
 
         $pastBookings = $bookings->where('end_date', '<', Carbon::now())->take(3);
 
@@ -77,42 +76,75 @@ class UserController extends Controller
 
     public function updateNameEmail(Request $request)
     {
-        $request->validate([
+        $messages = [
+            'name.required' => 'Имя обязательно для заполнения.',
+            'name.string' => 'Имя должно быть текстом.',
+            'name.max' => 'Имя не должно превышать 255 символов.',
+            'email.required' => 'Email обязателен для заполнения.',
+            'email.email' => 'Введите корректный email адрес.',
+            'email.max' => 'Email не должен превышать 255 символов.',
+            'email.unique' => 'Этот email уже используется другим пользователем.',
+        ];
+
+        $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email,' . Auth::id(),
-        ]);
+        ], $messages);
 
         try {
             $user = Auth::user();
-            $user->name = $request->name;
-            $user->email = $request->email;
+            $user->name = $validatedData['name'];
+            $user->email = $validatedData['email'];
             $user->save();
 
-            return redirect()->route('user.profile')->with('success', 'Данные успешно обновлены!');
+            return redirect()->route('user.profile')
+                ->with('success', 'Данные успешно обновлены!');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Не удалось обновить данные.');
+            return redirect()->back()
+                ->withErrors(['error' => 'Не удалось обновить данные. Пожалуйста, попробуйте снова.'])
+                ->withInput();
         }
     }
 
     public function updatePassword(Request $request)
     {
-        $request->validate([
-            'current_password' => 'required',
-            'new_password' => 'required|string|min:8|confirmed',
-        ]);
+        $messages = [
+            'current_password.required' => 'Текущий пароль обязателен для заполнения.',
+            'new_password.required' => 'Новый пароль обязателен для заполнения.',
+            'new_password.string' => 'Новый пароль должен быть текстом.',
+            'new_password.min' => 'Новый пароль должен содержать минимум 8 символов.',
+            'new_password.confirmed' => 'Пароли не совпадают.',
+            'new_password.regex' => 'Пароль должен содержать как минимум одну заглавную букву, одну строчную букву и одну цифру.',
+        ];
 
-        if (!Hash::check($request->current_password, Auth::user()->password)) {
-            return redirect()->back()->with('error', 'Текущий пароль введен неверно.');
+        $validatedData = $request->validate([
+            'current_password' => 'required',
+            'new_password' => [
+                'required',
+                'string',
+                'min:8',
+                'confirmed',
+                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/'
+            ],
+        ], $messages);
+
+        if (!Hash::check($validatedData['current_password'], Auth::user()->password)) {
+            return redirect()->back()
+                ->withErrors(['current_password' => 'Текущий пароль введен неверно.'])
+                ->withInput();
         }
 
         try {
             $user = Auth::user();
-            $user->password = Hash::make($request->new_password);
+            $user->password = Hash::make($validatedData['new_password']);
             $user->save();
 
-            return redirect()->route('user.profile')->with('success', 'Пароль успешно изменён!');
+            return redirect()->route('user.profile')
+                ->with('success', 'Пароль успешно изменён!');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Не удалось изменить пароль.');
+            return redirect()->back()
+                ->withErrors(['error' => 'Не удалось изменить пароль. Пожалуйста, попробуйте снова.'])
+                ->withInput();
         }
     }
 }
