@@ -24,20 +24,6 @@ services:
       - DB_USERNAME=postgres
       - DB_PASSWORD=postgres
 
-  nginx:
-    image: nginx:alpine
-    container_name: airbnb-nginx
-    restart: unless-stopped
-    ports:
-      - "8000:80"
-    volumes:
-      - ./:/var/www
-      - ./docker/nginx/conf.d:/etc/nginx/conf.d
-    networks:
-      - airbnb-network
-    depends_on:
-      - app
-
   db:
     image: postgres:15
     container_name: airbnb-db
