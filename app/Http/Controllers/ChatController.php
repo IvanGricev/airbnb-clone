@@ -22,11 +22,6 @@ class ChatController extends Controller
     {
         try {
             $withUser = User::findOrFail($withUserId);
-            
-            // Проверка прав доступа
-            if (!Auth::user()->can('chat', $withUser)) {
-                return redirect()->back()->with('error', 'У вас нет доступа к этому чату.');
-            }
 
             $messages = Message::where(function($query) use ($withUserId) {
                 $query->where('from_user_id', Auth::id())
@@ -62,11 +57,6 @@ class ChatController extends Controller
             ]);
 
             $toUser = User::findOrFail($request->to_user_id);
-
-            // Проверка прав доступа
-            if (!Auth::user()->can('chat', $toUser)) {
-                return redirect()->back()->with('error', 'У вас нет доступа к этому чату.');
-            }
 
             // Если указан booking_id, проверяем что пользователи связаны с этим бронированием
             if ($request->has('booking_id')) {
