@@ -27,14 +27,11 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www
 
-# Copy composer files first
-COPY composer.json composer.lock ./
+# Copy the entire application first
+COPY . .
 
 # Install composer dependencies
 RUN composer install --no-dev --optimize-autoloader
-
-# Copy the rest of the application
-COPY . .
 
 # Install npm dependencies and build assets
 RUN npm install && npm run build
