@@ -12,7 +12,6 @@ class CreateSupportTicketsTable extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('subject');
-            $table->text('message');
             $table->string('status')->default('open'); // Возможные статусы: open, in_progress, closed
             $table->timestamps();
         });
