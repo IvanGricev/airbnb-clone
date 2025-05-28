@@ -44,8 +44,14 @@ RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache && \
 # Create storage link
 RUN php artisan storage:link
 
-# Expose port 9000 for PHP-FPM
-EXPOSE 9000
+# Create startup script
+RUN echo '#!/bin/bash\n\
+php-fpm -D\n\
+php -S 0.0.0.0:8000 -t public' > /start.sh && \
+    chmod +x /start.sh
 
-# Start PHP-FPM
-CMD ["php-fpm"] 
+# Expose port 8000 for HTTP
+EXPOSE 8000
+
+# Start PHP-FPM and built-in server
+CMD ["/start.sh"] 
