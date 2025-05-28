@@ -1,7 +1,7 @@
 @extends('layouts.main')
-@section('title', 'Таблица: ' . $table) <!-- Исправлено $tableName → $table -->
+@section('title', 'Таблица: ' . $table)
 @section('content')
-<link rel="stylesheet" href="{{ url('/css/table.blade.admin.css') }}">
+<link rel="stylesheet" href="{{ asset('css/table.blade.admin.css') }}">
 <div class="db-table-container">
     <div class="db-table-card">
         <div class="db-table-header">
@@ -9,40 +9,52 @@
             <a href="{{ route('admin.database.create', ['table' => $table]) }}" class="btn btn-success">Добавить запись</a>
         </div>
         <div class="db-table-divider"></div>
+
+        @if(session('error'))
+            <div class="alert alert-danger">{{ session('error') }}</div>
+        @endif
+
         @if(session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
+
         <div class="db-table-responsive">
             <table class="table">
                 <thead>
                     <tr>
                         @foreach($columns as $column)
-                            <th>{{ $column->Field }}</th>
+                            <th>{{ $column->column_name }}</th>
                         @endforeach
                         <th>Действия</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($data as $row)
+                    @forelse($data as $row)
                         <tr>
                             @foreach($columns as $column)
-                                <td>{{ $row->{$column->Field} }}</td>
+                                <td>{{ $row->{$column->column_name} }}</td>
                             @endforeach
                             <td>
                                 <a href="{{ route('admin.database.edit', ['table' => $table, 'id' => $row->id]) }}" class="btn btn-primary">Редактировать</a>
                                 <form action="{{ route('admin.database.delete', ['table' => $table, 'id' => $row->id]) }}" method="POST" style="display:inline-block;">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-danger">Удалить</button>
+                                    <button type="submit" class="btn btn-danger" onclick="return confirm('Вы уверены, что хотите удалить эту запись?')">Удалить</button>
                                 </form>
                             </td>
                         </tr>
-                    @endforeach
+                    @empty
+                        <tr>
+                            <td colspan="{{ count($columns) + 1 }}" class="text-center">
+                                Нет данных в таблице
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
         <div class="pagination">
-            {{ $data->links() }} <!-- Пагинация -->
+            {{ $data->links() }}
         </div>
     </div>
 </div>

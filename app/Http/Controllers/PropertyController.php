@@ -38,9 +38,9 @@ class PropertyController extends Controller
 
             if ($query) {
                 $queryBuilder->where(function ($q) use ($query) {
-                    $q->where('title', 'like', '%' . $query . '%')
-                      ->orWhere('description', 'like', '%' . $query . '%')
-                      ->orWhere('address', 'like', '%' . $query . '%');
+                    $q->where('title', 'ilike', '%' . $query . '%')
+                      ->orWhere('description', 'ilike', '%' . $query . '%')
+                      ->orWhere('address', 'ilike', '%' . $query . '%');
                 });
             }
 
