@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SupportMessage extends Model
 {
@@ -12,12 +13,14 @@ class SupportMessage extends Model
         'message',
     ];
 
-    public function ticket()
+    protected $with = ['user'];
+
+    public function ticket(): BelongsTo
     {
         return $this->belongsTo(SupportTicket::class);
     }
 
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
