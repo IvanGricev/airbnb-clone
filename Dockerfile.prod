@@ -46,7 +46,7 @@ RUN chown -R www-data:www-data /var/www && \
 RUN php artisan storage:link
 
 # Generate application key if not set
-RUN php artisan key:generate --force
+# RUN php artisan key:generate --force
 
 # Clear all caches
 RUN php artisan config:clear && \
