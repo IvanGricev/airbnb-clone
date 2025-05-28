@@ -3,7 +3,7 @@
 @section('title', 'Создать тикет поддержки')
 
 @section('content')
-<link rel="stylesheet" href="{{ asset('build/css/tickets.css') }}">
+<link rel="stylesheet" href="{{ asset('/css/tickets.css') }}">
 <div class="ticket-create-wrapper">
     <h1>Создать тикет поддержки</h1>
 
