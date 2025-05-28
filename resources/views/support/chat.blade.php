@@ -1,7 +1,7 @@
 @extends('layouts.main')
 @section('title', 'Тикет #' . $ticket->id)
 @section('content')
-<link rel="stylesheet" href="{{ url('/css/chat.css') }}">
+<link rel="stylesheet" href="{{ asset('css/chat.css') }}">
 <div class="chat-wrapper">
     <h1 class="chat-title">Тикет #{{ $ticket->id }}: {{ $ticket->subject }}</h1>
     <div id="chat-messages" class="chat-messages">

@@ -3,7 +3,7 @@
 @section('title', 'Профиль пользователя')
 
 @section('content')
-<link rel="stylesheet" href="{{ url('/css/profile.css') }}">
+<link rel="stylesheet" href="{{ asset('css/profile.css') }}">
 
 <div class="profile-container">
     <div class="profile-header">

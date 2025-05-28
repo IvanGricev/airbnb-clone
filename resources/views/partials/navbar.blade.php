@@ -1,4 +1,4 @@
-<link rel="stylesheet" href="{{ url('/css/app.css') }}">
+<link rel="stylesheet" href="{{ asset('css/app.css') }}">
 <nav class="navbar navbar-expand-lg navbar-transparent ">
     <div class="container-fluid container">
         <a class="navbar-brand" href="{{ route('home') }}">

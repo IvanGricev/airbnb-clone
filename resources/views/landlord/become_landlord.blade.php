@@ -1,0 +1,1 @@
+<link rel="stylesheet" href="{{ asset('css/become_landlord.css') }}"> 

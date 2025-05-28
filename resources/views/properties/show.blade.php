@@ -1,4 +1,4 @@
-<link rel="stylesheet" href="{{ url('/css/show_blade.css') }}">
+<link rel="stylesheet" href="{{ asset('css/show_blade.css') }}">
 @extends('layouts.main')
 
 @section('title', $property->title)
@@ -196,7 +196,7 @@
 
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <!-- Подключение Datepicker -->
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
     <script>

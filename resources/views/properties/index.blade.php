@@ -1,4 +1,4 @@
-<link rel="stylesheet" href="{{ url('/css/main.css') }}">
+<link rel="stylesheet" href="{{ asset('css/main.css') }}">
 @extends('layouts.main')
 
 @section('title', 'Список жилья')
