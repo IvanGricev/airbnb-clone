@@ -3,9 +3,7 @@
 @section('title', 'Тикет #' . $ticket->id)
 @section('content')
 <link rel="stylesheet" href="{{ asset('/css/chat.css') }}">
-<div class="chat-wrapper">
-    <h1 class="chat-title">Тикет #{{ $ticket->id }}: {{ $ticket->subject }}</h1>
-    
+<div class="chat-wrapper">    
     @if(session('error'))
         <div class="alert alert-danger">
             {{ session('error') }}
@@ -15,6 +13,7 @@
     <div class="admin-chat-container">
         <!-- Информация о пользователе и статус тикета -->
         <div class="admin-chat-sidebar">
+            <h1 class="chat-title">Тикет #{{ $ticket->id }}: {{ $ticket->subject }}</h1>
             <div class="ticket-chat-userinfo mb-2">
                 <div><strong>Пользователь:</strong> {{ $ticket->user->name }} ({{ $ticket->user->role }})</div>
                 <div><strong>Email:</strong> {{ $ticket->user->email }}</div>
