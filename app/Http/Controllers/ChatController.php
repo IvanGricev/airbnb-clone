@@ -97,23 +97,20 @@ class ChatController extends Controller
         try {
             $userId = Auth::id();
             
-            // Получаем последние сообщения для каждого чата
-            $latestMessages = Message::select('id', 'from_user_id', 'to_user_id', 'created_at')
-                ->where(function($query) use ($userId) {
-                    $query->where('from_user_id', $userId)
-                          ->orWhere('to_user_id', $userId);
-                })
-                ->orderBy('created_at', 'desc')
+            // Получаем всех пользователей, с которыми есть сообщения
+            $userIds = Message::where('from_user_id', $userId)
+                ->orWhere('to_user_id', $userId)
+                ->select('from_user_id', 'to_user_id')
                 ->get()
-                ->groupBy(function($message) use ($userId) {
+                ->map(function ($message) use ($userId) {
                     return $message->from_user_id == $userId ? $message->to_user_id : $message->from_user_id;
                 })
-                ->map(function($messages) {
-                    return $messages->first();
-                });
+                ->unique()
+                ->values()
+                ->toArray();
 
             // Получаем пользователей с их последними сообщениями
-            $users = User::whereIn('id', $latestMessages->keys())
+            $users = User::whereIn('id', $userIds)
                 ->with(['messages' => function($query) use ($userId) {
                     $query->where(function($q) use ($userId) {
                         $q->where('from_user_id', $userId)
@@ -124,6 +121,7 @@ class ChatController extends Controller
                 }])
                 ->get();
 
+            // Получаем тикеты поддержки
             $supportTickets = SupportTicket::where('user_id', $userId)
                 ->with(['messages' => function($query) {
                     $query->orderBy('created_at', 'desc')->limit(1);
