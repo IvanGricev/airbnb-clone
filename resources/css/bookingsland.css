@@ -1,0 +1,141 @@
+@import url('https://fonts.googleapis.com/css2?family=Lexend&display=swap');
+
+.bookings-landlord-container {
+    max-width: 1200px;
+    margin: 48px auto;
+    padding: 0 24px;
+}
+.bookings-landlord-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+.bookings-landlord-header h1 {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #1e2351;
+    margin-bottom: 12px;
+}
+.bookings-landlord-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(370px, 1fr));
+    gap: 32px;
+    margin-top: 32px;
+}
+.booking-land-card {
+    background: #fff;
+    border-radius: 22px;
+    box-shadow: 0 8px 40px rgba(30,64,175,0.10);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+.booking-land-image {
+    width: 100%;
+    height: 280px;
+    object-fit: cover;
+    background: #f3f3f3;
+    border-top-left-radius: 22px;
+    border-top-right-radius: 22px;
+}
+.booking-land-content {
+    padding: 22px 22px 0 22px;
+    background: #f8fafc;
+    font-size: 1.18rem;
+    font-weight: 700;
+    color: #1e2351;
+}
+.booking-land-details {
+    padding: 18px 22px 0 22px;
+    background: #fff;
+    font-size: 1.04rem;
+    color: #232323;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.booking-land-tenant {
+    color: #888;
+    font-size: 1.01rem;
+    margin-bottom: 2px;
+}
+.booking-land-dates {
+    color: #888;
+    font-size: 1.01rem;
+    margin-bottom: 2px;
+}
+.booking-land-status {
+    margin: 12px 0 0 0;
+}
+.booking-land-status-badge {
+    display: inline-block;
+    background: #e6f9f0;
+    color: #10B981;
+    border-radius: 16px;
+    padding: 7px 18px;
+    font-size: 1.01rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+.booking-land-status-cancel {
+    background: #ffeaea;
+    color: #ef4444;
+}
+.booking-land-actions {
+    padding: 0 22px 22px 22px;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.booking-land-btn {
+    width: 100%;
+    padding: 14px 0;
+    background: #ffb43a;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.13rem;
+    font-weight: 700;
+    text-align: center;
+    box-shadow: 0 2px 8px #2563eb11;
+    transition: background 0.2s;
+    text-decoration: none;
+    display: block;
+}
+.booking-land-btn:hover {
+    background: #ffa500;
+    color: #fff;
+}
+.booking-land-btn-cancel {
+    background: linear-gradient(90deg, #ef4444 0%, #f59e0b 100%);
+    color: #fff;
+    font-weight: 700;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.13rem;
+    padding: 14px 0;
+    margin-top: 0;
+    box-shadow: 0 2px 8px #ef444422;
+    transition: background 0.2s;
+    cursor: pointer;
+}
+.booking-land-btn-cancel:hover {
+    background: linear-gradient(90deg, #dc2626 0%, #f59e0b 100%);
+}
+@media (max-width: 700px) {
+    .bookings-landlord-container {
+        padding: 0 6px;
+    }
+    .bookings-landlord-header h1 {
+        font-size: 1.3rem;
+    }
+    .bookings-landlord-grid {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+    .booking-land-content, .booking-land-details, .booking-land-actions {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+}

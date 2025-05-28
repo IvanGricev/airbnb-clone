@@ -2,41 +2,46 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>@yield('title', 'Airbnb Clone')</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+    <title>@yield('title') - Airbnb Clone</title>
     
-
-    <meta http-equiv="Content-Security-Policy" content="
-        script-src 'self' 
-                https://cdn.jsdelivr.net;
-        style-src 'self' 
-                'unsafe-inline' 
-                https://cdn.jsdelivr.net 
-                https://cdnjs.cloudflare.com;
-    ">
-
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/main.css') }}">
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
-    <!-- CDN FullCalendar CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/main.css') }}">
+    
+    <!-- FullCalendar CSS -->
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.css' rel='stylesheet' />
+    
+    @stack('styles')
 </head>
 <body>
     @include('partials.navbar')
+    
     <div class="container mt-4">
         @if(session('success'))
             <div class="alert alert-success">
                 {{ session('success') }}
             </div>
         @endif
+        
         @yield('content')
     </div>
+    
     @include('partials.footer')
-
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
-
+    
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- FullCalendar JS -->
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.js'></script>
+    
+    <!-- Custom JS -->
     <script type="module" src="{{ asset('js/app.js') }}"></script>
-
+    
+    @stack('scripts')
 </body>
 </html>

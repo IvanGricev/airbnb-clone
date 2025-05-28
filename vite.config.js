@@ -8,4 +8,25 @@ export default defineConfig({
             refresh: true,
         }),
     ],
+    resolve: {
+        alias: {
+            '~bootstrap': 'bootstrap',
+        }
+    },
+    build: {
+        assetsDir: 'build',
+        rollupOptions: {
+            output: {
+                assetFileNames: (assetInfo) => {
+                    let extType = assetInfo.name.split('.').at(1);
+                    if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(extType)) {
+                        extType = 'img';
+                    }
+                    return `build/${extType}/[name][extname]`;
+                },
+                chunkFileNames: 'build/js/[name].js',
+                entryFileNames: 'build/js/[name].js',
+            },
+        },
+    },
 });

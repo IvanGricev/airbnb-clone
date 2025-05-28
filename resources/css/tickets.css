@@ -1,0 +1,115 @@
+.ticket-create-wrapper {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 4px 32px 0 rgba(0,0,0,0.07);
+    padding: 36px 32px 32px 32px;
+    max-width: 500px;
+    margin: 60px auto 40px auto;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+.ticket-create-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+.mb-3 {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+.mb-3 label {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #232323;
+    margin-bottom: 2px;
+    font-family: 'Montserrat', 'Arial', sans-serif;
+}
+.form-input {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1.5px solid #ececec;
+    background: #fafafa;
+    font-size: 1rem;
+    transition: border 0.2s, box-shadow 0.2s;
+    font-family: 'Montserrat', 'Arial', sans-serif;
+}
+.form-input:focus {
+    border: 1.5px solid #ffb43a;
+    outline: none;
+    box-shadow: 0 0 0 2px #ffdb3a33;
+}
+.ticket-create-form .btn-primary {
+    background: #ffb43a;
+    color: #232323;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding: 14px 0;
+    margin-top: 10px;
+    transition: background 0.2s, color 0.2s;
+    width: 100%;
+    box-shadow: 0 2px 12px 0 rgba(255,180,58,0.08);
+}
+.ticket-create-form .btn-primary:hover {
+    background: #ffa500;
+    color: #fff;
+}
+@media (max-width: 700px) {
+    .ticket-create-wrapper {
+        padding: 16px 6px 18px 6px;
+        max-width: 100%;
+    }
+}
+.tickets-section {
+    margin-bottom: 38px;
+}
+.tickets-section-title {
+    font-size: 1.18rem;
+    font-weight: 700;
+    color: #232323;
+    margin-bottom: 18px;
+    letter-spacing: -0.2px;
+    font-family: 'Montserrat', 'Arial', sans-serif;
+}
+.tickets-empty {
+    color: #bdbdbd;
+    font-size: 1.05rem;
+    padding: 18px 0 10px 0;
+    font-family: 'Montserrat', 'Arial', sans-serif;
+}
+.tickets-ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+.ticket-chat-card .ticket-card-meta {
+    color: #1a9c2e;
+    font-weight: 500;
+}
+.ticket-support-card .ticket-card-meta {
+    color: #ffb43a;
+    font-weight: 500;
+}
+.ticket-card a {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+@media (max-width: 700px) {
+    .tickets-section-title {
+        font-size: 1rem;
+        margin-bottom: 10px;
+    }
+    .tickets-section {
+        margin-bottom: 22px;
+    }
+}

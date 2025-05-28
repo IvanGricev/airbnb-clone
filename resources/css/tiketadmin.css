@@ -1,0 +1,126 @@
+@import url('https://fonts.googleapis.com/css2?family=Lexend&display=swap');
+
+.tickets-admin-container {
+    max-width: 1200px;
+    margin: 48px auto;
+    padding: 0 24px;
+}
+.tickets-admin-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+.tickets-admin-header h1 {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #1e2351;
+    margin-bottom: 12px;
+}
+.tickets-admin-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 32px;
+    margin-top: 32px;
+}
+.ticket-admin-card {
+    background: #fff;
+    border-radius: 22px;
+    box-shadow: 0 8px 40px rgba(30,64,175,0.10);
+    padding: 0 0 24px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    overflow: hidden;
+    min-width: 0;
+}
+.ticket-admin-avatar-block {
+    width: 100%;
+    background: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 0 0 0;
+}
+.ticket-admin-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 2px 8px #2563eb11;
+    object-fit: cover;
+    margin-bottom: 12px;
+}
+.ticket-admin-card-content {
+    padding: 24px 28px 0 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.ticket-admin-name {
+    font-size: 1.18rem;
+    font-weight: 700;
+    color: #1e2351;
+    margin-bottom: 2px;
+}
+.ticket-admin-email {
+    font-size: 1.01rem;
+    color: #8b8fa9;
+    margin-bottom: 8px;
+}
+.ticket-admin-subject {
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 1.05rem;
+    margin-bottom: 8px;
+    color: #232323;
+}
+.ticket-admin-date {
+    color: #888;
+    font-size: 0.98rem;
+    margin-bottom: 10px;
+}
+.ticket-admin-status {
+    display: inline-block;
+    background: #e6f9f0;
+    color: #10B981;
+    border-radius: 16px;
+    padding: 7px 18px;
+    font-size: 1.01rem;
+    font-weight: 600;
+    margin-bottom: 14px;
+}
+.ticket-admin-btn {
+    width: 100%;
+    padding: 14px 0;
+    background: #ffb43a;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.13rem;
+    font-weight: 700;
+    text-align: center;
+    margin-top: 8px;
+    box-shadow: 0 2px 8px #2563eb11;
+    transition: background 0.2s;
+    text-decoration: none;
+    display: block;
+}
+.ticket-admin-btn:hover {
+    background: #ffa500;
+    color: #fff;
+}
+@media (max-width: 700px) {
+    .tickets-admin-container {
+        padding: 0 6px;
+    }
+    .tickets-admin-header h1 {
+        font-size: 1.3rem;
+    }
+    .tickets-admin-grid {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+    .ticket-admin-card-content {
+        padding: 16px 10px 0 10px;
+    }
+}
