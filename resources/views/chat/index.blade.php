@@ -3,23 +3,23 @@
 @section('title', 'Чат с ' . $withUser->name)
 
 @section('content')
-<link rel="stylesheet" href="{{ asset('/css/chat.css') }}">
-<div class="chat-wrapper">
-    <h1 class="chat-title">Чат с {{ $withUser->name }}</h1>
+<link rel="stylesheet" href="{{ asset('/css/allchats.css') }}">
+<div class="allchats-layout">
+    <div class="allchats-main">
+        <h1 class="allchats-support-title">Чат с {{ $withUser->name }}</h1>
 
-    @if(session('error'))
-        <div class="alert alert-danger">
-            {{ session('error') }}
-        </div>
-    @endif
+        @if(session('error'))
+            <div class="alert alert-danger">
+                {{ session('error') }}
+            </div>
+        @endif
 
-    @if(session('success'))
-        <div class="alert alert-success">
-            {{ session('success') }}
-        </div>
-    @endif
+        @if(session('success'))
+            <div class="alert alert-success">
+                {{ session('success') }}
+            </div>
+        @endif
 
-    <div class="chat-container">
         <div id="chat-messages" class="chat-messages">
             @foreach($messages as $message)
                 <div class="chat-message-row {{ $message->from_user_id === Auth::id() ? 'chat-message-own' : 'chat-message-other' }}">
@@ -103,31 +103,13 @@
 @endpush
 
 <style>
-.chat-wrapper {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-.chat-title {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.chat-container {
-    display: flex;
-    flex-direction: column;
-    height: calc(100vh - 200px);
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    overflow: hidden;
-}
-
 .chat-messages {
     flex: 1;
     overflow-y: auto;
     padding: 20px;
     background: #f9f9f9;
+    border-radius: 14px;
+    margin-bottom: 20px;
 }
 
 .chat-message-row {
@@ -144,12 +126,12 @@
     padding: 10px 15px;
     border-radius: 15px;
     background: #fff;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 12px 0 rgba(0,0,0,0.04);
 }
 
 .chat-message-own .chat-message-bubble {
-    background: #007bff;
-    color: #fff;
+    background: #ffdb3a;
+    color: #232323;
 }
 
 .chat-message-content {
@@ -159,19 +141,20 @@
 
 .chat-message-meta {
     font-size: 0.8em;
-    color: #666;
+    color: #888;
     display: flex;
     justify-content: space-between;
 }
 
 .chat-message-own .chat-message-meta {
-    color: #e6e6e6;
+    color: #666;
 }
 
 .chat-form {
     padding: 15px;
     background: #fff;
-    border-top: 1px solid #ddd;
+    border-radius: 14px;
+    box-shadow: 0 2px 12px 0 rgba(0,0,0,0.04);
 }
 
 .chat-input-container {
@@ -181,24 +164,31 @@
 
 .chat-input {
     flex: 1;
-    padding: 10px;
+    padding: 12px;
     border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
+    border-radius: 8px;
+    font-size: 1.05rem;
+    transition: border-color 0.18s;
+}
+
+.chat-input:focus {
+    outline: none;
+    border-color: #ffdb3a;
 }
 
 .chat-send-button {
-    padding: 10px 20px;
-    background: #007bff;
-    color: #fff;
+    padding: 12px 24px;
+    background: #ffdb3a;
+    color: #232323;
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
     cursor: pointer;
-    transition: background 0.2s;
+    font-weight: 600;
+    transition: background 0.18s;
 }
 
 .chat-send-button:hover {
-    background: #0056b3;
+    background: #ffd700;
 }
 
 .chat-form-error {
@@ -208,9 +198,10 @@
 }
 
 .alert {
-    padding: 10px;
+    padding: 12px;
     margin-bottom: 15px;
-    border-radius: 4px;
+    border-radius: 8px;
+    font-size: 1.05rem;
 }
 
 .alert-danger {
