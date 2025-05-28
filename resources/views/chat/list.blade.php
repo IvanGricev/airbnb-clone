@@ -43,9 +43,9 @@
                         <div class="allchats-support-card-title">Тикет #{{ $ticket->id }}</div>
                         <div class="allchats-support-card-subject">{{ $ticket->subject }}</div>
                         <div class="allchats-support-card-status">Статус: {{ $ticket->status ?? 'Открыт' }}</div>
-                        @if($ticket->messages->isNotEmpty())
+                        @if($ticket->supportMessages->isNotEmpty())
                             <div class="allchats-support-card-preview">
-                                {{ Str::limit($ticket->messages->first()->content, 100) }}
+                                {{ Str::limit($ticket->supportMessages->first()->content, 100) }}
                             </div>
                         @endif
                         <a href="{{ route('support.show', $ticket->id) }}" class="allchats-support-card-link">Подробнее</a>

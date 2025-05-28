@@ -96,18 +96,31 @@ class ChatController extends Controller
     {
         try {
             $userId = Auth::id();
+            Log::info('Loading conversations for user: ' . $userId);
             
             // Получаем всех пользователей, с которыми есть сообщения
-            $userIds = Message::where('from_user_id', $userId)
-                ->orWhere('to_user_id', $userId)
-                ->select('from_user_id', 'to_user_id')
-                ->get()
-                ->map(function ($message) use ($userId) {
-                    return $message->from_user_id == $userId ? $message->to_user_id : $message->from_user_id;
-                })
-                ->unique()
-                ->values()
-                ->toArray();
+            $userIds = Message::where(function($query) use ($userId) {
+                $query->where('from_user_id', $userId)
+                      ->orWhere('to_user_id', $userId);
+            })
+            ->select('from_user_id', 'to_user_id')
+            ->get()
+            ->map(function ($message) use ($userId) {
+                return $message->from_user_id == $userId ? $message->to_user_id : $message->from_user_id;
+            })
+            ->unique()
+            ->values()
+            ->toArray();
+
+            Log::info('Found user IDs for conversations: ' . implode(', ', $userIds));
+
+            if (empty($userIds)) {
+                Log::info('No conversations found for user');
+                return view('chat.list', [
+                    'users' => collect(),
+                    'supportTickets' => collect()
+                ]);
+            }
 
             // Получаем пользователей с их последними сообщениями
             $users = User::whereIn('id', $userIds)
@@ -121,18 +134,23 @@ class ChatController extends Controller
                 }])
                 ->get();
 
+            Log::info('Loaded ' . $users->count() . ' users with their messages');
+
             // Получаем тикеты поддержки
             $supportTickets = SupportTicket::where('user_id', $userId)
-                ->with(['messages' => function($query) {
+                ->with(['supportMessages' => function($query) {
                     $query->orderBy('created_at', 'desc')->limit(1);
                 }])
                 ->orderBy('updated_at', 'desc')
                 ->get();
 
+            Log::info('Loaded ' . $supportTickets->count() . ' support tickets');
+
             return view('chat.list', compact('users', 'supportTickets'));
         } catch (\Exception $e) {
             Log::error('Error loading conversations: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Произошла ошибка при загрузке списка чатов.');
+            Log::error('Stack trace: ' . $e->getTraceAsString());
+            return redirect()->back()->with('error', 'Произошла ошибка при загрузке списка чатов. Пожалуйста, попробуйте позже.');
         }
     }
 }
