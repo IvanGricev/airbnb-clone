@@ -9,8 +9,9 @@ RUN apt-get update && apt-get install -y \
     unzip \
     git \
     curl \
+    libpq-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) gd pdo pdo_mysql
+    && docker-php-ext-install -j$(nproc) gd pdo pdo_mysql pdo_pgsql pgsql
 
 # Установка Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -37,17 +38,14 @@ RUN chown -R www-data:www-data /var/www \
     && chmod -R 755 /var/www/public \
     && chmod -R 755 /var/www/public/build
 
-# Очистка кэша
-RUN php artisan config:clear \
-    && php artisan cache:clear \
-    && php artisan view:clear
+# Создание символической ссылки для storage
+RUN php artisan storage:link
 
 # Запуск миграций и оптимизации
 CMD php artisan migrate --force && \
     php artisan config:cache && \
     php artisan route:cache && \
     php artisan view:cache && \
-    php artisan storage:link && \
     php -S 0.0.0.0:8000 -t public
 
 # Expose port 8000
