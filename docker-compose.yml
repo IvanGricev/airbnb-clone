@@ -32,18 +32,19 @@ services:
       POSTGRES_DB: airbnb_clone_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+      PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
-      - dbdata:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     networks:
       - airbnb-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
+      test: ["CMD-SHELL", "pg_isready -U postgres -d airbnb_clone_db"]
+      interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s
+      start_period: 10s
 
   pgadmin:
     image: dpage/pgadmin4
@@ -77,4 +78,4 @@ networks:
         - subnet: 172.20.0.0/16
 
 volumes:
-  dbdata: 
+  postgres_data: 
