@@ -17,14 +17,19 @@ class SupportController extends Controller
     public function myTickets()
     {
         try {
-            // Используем пагинацию для удобства
-            $tickets = SupportTicket::where('user_id', Auth::id())
-                        ->orderBy('created_at', 'desc')
-                        ->paginate(10);
+            $tickets = SupportTicket::with(['messages' => function($query) {
+                    $query->latest()->take(1);
+                }])
+                ->where('user_id', Auth::id())
+                ->orderBy('updated_at', 'desc')
+                ->paginate(10);
 
             return view('support.index', compact('tickets'));
         } catch (\Exception $e) {
-            Log::error('Ошибка при получении тикетов пользователя', ['error' => $e->getMessage()]);
+            Log::error('Ошибка при получении тикетов пользователя', [
+                'error' => $e->getMessage(),
+                'user_id' => Auth::id()
+            ]);
             return redirect()->back()->with('error', 'Не удалось загрузить ваши тикеты.');
         }
     }
@@ -95,19 +100,32 @@ class SupportController extends Controller
     public function show($id)
     {
         try {
-            $ticket = SupportTicket::findOrFail($id);
+            $ticket = SupportTicket::with(['messages.user', 'user'])
+                ->findOrFail($id);
 
-            // Проверка доступа: тикет должен принадлежать текущему пользователю.
-            if ($ticket->user_id !== Auth::id()) {
+            // Проверка доступа: тикет должен принадлежать текущему пользователю
+            if ($ticket->user_id !== Auth::id() && Auth::user()->role !== 'admin') {
+                Log::warning('Попытка доступа к чужому тикету', [
+                    'user_id' => Auth::id(),
+                    'ticket_id' => $id,
+                    'ticket_user_id' => $ticket->user_id
+                ]);
                 return redirect()->route('support.index')
-                        ->with('error', 'У вас нет доступа к этому тикету.');
+                    ->with('error', 'У вас нет доступа к этому тикету.');
             }
 
-            $messages = $ticket->messages()->orderBy('created_at', 'asc')->get();
+            $messages = $ticket->messages()
+                ->with('user')
+                ->orderBy('created_at', 'asc')
+                ->get();
 
             return view('support.chat', compact('ticket', 'messages'));
         } catch (\Exception $e) {
-            Log::error('Ошибка при отображении тикета', ['error' => $e->getMessage()]);
+            Log::error('Ошибка при отображении тикета', [
+                'error' => $e->getMessage(),
+                'ticket_id' => $id,
+                'user_id' => Auth::id()
+            ]);
             return redirect()->back()->with('error', 'Не удалось загрузить тикет.');
         }
     }
@@ -129,27 +147,44 @@ class SupportController extends Controller
         ], $messages);
 
         try {
+            DB::beginTransaction();
+
             $ticket = SupportTicket::findOrFail($id);
 
-            if ($ticket->user_id !== Auth::id()) {
+            // Проверка доступа
+            if ($ticket->user_id !== Auth::id() && Auth::user()->role !== 'admin') {
+                Log::warning('Попытка отправки сообщения в чужой тикет', [
+                    'user_id' => Auth::id(),
+                    'ticket_id' => $id,
+                    'ticket_user_id' => $ticket->user_id
+                ]);
                 return redirect()->route('support.index')
                     ->withErrors(['error' => 'У вас нет доступа к этому тикету.']);
             }
 
+            // Проверка статуса тикета
             if ($ticket->status === 'closed') {
                 return redirect()->back()
                     ->withErrors(['error' => 'Этот тикет закрыт. Вы не можете отправлять сообщения.']);
             }
 
-            SupportMessage::create([
+            // Создание сообщения
+            $message = SupportMessage::create([
                 'ticket_id' => $ticket->id,
                 'user_id' => Auth::id(),
                 'message' => $validatedData['message'],
             ]);
 
+            // Обновление статуса тикета
+            $ticket->status = Auth::user()->role === 'admin' ? 'answered' : 'open';
+            $ticket->save();
+
+            DB::commit();
+
             return redirect()->back()
                 ->with('success', 'Сообщение отправлено.');
         } catch (\Exception $e) {
+            DB::rollBack();
             Log::error('Ошибка при отправке сообщения в тикете', [
                 'error' => $e->getMessage(),
                 'ticket_id' => $id,
