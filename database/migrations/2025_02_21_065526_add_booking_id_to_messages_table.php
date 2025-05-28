@@ -9,8 +9,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('messages', function (Blueprint $table) {
-            $table->unsignedBigInteger('booking_id')->nullable()->after('id');
-    
+            $table->unsignedBigInteger('booking_id')->nullable();
             $table->foreign('booking_id')->references('id')->on('bookings')->onDelete('cascade');
         });
     }
@@ -22,5 +21,4 @@ return new class extends Migration
             $table->dropColumn('booking_id');
         });
     }
-    
 };

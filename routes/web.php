@@ -70,9 +70,9 @@ Route::middleware('auth')->group(function () {
     /**
      * Чат
      */
-    Route::get('chat/{withUserId}', [ChatController::class, 'index'])->name('chat.index');
-    Route::post('messages', [ChatController::class, 'sendMessage'])->name('messages.send');
-    Route::get('/chats', [ChatController::class, 'conversations'])->name('chat.conversations');
+    Route::get('/chat/{withUserId}', [ChatController::class, 'index'])->name('chat.index');
+    Route::post('/messages/send', [ChatController::class, 'sendMessage'])->name('messages.send');
+    Route::get('/conversations', [ChatController::class, 'conversations'])->name('chat.conversations');
 
     /**
      * Поддержка
