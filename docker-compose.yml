@@ -1,0 +1,80 @@
+version: '3'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: airbnb-app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+    networks:
+      - airbnb-network
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=airbnb_clone_db
+      - DB_USERNAME=root
+      - DB_PASSWORD=
+
+  nginx:
+    image: nginx:alpine
+    container_name: airbnb-nginx
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d
+    networks:
+      - airbnb-network
+    depends_on:
+      - app
+
+  db:
+    image: mysql:8.2
+    container_name: airbnb-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: airbnb_clone_db
+      MYSQL_ROOT_PASSWORD: ""
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    volumes:
+      - dbdata:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - airbnb-network
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  redis:
+    image: redis:alpine
+    container_name: airbnb-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - airbnb-network
+
+networks:
+  airbnb-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  dbdata: 
