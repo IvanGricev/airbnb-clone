@@ -3,6 +3,7 @@
 @section('title', 'Мои тикеты поддержки')
 
 @section('content')
+<link rel="stylesheet" href="{{ asset('/css/tickets.css') }}">
     <h1>Мои тикеты поддержки</h1>
 
     @if(session('error'))

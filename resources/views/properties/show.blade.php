@@ -1,4 +1,4 @@
-<link rel="stylesheet" href="{{ asset('css/show_blade.css') }}">
+<link rel="stylesheet" href="{{ asset('/css/show_blade.css') }}">
 @extends('layouts.main')
 
 @section('title', $property->title)
