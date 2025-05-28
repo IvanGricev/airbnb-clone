@@ -14,24 +14,22 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      redis:
-        condition: service_started
     environment:
       - DB_CONNECTION=pgsql
       - DB_HOST=db
       - DB_PORT=5432
-      - DB_DATABASE=airbnb_clone_db
-      - DB_USERNAME=postgres
-      - DB_PASSWORD=postgres
+      - DB_DATABASE=airbnb_clone_db_cnld
+      - DB_USERNAME=airbnb_clone_db_cnld_user
+      - DB_PASSWORD=2X6drMHc0AwBx1d9toLjgkR7rNRRkRud
 
   db:
     image: postgres:15
     container_name: airbnb-db
     restart: unless-stopped
     environment:
-      POSTGRES_DB: airbnb_clone_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: airbnb_clone_db_cnld
+      POSTGRES_USER: airbnb_clone_db_cnld_user
+      POSTGRES_PASSWORD: 2X6drMHc0AwBx1d9toLjgkR7rNRRkRud
       PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -40,7 +38,7 @@ services:
     networks:
       - airbnb-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d airbnb_clone_db"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d airbnb_clone_db_cnld"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -59,15 +57,6 @@ services:
       - airbnb-network
     depends_on:
       - db
-
-  redis:
-    image: redis:alpine
-    container_name: airbnb-redis
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
-    networks:
-      - airbnb-network
 
 networks:
   airbnb-network:
