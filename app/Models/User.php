@@ -60,4 +60,19 @@ class User extends Authenticatable
     {
         return $this->hasMany(Favorite::class);
     }
+
+    public function sentMessages()
+    {
+        return $this->hasMany(Message::class, 'from_user_id');
+    }
+
+    public function receivedMessages()
+    {
+        return $this->hasMany(Message::class, 'to_user_id');
+    }
+
+    public function messages()
+    {
+        return $this->sentMessages()->union($this->receivedMessages());
+    }
 }

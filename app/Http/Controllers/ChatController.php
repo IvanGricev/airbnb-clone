@@ -124,15 +124,33 @@ class ChatController extends Controller
 
             // Получаем пользователей с их последними сообщениями
             $users = User::whereIn('id', $userIds)
-                ->with(['messages' => function($query) use ($userId) {
-                    $query->where(function($q) use ($userId) {
-                        $q->where('from_user_id', $userId)
-                          ->orWhere('to_user_id', $userId);
-                    })
-                    ->orderBy('created_at', 'desc')
-                    ->limit(1);
+                ->with(['sentMessages' => function($query) use ($userId) {
+                    $query->where('to_user_id', $userId)
+                          ->orderBy('created_at', 'desc')
+                          ->limit(1);
+                }, 'receivedMessages' => function($query) use ($userId) {
+                    $query->where('from_user_id', $userId)
+                          ->orderBy('created_at', 'desc')
+                          ->limit(1);
                 }])
-                ->get();
+                ->get()
+                ->map(function ($user) {
+                    $lastSentMessage = $user->sentMessages->first();
+                    $lastReceivedMessage = $user->receivedMessages->first();
+                    
+                    $user->lastMessage = null;
+                    if ($lastSentMessage && $lastReceivedMessage) {
+                        $user->lastMessage = $lastSentMessage->created_at > $lastReceivedMessage->created_at 
+                            ? $lastSentMessage 
+                            : $lastReceivedMessage;
+                    } elseif ($lastSentMessage) {
+                        $user->lastMessage = $lastSentMessage;
+                    } elseif ($lastReceivedMessage) {
+                        $user->lastMessage = $lastReceivedMessage;
+                    }
+                    
+                    return $user;
+                });
 
             Log::info('Loaded ' . $users->count() . ' users with their messages');
 

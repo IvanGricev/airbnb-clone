@@ -16,12 +16,12 @@
                         </div>
                         <div class="allchats-chat-info">
                             <div class="allchats-chat-name">{{ $user->name }}</div>
-                            @if($user->messages->isNotEmpty())
+                            @if($user->lastMessage)
                                 <div class="allchats-chat-preview">
-                                    {{ Str::limit($user->messages->first()->content, 50) }}
+                                    {{ Str::limit($user->lastMessage->content, 50) }}
                                 </div>
                                 <div class="allchats-chat-time">
-                                    {{ $user->messages->first()->created_at->format('H:i d.m.Y') }}
+                                    {{ $user->lastMessage->created_at->format('H:i d.m.Y') }}
                                 </div>
                             @endif
                         </div>
