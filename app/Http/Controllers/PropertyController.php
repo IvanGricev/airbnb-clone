@@ -108,6 +108,7 @@ class PropertyController extends Controller
             'price_per_night.required' => 'Цена за ночь обязательна для заполнения.',
             'price_per_night.numeric' => 'Цена должна быть числом.',
             'price_per_night.min' => 'Цена не может быть отрицательной.',
+            'images.required' => 'Необходимо загрузить хотя бы одно изображение.',
             'images.max' => 'Можно загрузить не более 12 изображений.',
             'images.*.image' => 'Файл должен быть изображением.',
             'images.*.mimes' => 'Изображение должно быть в формате: jpeg, png, jpg, gif или svg.',
@@ -143,19 +144,31 @@ class PropertyController extends Controller
 
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
-                    $property->images()->create([
-                        'image_data' => file_get_contents($image->getRealPath()),
-                        'mime_type' => $image->getMimeType(),
-                        'original_name' => $image->getClientOriginalName(),
-                        'size' => $image->getSize()
-                    ]);
+                    try {
+                        $imageData = file_get_contents($image->getRealPath());
+                        if ($imageData === false) {
+                            throw new \Exception('Не удалось прочитать файл изображения');
+                        }
+                        
+                        $property->images()->create([
+                            'image_data' => $imageData,
+                            'mime_type' => $image->getMimeType(),
+                            'original_name' => $image->getClientOriginalName(),
+                            'size' => $image->getSize()
+                        ]);
+                    } catch (\Exception $e) {
+                        Log::error('Ошибка при загрузке изображения: ' . $e->getMessage());
+                        return back()->withErrors(['error' => 'Произошла ошибка при загрузке изображения: ' . $e->getMessage()])
+                                    ->withInput();
+                    }
                 }
             }
 
             return redirect()->route('properties.show', $property->id)
                            ->with('success', 'Жильё успешно добавлено.');
         } catch (\Exception $e) {
-            return back()->withErrors(['error' => 'Произошла ошибка при создании жилья. Пожалуйста, попробуйте снова.'])
+            Log::error('Ошибка при создании жилья: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'Произошла ошибка при создании жилья: ' . $e->getMessage()])
                         ->withInput();
         }
     }

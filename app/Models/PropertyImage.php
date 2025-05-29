@@ -15,7 +15,6 @@ class PropertyImage extends Model
     ];
 
     protected $casts = [
-        'image_data' => 'binary',
         'size' => 'integer'
     ];
 
@@ -27,5 +26,19 @@ class PropertyImage extends Model
     public function getImageUrlAttribute()
     {
         return route('property.image', $this->id);
+    }
+
+    protected function setImageDataAttribute($value)
+    {
+        if (is_resource($value)) {
+            $this->attributes['image_data'] = stream_get_contents($value);
+        } else {
+            $this->attributes['image_data'] = $value;
+        }
+    }
+
+    protected function getImageDataAttribute($value)
+    {
+        return $value;
     }
 }
