@@ -2,7 +2,7 @@
 @section('title', 'Таблица: ' . $table)
 @section('content')
 <link rel="stylesheet" href="{{ asset('css/table.blade.admin.css') }}">
-<div class="db-table-container">
+<div class="db-table-container px-4 px-md-5">
     <div class="db-table-card">
         <div class="db-table-header">
             <h1>Таблица: {{ $table }}</h1>
@@ -53,7 +53,7 @@
                 </tbody>
             </table>
         </div>
-        <div class="d-flex justify-content-between align-items-center my-3">
+        <div class="d-flex justify-content-between align-items-center my-3 px-2 px-md-4">
             <div>
                 <small>
                     Показано {{ $data->firstItem() }}–{{ $data->lastItem() }} из {{ $data->total() }} записей
