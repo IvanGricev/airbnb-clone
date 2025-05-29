@@ -25,6 +25,12 @@ services:
       - PHP_MEMORY_LIMIT=256M
       - PHP_POST_MAX_SIZE=20M
       - PHP_UPLOAD_MAX_FILESIZE=20M
+    healthcheck:
+      test: ["CMD", "php", "artisan", "db:monitor", "--timeout=1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   db:
     image: postgres:15
@@ -43,7 +49,19 @@ services:
       POSTGRES_LARGE_OBJECTS: true
       POSTGRES_MAX_WAL_SIZE: 1GB
       POSTGRES_MIN_WAL_SIZE: 80MB
-      POSTGRES_WAL_KEEP_SEGMENTS: 10
+    command: >
+      postgres
+      -c shared_buffers=256MB
+      -c effective_cache_size=768MB
+      -c maintenance_work_mem=64MB
+      -c work_mem=4MB
+      -c max_wal_size=1GB
+      -c min_wal_size=80MB
+      -c random_page_cost=1.1
+      -c effective_io_concurrency=200
+      -c wal_level=replica
+      -c max_wal_senders=10
+      -c max_replication_slots=10
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -56,17 +74,6 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
-    command: >
-      postgres
-      -c shared_buffers=256MB
-      -c effective_cache_size=768MB
-      -c maintenance_work_mem=64MB
-      -c work_mem=4MB
-      -c max_wal_size=1GB
-      -c min_wal_size=80MB
-      -c wal_keep_segments=10
-      -c random_page_cost=1.1
-      -c effective_io_concurrency=200
 
   pgadmin:
     image: dpage/pgadmin4

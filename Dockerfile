@@ -53,9 +53,6 @@ RUN php artisan key:generate
 RUN chown -R dev:www-data /var/www/storage /var/www/bootstrap/cache && \
     chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 
-# Create storage link
-RUN php artisan storage:link
-
 # Expose port 9000
 EXPOSE 9000
 

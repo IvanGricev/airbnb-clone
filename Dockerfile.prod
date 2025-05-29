@@ -1,60 +1,50 @@
 FROM php:8.2-fpm
 
-# Установка необходимых расширений PHP
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
-    libpng-dev \
-    libjpeg-dev \
-    libfreetype6-dev \
-    zip \
-    unzip \
     git \
     curl \
-    libpq-dev \
-    postgresql-client \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) gd pdo pdo_mysql pdo_pgsql pgsql
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    zip \
+    unzip \
+    libpq-dev
 
-# Настройка PostgreSQL для работы с бинарными данными
-RUN echo "max_allowed_packet=16M" >> /usr/local/etc/php/conf.d/docker-php-ext-pgsql.ini
-RUN echo "upload_max_filesize=20M" >> /usr/local/etc/php/conf.d/docker-php-ext-pgsql.ini
-RUN echo "post_max_size=20M" >> /usr/local/etc/php/conf.d/docker-php-ext-pgsql.ini
-RUN echo "memory_limit=256M" >> /usr/local/etc/php/conf.d/docker-php-ext-pgsql.ini
-RUN echo "max_execution_time=300" >> /usr/local/etc/php/conf.d/docker-php-ext-pgsql.ini
+# Clear cache
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Установка Composer
+# Install PHP extensions
+RUN docker-php-ext-install pdo_pgsql mbstring exif pcntl bcmath gd
+
+# Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Установка Node.js и npm
-RUN curl -sL https://deb.nodesource.com/setup_18.x | bash - \
-    && apt-get install -y nodejs
-
-# Установка рабочей директории
+# Set working directory
 WORKDIR /var/www
 
-# Копирование файлов проекта
+# Copy existing application directory
 COPY . .
 
-# Установка зависимостей PHP и Node.js
-RUN composer install --no-dev --optimize-autoloader \
-    && npm install \
-    && npm run build
+# Copy startup script
+COPY docker/start.sh /usr/local/bin/start.sh
+RUN chmod +x /usr/local/bin/start.sh
 
-# Настройка прав доступа
-RUN chown -R www-data:www-data /var/www \
-    && chmod -R 755 /var/www/storage \
-    && chmod -R 755 /var/www/bootstrap/cache \
-    && chmod -R 755 /var/www/public \
-    && chmod -R 755 /var/www/public/build
+# Install dependencies
+RUN composer install --no-dev --optimize-autoloader
 
-# Создание символической ссылки для storage
-RUN php artisan storage:link
+# Set permissions
+RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
-# Запуск миграций и оптимизации
-CMD php artisan migrate --force && \
-    php artisan config:cache && \
-    php artisan route:cache && \
-    php artisan view:cache && \
-    php -S 0.0.0.0:8000 -t public
+# Configure PHP
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" && \
+    sed -i 's/memory_limit = .*/memory_limit = 256M/' "$PHP_INI_DIR/php.ini" && \
+    sed -i 's/max_execution_time = .*/max_execution_time = 300/' "$PHP_INI_DIR/php.ini" && \
+    sed -i 's/post_max_size = .*/post_max_size = 20M/' "$PHP_INI_DIR/php.ini" && \
+    sed -i 's/upload_max_filesize = .*/upload_max_filesize = 20M/' "$PHP_INI_DIR/php.ini"
 
 # Expose port 8000
-EXPOSE 8000 
+EXPOSE 8000
+
+# Set entrypoint
+ENTRYPOINT ["/usr/local/bin/start.sh"] 
