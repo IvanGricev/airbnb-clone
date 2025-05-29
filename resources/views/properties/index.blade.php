@@ -326,7 +326,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!target.classList.contains('show')) {
                 arrow.style.transform = 'rotate(90deg)';
             } else {
-                arrow.style.transform = 'rotate(0deg)';
+                arrow.style.transform = 'rotate(-90deg)';
             }
         });
     });
