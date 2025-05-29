@@ -105,19 +105,27 @@ $(function() {
     </div>
     <div class="row">
         <div class="col-md-12">
+            @php $catIndex = 0; @endphp
             @foreach($tags as $category => $tagsGroup)
+                @php $collapseId = 'tagsCollapse' . $catIndex; @endphp
                 <div class="mb-3">
-                    <label class="form-label fw-bold">{{ $category }}</label>
-                    <div class="d-flex flex-wrap gap-2">
-                        @foreach($tagsGroup as $tag)
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" name="tags[]" id="tag{{ $tag->id }}" value="{{ $tag->id }}" 
-                                    {{ in_array($tag->id, $selectedTags) ? 'checked' : '' }}>
-                                <label class="form-check-label" for="tag{{ $tag->id }}">{{ $tag->name }}</label>
-                            </div>
-                        @endforeach
+                    <div class="d-flex align-items-center category-toggle" data-bs-toggle="collapse" data-bs-target="#{{ $collapseId }}" aria-expanded="false" aria-controls="{{ $collapseId }}" style="cursor:pointer;">
+                        <span class="form-label fw-bold mb-0 me-2">{{ $category }}</span>
+                        <span class="toggle-arrow" style="transition: transform 0.2s;">&#9654;</span>
+                    </div>
+                    <div class="collapse mt-2" id="{{ $collapseId }}">
+                        <div class="d-flex flex-wrap gap-2">
+                            @foreach($tagsGroup as $tag)
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" name="tags[]" id="tag{{ $tag->id }}" value="{{ $tag->id }}" 
+                                        {{ in_array($tag->id, $selectedTags) ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="tag{{ $tag->id }}">{{ $tag->name }}</label>
+                                </div>
+                            @endforeach
+                        </div>
                     </div>
                 </div>
+                @php $catIndex++; @endphp
             @endforeach
         </div>
     </div>
@@ -295,4 +303,31 @@ $(function() {
 </section>
 
 @endif
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.category-toggle').forEach(function(toggle) {
+        toggle.addEventListener('click', function() {
+            var arrow = this.querySelector('.toggle-arrow');
+            var targetId = this.getAttribute('data-bs-target');
+            var target = document.querySelector(targetId);
+            if (target.classList.contains('show')) {
+                arrow.style.transform = 'rotate(0deg)';
+            } else {
+                arrow.style.transform = 'rotate(90deg)';
+            }
+        });
+    });
+    // При открытии/закрытии collapse меняем стрелку
+    document.querySelectorAll('.collapse').forEach(function(collapse) {
+        collapse.addEventListener('show.bs.collapse', function(e) {
+            var toggle = document.querySelector('[data-bs-target="#'+this.id+'"]');
+            if (toggle) toggle.querySelector('.toggle-arrow').style.transform = 'rotate(90deg)';
+        });
+        collapse.addEventListener('hide.bs.collapse', function(e) {
+            var toggle = document.querySelector('[data-bs-target="#'+this.id+'"]');
+            if (toggle) toggle.querySelector('.toggle-arrow').style.transform = 'rotate(0deg)';
+        });
+    });
+});
+</script>
 @endsection
