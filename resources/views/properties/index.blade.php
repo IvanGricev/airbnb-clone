@@ -14,15 +14,6 @@
             Всё, что вам нужно для поиска места для аренды, будет здесь.<br>
             Наши предложения сделаны из отборных и лучших вариантов, которые подходят для аренды вашей мечты
         </p>
-        <form class="search-form" action="{{ route('properties.index') }}" method="GET">
-            <span class="search-icon">
-                <img src="{{ asset('images/search-location.svg') }}" alt="Поиск" />
-            </span>
-            <input type="text" name="query" class="form-control" placeholder="Что ищем?" value="{{ request('query') }}">
-            <button type="submit" class="search-btn">
-                Поиск <span class="arrow">&rarr;</span>
-            </button>
-        </form>
     </div>
     <div class="hero-right">
         <div class="main-image">
@@ -326,7 +317,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!target.classList.contains('show')) {
                 arrow.style.transform = 'rotate(90deg)';
             } else {
-                arrow.style.transform = 'rotate(-90deg)';
+                arrow.style.transform = 'rotate(0deg)';
             }
         });
     });
@@ -362,7 +353,10 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             if (showMoreWrapper) showMoreWrapper.style.display = '';
             if (showLessWrapper) showLessWrapper.style.display = 'none';
-            window.scrollTo({top: document.querySelector('.tag-group').offsetTop - 100, behavior: 'smooth'});
+            var firstGroup = document.querySelector('.tag-group');
+            if (firstGroup) {
+                window.scrollTo({top: firstGroup.offsetTop - 100, behavior: 'smooth'});
+            }
         });
     }
 });
