@@ -37,18 +37,8 @@
                 @php $booking = $bookings->first(); $property = $booking->property; @endphp
                 <div class="booking-info-card">
                     <div class="booking-image">
-                        @if($property)
-                            @if($property->images->isNotEmpty())
-                                <img src="{{ $property->images->first()->image_url }}" 
-                                     alt="{{ $property->title }}"
-                                     class="property-thumbnail"
-                                     onerror="this.onerror=null; this.src='{{ asset('images/no-image.jpg') }}'; this.alt='Нет изображения';">
-                            @else
-                                <div class="property-image-placeholder">
-                                    <span class="placeholder-text">Нет изображения</span>
-                                </div>
-                            @endif
-                        @endif
+                        <img src="{{ $property->images->first() ? asset('storage/' . $property->images->first()->image_path) : asset('images/user-placeholder.svg') }}" 
+                             alt="{{ $property->title }}">
                     </div>
                     <div class="booking-details">
                         <h3>{{ $property->title }}</h3>

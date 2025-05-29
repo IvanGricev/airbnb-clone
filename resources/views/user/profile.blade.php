@@ -91,16 +91,7 @@
             @else
                 <div class="bookings-grid">
                     @foreach($bookings as $booking)
-                        <div class="booking-item">
-                            @if($booking->property->images->isNotEmpty())
-                                <img src="{{ $booking->property->images->first()->image_url }}" 
-                                     alt="{{ $booking->property->title }}"
-                                     onerror="this.onerror=null; this.src='{{ asset('images/no-image.jpg') }}'; this.alt='Нет изображения';">
-                            @else
-                                <div class="property-image-placeholder">
-                                    <span class="placeholder-text">Нет изображения</span>
-                                </div>
-                            @endif
+                        <div class="booking-card">
                             <div class="booking-info">
                                 <h3 class="booking-title">
                                     <a href="{{ route('properties.show', $booking->property->id) }}">{{ $booking->property->title }}</a>
@@ -126,15 +117,13 @@
             @else
                 <div class="favorites-grid">
                     @foreach($favorites as $favorite)
-                        <div class="favorite-item">
-                            @if($favorite->property->images->isNotEmpty())
-                                <img src="{{ $favorite->property->images->first()->image_url }}" 
-                                     alt="{{ $favorite->property->title }}"
-                                     onerror="this.onerror=null; this.src='{{ asset('images/no-image.jpg') }}'; this.alt='Нет изображения';">
+                        <div class="property-card">
+                            @if($favorite->property->images->count() > 0)
+                                <img src="{{ asset('storage/' . $favorite->property->images->first()->image_path) }}" 
+                                     class="property-image" alt="{{ $favorite->property->title }}">
                             @else
-                                <div class="property-image-placeholder">
-                                    <span class="placeholder-text">Нет изображения</span>
-                                </div>
+                                <img src="{{ asset('storage/default-placeholder.png') }}" 
+                                     class="property-image" alt="Нет изображения">
                             @endif
                             <div class="property-info">
                                 <h3 class="property-title">{{ $favorite->property->title }}</h3>
@@ -175,37 +164,6 @@
                 </div>
                 <div class="view-all-link">
                     <a href="{{ route('bookings.history') }}" class="btn btn-link">Посмотреть все бронирования</a>
-                </div>
-            @endif
-        </section>
-
-        <!-- История просмотров -->
-        <section class="profile-section">
-            <h2 class="section-title">История просмотров</h2>
-            @if($viewHistory->isEmpty())
-                <div class="empty-state">
-                    <p>У вас нет истории просмотров.</p>
-                </div>
-            @else
-                <div class="history-grid">
-                    @foreach($viewHistory as $item)
-                        <div class="history-item">
-                            @if($item['property']->images->isNotEmpty())
-                                <img src="{{ $item['property']->images->first()->image_url }}" 
-                                     alt="{{ $item['property']->title }}"
-                                     onerror="this.onerror=null; this.src='{{ asset('images/no-image.jpg') }}'; this.alt='Нет изображения';">
-                            @else
-                                <div class="property-image-placeholder">
-                                    <span class="placeholder-text">Нет изображения</span>
-                                </div>
-                            @endif
-                            <div class="history-info">
-                                <h3 class="property-title">{{ $item['property']->title }}</h3>
-                                <p class="property-description">{{ Str::limit($item['property']->description, 100) }}</p>
-                                <a href="{{ route('properties.show', $item['property']->id) }}" class="btn btn-primary">Подробнее</a>
-                            </div>
-                        </div>
-                    @endforeach
                 </div>
             @endif
         </section>

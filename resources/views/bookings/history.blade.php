@@ -25,16 +25,17 @@
             <div class="booking-cards">
                 @foreach($bookings as $booking)
                     <div class="booking-card">
-                        @if($booking->property->images->isNotEmpty())
-                            <img src="{{ $booking->property->images->first()->image_url }}" 
-                                 alt="{{ $booking->property->title }}"
-                                 class="booking-image"
-                                 onerror="this.onerror=null; this.src='{{ asset('images/no-image.jpg') }}'; this.alt='Нет изображения';">
-                        @else
-                            <div class="property-image-placeholder">
-                                <span class="placeholder-text">Нет изображения</span>
+                        <a href="{{ route('properties.show', $booking->property->id) }}">
+                            <div class="booking-card-image">
+                                @if($booking->property->images->count() > 0)
+                                    <img src="{{ asset('storage/' . $booking->property->images->first()->image_path) }}" 
+                                         alt="{{ $booking->property->title }}" loading="lazy">
+                                @else
+                                    <img src="{{ asset('storage/default-placeholder.png') }}" 
+                                         alt="Нет изображения" loading="lazy">
+                                @endif
                             </div>
-                        @endif
+                        </a>
                         <div class="booking-card-header">
                             <h3>
                                 <a href="{{ route('properties.show', $booking->property->id) }}">
