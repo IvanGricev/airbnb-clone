@@ -105,10 +105,10 @@ $(function() {
     </div>
     <div class="row">
         <div class="col-md-12">
-            @php $catIndex = 0; @endphp
+            @php $catIndex = 0; $totalGroups = count($tags); @endphp
             @foreach($tags as $category => $tagsGroup)
                 @php $collapseId = 'tagsCollapse' . $catIndex; @endphp
-                <div class="mb-3">
+                <div class="mb-3 tag-group" data-group-index="{{ $catIndex }}" style="{{ $catIndex > 2 ? 'display:none;' : '' }}">
                     <div class="d-flex align-items-center category-toggle" data-bs-toggle="collapse" data-bs-target="#{{ $collapseId }}" aria-expanded="false" aria-controls="{{ $collapseId }}" style="cursor:pointer;">
                         <span class="form-label fw-bold mb-0 me-2">{{ $category }}</span>
                         <span class="toggle-arrow" style="transition: transform 0.2s;">&#9654;</span>
@@ -127,6 +127,11 @@ $(function() {
                 </div>
                 @php $catIndex++; @endphp
             @endforeach
+            @if($totalGroups > 3)
+                <div class="mb-3" id="showMoreTagsWrapper">
+                    <button type="button" class="btn btn-link p-0" id="showMoreTagsBtn">Больше тегов</button>
+                </div>
+            @endif
         </div>
     </div>
 </form>
@@ -305,16 +310,19 @@ $(function() {
 @endif
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Стрелка для collapse
     document.querySelectorAll('.category-toggle').forEach(function(toggle) {
         toggle.addEventListener('click', function() {
             var arrow = this.querySelector('.toggle-arrow');
             var targetId = this.getAttribute('data-bs-target');
             var target = document.querySelector(targetId);
-            if (target.classList.contains('show')) {
-                arrow.style.transform = 'rotate(0deg)';
-            } else {
-                arrow.style.transform = 'rotate(90deg)';
-            }
+            setTimeout(function() {
+                if (target.classList.contains('show')) {
+                    arrow.style.transform = 'rotate(90deg)';
+                } else {
+                    arrow.style.transform = 'rotate(0deg)';
+                }
+            }, 250); // Ждём окончания анимации collapse
         });
     });
     // При открытии/закрытии collapse меняем стрелку
@@ -328,6 +336,16 @@ document.addEventListener('DOMContentLoaded', function() {
             if (toggle) toggle.querySelector('.toggle-arrow').style.transform = 'rotate(0deg)';
         });
     });
+    // Кнопка "Больше тегов"
+    var showMoreBtn = document.getElementById('showMoreTagsBtn');
+    if (showMoreBtn) {
+        showMoreBtn.addEventListener('click', function() {
+            document.querySelectorAll('.tag-group').forEach(function(group) {
+                group.style.display = '';
+            });
+            document.getElementById('showMoreTagsWrapper').style.display = 'none';
+        });
+    }
 });
 </script>
 @endsection
