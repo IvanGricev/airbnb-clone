@@ -137,3 +137,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/support/{user1}/{user2}', [AdminController::class, 'viewChatBetweenUsers'])->name('support.between');
     Route::post('/chat/{user1}/{user2}/send', [AdminController::class, 'sendChatMessageBetweenUsers'])->name('chat.sendMessage');
 });
+
+// Маршрут для отображения изображений
+Route::get('/property-image/{id}', [PropertyController::class, 'showImage'])
+    ->name('property.image');

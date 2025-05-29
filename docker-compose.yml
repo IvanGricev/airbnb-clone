@@ -21,6 +21,10 @@ services:
       - DB_DATABASE=airbnb_clone_db_cnld
       - DB_USERNAME=airbnb_clone_db_cnld_user
       - DB_PASSWORD=2X6drMHc0AwBx1d9toLjgkR7rNRRkRud
+      - PHP_MAX_EXECUTION_TIME=300
+      - PHP_MEMORY_LIMIT=256M
+      - PHP_POST_MAX_SIZE=20M
+      - PHP_UPLOAD_MAX_FILESIZE=20M
 
   db:
     image: postgres:15
@@ -31,6 +35,12 @@ services:
       POSTGRES_USER: airbnb_clone_db_cnld_user
       POSTGRES_PASSWORD: 2X6drMHc0AwBx1d9toLjgkR7rNRRkRud
       PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_MAX_CONNECTIONS: 200
+      POSTGRES_SHARED_BUFFERS: 256MB
+      POSTGRES_EFFECTIVE_CACHE_SIZE: 768MB
+      POSTGRES_MAINTENANCE_WORK_MEM: 64MB
+      POSTGRES_WORK_MEM: 4MB
+      POSTGRES_LARGE_OBJECTS: true
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:

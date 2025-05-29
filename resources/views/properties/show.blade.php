@@ -1,4 +1,5 @@
 <link rel="stylesheet" href="{{ asset('/css/show_blade.css') }}">
+<link rel="stylesheet" href="{{ asset('/css/image-placeholder.css') }}">
 @extends('layouts.main')
 
 @section('title', $property->title)
@@ -11,7 +12,10 @@
                     <div class="carousel-inner">
                         @foreach($property->images as $index => $image)
                             <div class="carousel-item @if($index == 0) active @endif">
-                                <img src="{{ asset('storage/' . $image->image_path) }}" class="property-main-image wide-img" alt="Изображение жилья">
+                                <img src="{{ $image->image_url }}" 
+                                     class="property-main-image wide-img" 
+                                     alt="{{ $property->title }}"
+                                     onerror="this.onerror=null; this.src='{{ asset('images/no-image.jpg') }}'; this.alt='Нет изображения';">
                             </div>
                         @endforeach
                     </div>
@@ -25,9 +29,14 @@
                     </button>
                 </div>
             @elseif($property->images->count() == 1)
-                <img src="{{ asset('storage/' . $property->images->first()->image_path) }}" class="property-main-image wide-img" alt="Изображение жилья">
+                <img src="{{ $property->images->first()->image_url }}" 
+                     class="property-main-image wide-img" 
+                     alt="{{ $property->title }}"
+                     onerror="this.onerror=null; this.src='{{ asset('images/no-image.jpg') }}'; this.alt='Нет изображения';">
             @else
-                <img src="{{ asset('storage/default-placeholder.png') }}" class="property-main-image wide-img" alt="Нет изображения">
+                <div class="property-image-placeholder wide-img">
+                    <span class="placeholder-text">Нет изображения</span>
+                </div>
             @endif
         </div>
         <div class="property-info-block property-info-simple">
@@ -192,6 +201,21 @@
             </div>
             <aside class="property-tab-additional-info"></aside>
         </div>
+    </div>
+
+    <div class="property-images">
+        @if($property->images->isNotEmpty())
+            @foreach($property->images as $image)
+                <img src="{{ $image->image_url }}" 
+                     alt="{{ $property->title }}" 
+                     class="property-image"
+                     onerror="this.onerror=null; this.src='{{ asset('images/no-image.jpg') }}'; this.alt='Нет изображения';">
+            @endforeach
+        @else
+            <div class="property-image-placeholder">
+                <span class="placeholder-text">Нет изображения</span>
+            </div>
+        @endif
     </div>
 
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">

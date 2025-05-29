@@ -10,11 +10,12 @@ class CreatePropertyImagesTable extends Migration
     {
         Schema::create('property_images', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('property_id');
-            $table->string('image_path');
+            $table->foreignId('property_id')->constrained()->onDelete('cascade');
+            $table->binary('image_data');
+            $table->string('mime_type');
+            $table->string('original_name');
+            $table->integer('size');
             $table->timestamps();
-
-            $table->foreign('property_id')->references('id')->on('properties')->onDelete('cascade');
         });
     }
 

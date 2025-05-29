@@ -1,91 +1,126 @@
 @extends('layouts.main')
 
-@section('title', 'Редактировать жильё')
+@section('title', 'Редактирование жилья')
 
 @section('content')
-<h1>Редактировать жильё</h1>
+<div class="container mt-4">
+    <h1>Редактирование жилья</h1>
 
-@if(session('error'))
-    <div class="alert alert-danger">{{ session('error') }}</div>
-@endif
-@if(session('success'))
-    <div class="alert alert-success">{{ session('success') }}</div>
-@endif
+    @if($errors->any())
+        <div class="alert alert-danger">
+            <ul>
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
-<!-- Форма редактирования -->
-<form action="{{ route('properties.update', $property->id) }}" method="POST" enctype="multipart/form-data">
-    @csrf
-    @method('PUT')
+    <form action="{{ route('properties.update', $property->id) }}" method="POST" enctype="multipart/form-data">
+        @csrf
+        @method('PUT')
 
-    <!-- Название -->
-    <div class="mb-3">
-        <label for="title" class="form-label">Название</label>
-        <input type="text" name="title" class="form-control" value="{{ old('title', $property->title) }}" required>
-        @error('title') <div class="text-danger">{{ $message }}</div> @enderror
-    </div>
-
-    <!-- Описание -->
-    <div class="mb-3">
-        <label for="description" class="form-label">Описание</label>
-        <textarea name="description" class="form-control" rows="5" required>{{ old('description', $property->description) }}</textarea>
-        @error('description') <div class="text-danger">{{ $message }}</div> @enderror
-    </div>
-
-    <!-- Адрес -->
-    <div class="mb-3">
-        <label for="address" class="form-label">Адрес</label>
-        <input type="text" name="address" class="form-control" value="{{ old('address', $property->address) }}" required>
-        @error('address') <div class="text-danger">{{ $message }}</div> @enderror
-    </div>
-
-    <!-- Цена за ночь -->
-    <div class="mb-3">
-        <label for="price_per_night" class="form-label">Цена за ночь (руб.)</label>
-        <input type="number" name="price_per_night" class="form-control" step="0.01" value="{{ old('price_per_night', $property->price_per_night) }}" required>
-        @error('price_per_night') <div class="text-danger">{{ $message }}</div> @enderror
-    </div>
-
-    <!-- Выбор тегов по категориям -->
-    @foreach($tags as $category => $tagsGroup)
         <div class="mb-3">
-            <label class="form-label">{{ $category }}</label>
-            <div>
-                @foreach($tagsGroup as $tag)
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="checkbox" name="tags[]" id="tag{{$tag->id}}" value="{{ $tag->id }}"
-                            {{ in_array($tag->id, old('tags', $property->tags->pluck('id')->toArray())) ? 'checked' : '' }}>
-                        <label class="form-check-label" for="tag{{$tag->id}}">{{ $tag->name }}</label>
+            <label for="title" class="form-label">Название</label>
+            <input type="text" class="form-control" id="title" name="title" value="{{ old('title', $property->title) }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="description" class="form-label">Описание</label>
+            <textarea class="form-control" id="description" name="description" rows="5" required>{{ old('description', $property->description) }}</textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="address" class="form-label">Адрес</label>
+            <input type="text" class="form-control" id="address" name="address" value="{{ old('address', $property->address) }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="price_per_night" class="form-label">Цена за ночь</label>
+            <input type="number" class="form-control" id="price_per_night" name="price_per_night" value="{{ old('price_per_night', $property->price_per_night) }}" required min="0">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Теги</label>
+            <div class="row">
+                @foreach($tags as $category => $tagsGroup)
+                    <div class="col-md-4 mb-2">
+                        <h6>{{ $category }}</h6>
+                        @foreach($tagsGroup as $tag)
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="tags[]" value="{{ $tag->id }}" id="tag{{ $tag->id }}"
+                                    {{ in_array($tag->id, old('tags', $property->tags->pluck('id')->toArray())) ? 'checked' : '' }}>
+                                <label class="form-check-label" for="tag{{ $tag->id }}">
+                                    {{ $tag->name }}
+                                </label>
+                            </div>
+                        @endforeach
                     </div>
                 @endforeach
             </div>
         </div>
-    @endforeach
 
-    <!-- Загрузка новых изображений -->
-    <div class="mb-3">
-        <label for="images" class="form-label">Добавить изображения</label>
-        <input type="file" name="images[]" id="images" class="form-control" multiple>
-        <small class="form-text text-muted">
-            Выберите от 1 до 12 файлов. Допустимые форматы: jpeg, png, jpg, gif, svg (максимум 2MB для каждого файла).
-        </small>
-        @error('images.*') <div class="text-danger">{{ $message }}</div> @enderror
-    </div>
-
-    <button type="submit" class="btn btn-primary">Сохранить изменения</button>
-</form>
-
-<!-- Список текущих изображений -->
-<h2 class="mt-5">Текущие изображения</h2>
-<div class="row">
-    @foreach($property->images as $image)
-        <div class="col-md-3 text-center mb-3">
-            <img src="{{ asset('storage/' . $image->image_path) }}" class="img-thumbnail mb-2" alt="Изображение">
-            <form action="{{ route('properties.images.delete', $image->id) }}" method="POST" style="display:inline-block;">
-                @csrf
-                @method('DELETE')
-                <button type="submit" class="btn btn-danger btn-sm">Удалить</button>
-            </form>
+        <div class="mb-3">
+            <label class="form-label">Текущие изображения</label>
+            <div class="row">
+                @foreach($property->images as $image)
+                    <div class="col-md-3 mb-3">
+                        <div class="card">
+                            <img src="{{ $image->image_url }}" class="card-img-top" alt="{{ $property->title }}">
+                            <div class="card-body">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="delete_images[]" value="{{ $image->id }}" id="delete_image{{ $image->id }}">
+                                    <label class="form-check-label" for="delete_image{{ $image->id }}">
+                                        Удалить
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
         </div>
-    @endforeach
+
+        <div class="mb-3">
+            <label for="images" class="form-label">Добавить новые изображения</label>
+            <input type="file" class="form-control" id="images" name="images[]" multiple accept="image/jpeg,image/png,image/jpg,image/gif,image/svg+xml">
+            <div class="form-text">Можно загрузить до 12 изображений. Поддерживаемые форматы: JPEG, PNG, JPG, GIF, SVG. Максимальный размер файла: 2MB.</div>
+        </div>
+
+        <div class="mb-3">
+            <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+            <a href="{{ route('properties.show', $property->id) }}" class="btn btn-secondary">Отмена</a>
+        </div>
+    </form>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const imageInput = document.getElementById('images');
+    const deleteCheckboxes = document.querySelectorAll('input[name="delete_images[]"]');
+    const maxImages = 12;
+
+    function updateImageCount() {
+        const currentImages = document.querySelectorAll('input[name="delete_images[]"]:not(:checked)').length;
+        const newImages = imageInput.files.length;
+        const totalImages = currentImages + newImages;
+
+        if (totalImages > maxImages) {
+            alert(`Общее количество изображений не может превышать ${maxImages}.`);
+            imageInput.value = '';
+        }
+    }
+
+    imageInput.addEventListener('change', updateImageCount);
+    deleteCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const remainingImages = document.querySelectorAll('input[name="delete_images[]"]:not(:checked)').length;
+            if (remainingImages === 0) {
+                alert('Должно быть загружено хотя бы одно изображение.');
+                this.checked = false;
+            }
+        });
+    });
+});
+</script>
 @endsection

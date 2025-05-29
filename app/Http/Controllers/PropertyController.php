@@ -79,8 +79,19 @@ class PropertyController extends Controller
     }
 
     /**
-     * Сохраняет новый объект недвижимости с загрузкой изображений.
-     * Ограничение: не более 12 изображений.
+     * Отображает изображение из базы данных
+     */
+    public function showImage($id)
+    {
+        $image = PropertyImage::findOrFail($id);
+        return response($image->image_data)
+            ->header('Content-Type', $image->mime_type)
+            ->header('Content-Disposition', 'inline; filename="' . $image->original_name . '"')
+            ->header('Cache-Control', 'public, max-age=31536000');
+    }
+
+    /**
+     * Сохраняет новый объект недвижимости с загрузкой изображений в БД
      */
     public function store(Request $request)
     {
@@ -111,7 +122,7 @@ class PropertyController extends Controller
             'price_per_night' => 'required|numeric|min:0',
             'tags' => 'array|nullable',
             'tags.*' => 'exists:tags,id',
-            'images' => 'nullable|array|max:12',
+            'images' => 'required|array|max:12',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ], $messages);
 
@@ -132,9 +143,11 @@ class PropertyController extends Controller
 
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
-                    $path = $image->store('properties', 'public');
                     $property->images()->create([
-                        'image_path' => $path,
+                        'image_data' => file_get_contents($image->getRealPath()),
+                        'mime_type' => $image->getMimeType(),
+                        'original_name' => $image->getClientOriginalName(),
+                        'size' => $image->getSize()
                     ]);
                 }
             }
@@ -163,7 +176,7 @@ class PropertyController extends Controller
     }
 
     /**
-     * Обновление объекта недвижимости, а также возможность загрузки новых изображений.
+     * Обновление объекта недвижимости с загрузкой изображений в БД
      */
     public function update(Request $request, Property $property)
     {
@@ -188,6 +201,7 @@ class PropertyController extends Controller
             'images.*.mimes' => 'Изображение должно быть в формате: jpeg, png, jpg, gif или svg.',
             'images.*.max' => 'Размер изображения не должен превышать 2MB.',
             'tags.*.exists' => 'Выбранный тег не существует.',
+            'delete_images.*.exists' => 'Выбранное изображение не существует.',
         ];
 
         $validatedData = $request->validate([
@@ -198,51 +212,87 @@ class PropertyController extends Controller
             'tags' => 'array|nullable',
             'tags.*' => 'exists:tags,id',
             'images' => 'nullable|array|max:12',
-            'images.*' => 'sometimes|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'delete_images' => 'array|nullable',
+            'delete_images.*' => 'exists:property_images,id',
         ], $messages);
 
         try {
-            $property->update($validatedData);
+            // Обновляем основную информацию о свойстве
+            $property->update([
+                'title' => $validatedData['title'],
+                'description' => $validatedData['description'],
+                'address' => $validatedData['address'],
+                'price_per_night' => $validatedData['price_per_night'],
+            ]);
 
+            // Обновляем теги
             if ($request->has('tags')) {
                 $property->tags()->sync($request->input('tags'));
             } else {
                 $property->tags()->detach();
             }
 
+            // Удаляем выбранные изображения
+            if ($request->has('delete_images')) {
+                foreach ($request->input('delete_images') as $imageId) {
+                    $image = PropertyImage::find($imageId);
+                    if ($image && $image->property_id === $property->id) {
+                        $image->delete();
+                    }
+                }
+            }
+
+            // Добавляем новые изображения
             if ($request->hasFile('images')) {
+                // Проверяем, не превысим ли лимит в 12 изображений
+                $currentImageCount = $property->images()->count();
+                $newImageCount = count($request->file('images'));
+                
+                if ($currentImageCount + $newImageCount > 12) {
+                    return back()->withErrors(['error' => 'Общее количество изображений не должно превышать 12.'])
+                                ->withInput();
+                }
+
                 foreach ($request->file('images') as $image) {
-                    $path = $image->store('properties', 'public');
                     $property->images()->create([
-                        'image_path' => $path,
+                        'image_data' => file_get_contents($image->getRealPath()),
+                        'mime_type' => $image->getMimeType(),
+                        'original_name' => $image->getClientOriginalName(),
+                        'size' => $image->getSize()
                     ]);
                 }
+            }
+
+            // Проверяем, осталось ли хотя бы одно изображение
+            if ($property->images()->count() === 0) {
+                return back()->withErrors(['error' => 'Должно быть загружено хотя бы одно изображение.'])
+                            ->withInput();
             }
 
             return redirect()->route('properties.show', $property->id)
                            ->with('success', 'Жильё успешно обновлено.');
         } catch (\Exception $e) {
-            return back()->withErrors(['error' => 'Произошла ошибка при обновлении жилья. Пожалуйста, попробуйте снова.'])
+            return back()->withErrors(['error' => 'Произошла ошибка при обновлении жилья: ' . $e->getMessage()])
                         ->withInput();
         }
     }
 
+    /**
+     * Удаление изображения из базы данных
+     */
     public function deleteImage($id)
     {
         $image = PropertyImage::findOrFail($id);
+        $property = $image->property;
 
-        // Проверяем, что текущий пользователь — владелец объекта
-        if (Auth::id() !== $image->property->user_id) {
-            return redirect()->back()->with('error', 'У вас нет прав для удаления этого изображения.');
+        // Проверяем права доступа
+        if (Auth::id() !== $property->user_id) {
+            return redirect()->route('home')->with('error', 'У вас нет прав для удаления этого изображения.');
         }
 
-        // Удаляем файл из хранилища
-        Storage::disk('public')->delete($image->image_path);
-
-        // Удаляем запись из базы данных
         $image->delete();
-
-        return redirect()->back()->with('success', 'Изображение успешно удалено.');
+        return back()->with('success', 'Изображение успешно удалено.');
     }
 
     /**
@@ -382,10 +432,22 @@ class PropertyController extends Controller
 
     public function destroy(Property $property)
     {
-        $property->delete();
-    
-        Cache::flush();
-    
-        return redirect()->route('home')->with('success', 'Жильё удалено.');
+        if (Auth::id() !== $property->user_id) {
+            return redirect()->route('home')->with('error', 'У вас нет прав для удаления этого объекта.');
+        }
+
+        try {
+            // Удаляем все связанные данные
+            $property->images()->delete();
+            $property->tags()->detach();
+            $property->reviews()->delete();
+            $property->bookings()->delete();
+            $property->delete();
+
+            return redirect()->route('properties.index')
+                           ->with('success', 'Объект успешно удален.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Произошла ошибка при удалении объекта.');
+        }
     }
 }

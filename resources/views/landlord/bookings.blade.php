@@ -19,8 +19,17 @@
     @else
         <div class="bookings-landlord-grid">
             @foreach($bookings as $booking)
-                <div class="booking-land-card">
-                    <img src="{{ $booking->property->images->first() ? asset('storage/' . $booking->property->images->first()->image_path) : asset('images/user-placeholder.svg') }}" alt="{{ $booking->property->title }}" class="booking-land-image">
+                <div class="booking-item">
+                    @if($booking->property->images->isNotEmpty())
+                        <img src="{{ $booking->property->images->first()->image_url }}" 
+                             alt="{{ $booking->property->title }}"
+                             class="booking-land-image"
+                             onerror="this.onerror=null; this.src='{{ asset('images/no-image.jpg') }}'; this.alt='Нет изображения';">
+                    @else
+                        <div class="property-image-placeholder">
+                            <span class="placeholder-text">Нет изображения</span>
+                        </div>
+                    @endif
                     <div class="booking-land-content">{{ $booking->property->title }}</div>
                     <div class="booking-land-details">
                         <div class="booking-land-tenant">Арендатор: <b>{{ $booking->user->name }}</b></div>

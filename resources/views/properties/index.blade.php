@@ -1,4 +1,5 @@
 <link rel="stylesheet" href="{{ asset('/css/main.css') }}">
+<link rel="stylesheet" href="{{ asset('/css/image-placeholder.css') }}">
 @extends('layouts.main')
 
 @section('title', 'Список жилья')
@@ -141,11 +142,9 @@ $(function() {
             <div class="col-md-3">
                 <div class="card mb-4">
                     <!-- Отображение изображения -->
-                    @if($property->images->count() > 0)
-                        <img src="{{ asset('storage/' . $property->images->first()->image_path) }}" class="card-img-top" alt="Превью">
-                    @else
-                        <img src="{{ asset('storage/default-placeholder.png') }}" class="card-img-top" alt="Нет изображения">
-                    @endif
+                    <img src="{{ $property->images->first() ? $property->images->first()->image_url : asset('images/no-image.jpg') }}" 
+                         alt="{{ $property->title }}" 
+                         class="property-image">
                     <div class="card-body">
                         <h5 class="card-title">{{ $property->title }}</h5>
                         <p>
