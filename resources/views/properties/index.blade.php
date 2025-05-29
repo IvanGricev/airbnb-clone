@@ -132,10 +132,10 @@ $(function() {
             @endforeach
             @if($totalGroups > 3)
                 <div class="mb-3 text-center" id="showMoreTagsWrapper">
-                    <button type="button" class="btn btn-outline-primary" id="showMoreTagsBtn">Больше тегов</button>
+                    <button type="button" class="search-btn" id="showMoreTagsBtn">Больше тегов</button>
                 </div>
                 <div class="mb-3 text-center" id="showLessTagsWrapper" style="display:none;">
-                    <button type="button" class="btn btn-outline-primary" id="showLessTagsBtn">Меньше тегов</button>
+                    <button type="button" class="search-btn" id="showLessTagsBtn">Меньше тегов</button>
                 </div>
             @endif
         </div>
