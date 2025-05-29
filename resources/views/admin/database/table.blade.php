@@ -53,8 +53,15 @@
                 </tbody>
             </table>
         </div>
-        <div class="pagination">
-            {{ $data->links() }}
+        <div class="d-flex justify-content-between align-items-center my-3">
+            <div>
+                <small>
+                    Показано {{ $data->firstItem() }}–{{ $data->lastItem() }} из {{ $data->total() }} записей
+                </small>
+            </div>
+            <div>
+                {{ $data->links('pagination::bootstrap-4') }}
+            </div>
         </div>
     </div>
 </div>
