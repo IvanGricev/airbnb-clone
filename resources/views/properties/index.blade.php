@@ -79,7 +79,7 @@ $(function() {
 <div class="reviews-link">Посмотреть Объекты</div>
 <h1>Наши предложения</h1>
 
-<form action="{{ route('properties.index') }}" method="GET" class="mb-4">
+<form action="{{ route('properties.index') }}" method="GET" class="mb-4 position-relative">
     <div class="row align-items-end mb-3">
         <div class="col-md-4 mb-2">
             <div class="input-group">
@@ -101,6 +101,9 @@ $(function() {
                 <option value="asc" {{ request('sort_order') == 'asc' ? 'selected' : '' }}>От дешевого к дорогому</option>
                 <option value="desc" {{ request('sort_order') == 'desc' ? 'selected' : '' }}>От дорогого к дешевому</option>
             </select>
+        </div>
+        <div class="col-md-1 mb-2 text-end">
+            <a href="{{ route('properties.index') }}" class="btn btn-outline-secondary w-100">Сбросить</a>
         </div>
     </div>
     <div class="row">
@@ -128,8 +131,11 @@ $(function() {
                 @php $catIndex++; @endphp
             @endforeach
             @if($totalGroups > 3)
-                <div class="mb-3" id="showMoreTagsWrapper">
-                    <button type="button" class="btn btn-link p-0" id="showMoreTagsBtn">Больше тегов</button>
+                <div class="mb-3 text-center" id="showMoreTagsWrapper">
+                    <button type="button" class="btn btn-outline-primary" id="showMoreTagsBtn">Больше тегов</button>
+                </div>
+                <div class="mb-3 text-center" id="showLessTagsWrapper" style="display:none;">
+                    <button type="button" class="btn btn-outline-primary" id="showLessTagsBtn">Меньше тегов</button>
                 </div>
             @endif
         </div>
@@ -316,16 +322,15 @@ document.addEventListener('DOMContentLoaded', function() {
             var arrow = this.querySelector('.toggle-arrow');
             var targetId = this.getAttribute('data-bs-target');
             var target = document.querySelector(targetId);
-            setTimeout(function() {
-                if (target.classList.contains('show')) {
-                    arrow.style.transform = 'rotate(90deg)';
-                } else {
-                    arrow.style.transform = 'rotate(0deg)';
-                }
-            }, 250); // Ждём окончания анимации collapse
+            // Мгновенно меняем положение стрелки
+            if (!target.classList.contains('show')) {
+                arrow.style.transform = 'rotate(90deg)';
+            } else {
+                arrow.style.transform = 'rotate(0deg)';
+            }
         });
     });
-    // При открытии/закрытии collapse меняем стрелку
+    // После завершения анимации collapse синхронизируем положение стрелки
     document.querySelectorAll('.collapse').forEach(function(collapse) {
         collapse.addEventListener('show.bs.collapse', function(e) {
             var toggle = document.querySelector('[data-bs-target="#'+this.id+'"]');
@@ -336,14 +341,28 @@ document.addEventListener('DOMContentLoaded', function() {
             if (toggle) toggle.querySelector('.toggle-arrow').style.transform = 'rotate(0deg)';
         });
     });
-    // Кнопка "Больше тегов"
+    // Кнопки "Больше тегов" и "Меньше тегов"
     var showMoreBtn = document.getElementById('showMoreTagsBtn');
+    var showLessBtn = document.getElementById('showLessTagsBtn');
+    var showMoreWrapper = document.getElementById('showMoreTagsWrapper');
+    var showLessWrapper = document.getElementById('showLessTagsWrapper');
     if (showMoreBtn) {
         showMoreBtn.addEventListener('click', function() {
             document.querySelectorAll('.tag-group').forEach(function(group) {
                 group.style.display = '';
             });
-            document.getElementById('showMoreTagsWrapper').style.display = 'none';
+            if (showMoreWrapper) showMoreWrapper.style.display = 'none';
+            if (showLessWrapper) showLessWrapper.style.display = '';
+        });
+    }
+    if (showLessBtn) {
+        showLessBtn.addEventListener('click', function() {
+            document.querySelectorAll('.tag-group').forEach(function(group, idx) {
+                group.style.display = (idx > 2) ? 'none' : '';
+            });
+            if (showMoreWrapper) showMoreWrapper.style.display = '';
+            if (showLessWrapper) showLessWrapper.style.display = 'none';
+            window.scrollTo({top: document.querySelector('.tag-group').offsetTop - 100, behavior: 'smooth'});
         });
     }
 });
