@@ -80,29 +80,35 @@ $(function() {
 <h1>Наши предложения</h1>
 
 <form action="{{ route('properties.index') }}" method="GET" class="mb-4">
-    <div class="row">
-        <div class="col-md-2 mb-4">
+    <div class="row align-items-end mb-3">
+        <div class="col-md-4 mb-2">
+            <div class="input-group">
+                <span class="input-group-text bg-white border-end-0">
+                    <img src="{{ asset('images/search-location.svg') }}" alt="Поиск" style="width:18px; height:18px;">
+                </span>
+                <input type="text" name="query" class="form-control border-start-0" placeholder="Что ищем?" value="{{ request('query') }}">
+                <button type="submit" class="btn btn-primary">Поиск</button>
+            </div>
+        </div>
+        <div class="col-md-2 mb-2">
             <input type="number" name="min_price" class="form-control" placeholder="Мин. цена" value="{{ request('min_price') }}">
         </div>
-        <div class="col-md-2 mb-4">
+        <div class="col-md-2 mb-2">
             <input type="number" name="max_price" class="form-control" placeholder="Макс. цена" value="{{ request('max_price') }}">
         </div>
-        <div class="col-md-3 mb-4">
+        <div class="col-md-3 mb-2">
             <select name="sort_order" class="form-control">
                 <option value="asc" {{ request('sort_order') == 'asc' ? 'selected' : '' }}>От дешевого к дорогому</option>
                 <option value="desc" {{ request('sort_order') == 'desc' ? 'selected' : '' }}>От дорогого к дешевому</option>
             </select>
-        </div>
-        <div class="col-md-2 mb-4">
-        <button type="submit" class="btn btn-primary">Найти</button>
         </div>
     </div>
     <div class="row">
         <div class="col-md-12">
             @foreach($tags as $category => $tagsGroup)
                 <div class="mb-3">
-                    <label class="form-label">{{ $category }}</label>
-                    <div>
+                    <label class="form-label fw-bold">{{ $category }}</label>
+                    <div class="d-flex flex-wrap gap-2">
                         @foreach($tagsGroup as $tag)
                             <div class="form-check form-check-inline">
                                 <input class="form-check-input" type="checkbox" name="tags[]" id="tag{{ $tag->id }}" value="{{ $tag->id }}" 
@@ -115,7 +121,6 @@ $(function() {
             @endforeach
         </div>
     </div>
-    
 </form>
 
 @if($properties->isEmpty())
