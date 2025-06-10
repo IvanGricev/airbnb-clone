@@ -163,14 +163,24 @@
         <div class="property-tabs-content-row">
             <div class="property-tab-reviews property-tab-pane active" id="tab-reviews-static">
                 @if($property->reviews->count() > 0)
-                    @foreach($property->reviews as $review)
-                        <div class="review-card">
-                            <div class="review-text">{{ $review->comment }}</div>
-                            <div class="review-author">{{ $review->user->name }}</div>
-                            <div class="review-rating">
-                                <span style="color:#b0b0b0; font-size:1.01rem; font-weight:400; margin-right:10px;">{{ $review->created_at->format('d.m.Y H:i') }}</span>
-                                <span class="material-icons review-star">&#11088;</span>
-                                <span style="font-weight:800; color:#1e2351; font-size:1.25rem;">{{ number_format($review->rating, 1) }}</span>
+                @foreach($property->reviews as $review)
+                    <div class="review-card" style="background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                            <div class="review-rating" style="display: flex; align-items: center; margin-bottom: 10px;">
+                                <span style="font-weight: 800; color: #1e2351; font-size: 1.5rem; margin-right: 5px;">{{ number_format($review->rating, 1) }}</span>
+                                <span class="material-icons review-star" style="color: #FFD700; font-size: 1.5rem;">&#11088;</span>
+                            </div>
+                            
+                            <div class="review-text" style="font-size: 1rem; line-height: 1.5; color: #333; margin-bottom: 15px;">
+                                "{{ $review->comment }}"
+                            </div>
+                            
+                            <div class="review-footer" style="display: flex; justify-content: space-between; align-items: center;">
+                                <div class="review-author" style="font-weight: 600; color: #1e2351;">
+                                    {{ $review->user->name }}
+                                </div>
+                                <div class="review-date" style="color: #888; font-size: 0.9rem;">
+                                    {{ $review->created_at->format('d.m.Y H:i') }}
+                                </div>
                             </div>
                         </div>
                     @endforeach
