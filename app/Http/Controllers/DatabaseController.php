@@ -19,7 +19,8 @@ class DatabaseController extends Controller
                 'support_tickets' => 'Тикеты поддержки',
                 'property_tag' => 'Теги объектов',
                 'reviews' => 'Отзывы',
-                'properties' => 'Объекты недвижимости'
+                'properties' => 'Объекты недвижимости',
+                'users' => 'Пользователи'
             ];
 
             // PostgreSQL query to get only allowed tables
