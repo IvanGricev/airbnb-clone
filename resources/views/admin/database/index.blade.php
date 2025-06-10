@@ -20,9 +20,9 @@
     @endif
 
     <div class="db-table-list">
-        @forelse($tables as $currentTable)
-            <a href="{{ route('admin.database.table', ['table' => $currentTable]) }}" class="db-table-btn">
-                {{ $currentTable }}
+        @forelse($tables as $table)
+            <a href="{{ route('admin.database.table', ['table' => $table['name']]) }}" class="db-table-btn">
+                {{ $table['display_name'] }}
             </a>
         @empty
             <div class="alert alert-info">

@@ -12,13 +12,29 @@ class DatabaseController extends Controller
     public function index()
     {
         try {
-            // PostgreSQL query to get all tables
+            $allowedTables = [
+                'bookings' => 'Бронирования',
+                'landlord_applications' => 'Заявки арендодателей',
+                'support_messages' => 'Сообщения поддержки',
+                'support_tickets' => 'Тикеты поддержки',
+                'property_tag' => 'Теги объектов',
+                'reviews' => 'Отзывы',
+                'properties' => 'Объекты недвижимости'
+            ];
+
+            // PostgreSQL query to get only allowed tables
             $tables = collect(DB::select("
                 SELECT table_name 
                 FROM information_schema.tables 
                 WHERE table_schema = 'public'
+                AND table_name IN ('" . implode("','", array_keys($allowedTables)) . "')
                 ORDER BY table_name
-            "))->pluck('table_name');
+            "))->pluck('table_name')->map(function($table) use ($allowedTables) {
+                return [
+                    'name' => $table,
+                    'display_name' => $allowedTables[$table]
+                ];
+            });
     
             return view('admin.database.index', compact('tables'));
         } catch (\Exception $e) {
