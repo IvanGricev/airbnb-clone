@@ -17,7 +17,7 @@
             <option value="">Выберите рейтинг</option>
             @for($i = 1; $i <= 5; $i++)
                 <option value="{{ $i }}" {{ old('rating') == $i ? 'selected' : '' }}>
-                    {{ $i }} звезда{{ $i > 1 ? 'ы' : '' }}
+                    {{ $i }} {{ $i == 1 ? 'звезда' : 'звезды' }}
                 </option>
             @endfor
         </select>
