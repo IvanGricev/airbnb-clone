@@ -502,7 +502,7 @@ form .row + .row {
     border-radius: 50%;
     object-fit: cover;
     margin: 0 auto 16px auto;
-    box-shadow: 0 2px 12px rgba(30,35,81,0.08);
+    box-shadow: 0 2px 12px rgba(81, 72, 30, 0.08);
 }
 .review-bubble {
     background: #fff;
@@ -538,7 +538,7 @@ form .row + .row {
     gap: 10px;
 }
 .avatar-placeholder {
-    background: #e4e6f1;
+    background: #f1eee4;
     color: #c99300;
     border-radius: 50%;
     width: 38px;
