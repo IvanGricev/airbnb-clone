@@ -28,7 +28,7 @@
     gap: 14px;
     max-height: 420px;
     min-height: 320px;
-    background: #f7f8fa;
+    background: #faf9f7;
     border-radius: 12px;
     margin-bottom: 12px;
 }
@@ -50,7 +50,7 @@
     max-width: 75%;
     padding: 12px 18px;
     border-radius: 16px;
-    background: #e4e6f1;
+    background: #f1f0e4;
     color: #222;
     font-size: 1.05rem;
     position: relative;
@@ -59,7 +59,7 @@
 }
 
 .chat-message-own .chat-message-bubble {
-    background: #d1e7ff;
+    background: #fff4d1;
     color: #ff9900;
     border-bottom-right-radius: 6px;
     border-bottom-left-radius: 16px;
@@ -84,7 +84,7 @@
 
 .chat-message-author {
     font-weight: 600;
-    color: #51411e;
+    color: #ff9900;
 }
 
 .chat-form {
@@ -101,12 +101,12 @@
 .chat-form-input {
     flex: 1 1 auto;
     border-radius: 8px;
-    border: 1px solid #dbe0ea;
+    border: 1px solid #eae4db;
     padding: 10px 14px;
     font-size: 1rem;
     resize: none;
     min-height: 44px;
-    background: #f7f8fa;
+    background: #faf9f7;
     transition: border 0.2s;
 }
 
@@ -116,7 +116,7 @@
 }
 
 .chat-form-send {
-    background: #51411e;
+    background: #ff9900;
     color: #fff;
     border: none;
     border-radius: 8px;
