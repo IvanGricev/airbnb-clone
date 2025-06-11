@@ -109,6 +109,30 @@ body {
     gap: 8px;
 }
 
+.reset-btn{
+        display: inline-block;
+    padding: 0.5rem 1.2rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    border: none;
+    border-radius: 6px;
+    background: #ffb43a;
+    color: #fff;    
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.2s;
+    min-width: 90px;
+    box-sizing: border-box;
+    white-space: nowrap;
+}
+
+.reset-btn:hover, .reset-btn:focus {
+    background: #e4e6f1; 
+    color: #fff;    
+    text-decoration: none;
+}
+
 .search-btn .arrow {
     font-size: 1.2em;
     margin-left: 4px;

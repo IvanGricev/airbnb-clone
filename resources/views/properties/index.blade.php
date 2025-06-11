@@ -94,7 +94,7 @@ $(function() {
             </select>
         </div>
         <div class="col-md-1 mb-2 text-end">
-            <a href="{{ route('properties.index') }}" class="search-btn">Сбросить</a>
+            <a href="{{ route('properties.index') }}" class="reset-btn">Сбросить</a>
         </div>
     </div>
     <div class="row">
