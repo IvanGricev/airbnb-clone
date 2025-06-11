@@ -143,10 +143,24 @@
                 <div style="margin-top: 18px;">
                     <div style="color:#888; font-size:1.04rem; margin-bottom: 6px;">Характеристики:</div>
                     <ul class="property-desc-list">
-                        <li>1 комната</li>
-                        <li>1 спальня</li>
-                        <li>1 ванная комната</li>
-                        <li>1 кухня</li>
+                        @php
+                            // Категории тегов для вывода
+                            $descCategories = [
+                                'Тип жилья',
+                                'Размер и планировка',
+                                'Комфорт и бытовые удобства',
+                                'Эстетика и дизайн'
+                            ];
+                            // Для каждой категории ищем первый тег этой категории
+                            $descTags = [];
+                            foreach ($descCategories as $cat) {
+                                $tag = $property->tags->firstWhere('category', $cat);
+                                $descTags[] = $tag ? ($tag->value ?? $tag->name) : 'не указано';
+                            }
+                        @endphp
+                        @foreach($descTags as $desc)
+                            <li>{{ $desc }}</li>
+                        @endforeach
                     </ul>
                 </div>
             </div>
