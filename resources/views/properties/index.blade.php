@@ -307,21 +307,7 @@ $(function() {
 @endif
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Стрелка для collapse
-    document.querySelectorAll('.category-toggle').forEach(function(toggle) {
-        toggle.addEventListener('click', function() {
-            var arrow = this.querySelector('.toggle-arrow');
-            var targetId = this.getAttribute('data-bs-target');
-            var target = document.querySelector(targetId);
-            // Мгновенно меняем положение стрелки
-            if (!target.classList.contains('show')) {
-                arrow.style.transform = 'rotate(90deg)';
-            } else {
-                arrow.style.transform = 'rotate(0deg)';
-            }
-        });
-    });
-    // После завершения анимации collapse синхронизируем положение стрелки
+    // Синхронизация стрелки с состоянием collapse
     document.querySelectorAll('.collapse').forEach(function(collapse) {
         collapse.addEventListener('show.bs.collapse', function(e) {
             var toggle = document.querySelector('[data-bs-target="#'+this.id+'"]');
@@ -332,6 +318,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (toggle) toggle.querySelector('.toggle-arrow').style.transform = 'rotate(0deg)';
         });
     });
+
     // Кнопки "Больше тегов" и "Меньше тегов"
     var showMoreBtn = document.getElementById('showMoreTagsBtn');
     var showLessBtn = document.getElementById('showLessTagsBtn');
