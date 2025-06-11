@@ -25,4 +25,8 @@ class SupportTicket extends Model
     {
         return $this->hasMany(SupportMessage::class, 'ticket_id');
     }
+
+    public function supportMessages() {
+        return $this->hasMany(SupportMessage::class, 'ticket_id');
+    }
 }

@@ -108,6 +108,7 @@ class ChatController extends Controller
             ->map(function ($message) use ($userId) {
                 return $message->from_user_id == $userId ? $message->to_user_id : $message->from_user_id;
             })
+            ->filter() // <-- добавлено
             ->unique()
             ->values()
             ->toArray();
@@ -135,6 +136,9 @@ class ChatController extends Controller
             }])
             ->get()
             ->map(function ($user) use ($userId) {  // Добавляем $userId в use
+                if (!$user || !$user->id) {
+                    return null;
+                }
                 $lastMessage = Message::where(function($q) use ($userId, $user) {
                         $q->where('from_user_id', $userId)
                           ->where('to_user_id', $user->id);
@@ -148,7 +152,8 @@ class ChatController extends Controller
 
                 $user->lastMessage = $lastMessage;
                 return $user;
-            });
+            })
+            ->filter(); // <-- добавлено
 
             Log::info('Loaded ' . $users->count() . ' users with their messages');
 
@@ -165,6 +170,8 @@ class ChatController extends Controller
             return view('chat.list', compact('users', 'supportTickets'));
         } catch (\Exception $e) {
             Log::error('Error loading conversations: ' . $e->getMessage());
+            Log::error('userIds: ' . json_encode($userIds ?? []));
+            Log::error('users: ' . (isset($users) ? $users->toJson() : 'not set'));
             Log::error('Stack trace: ' . $e->getTraceAsString());
             return redirect()->back()->with('error', 'Произошла ошибка при загрузке списка чатов. Пожалуйста, попробуйте позже.');
         }
