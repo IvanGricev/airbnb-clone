@@ -22,31 +22,36 @@ class BookingController extends Controller
             'property_id.required' => 'Необходимо указать объект недвижимости.',
             'property_id.exists' => 'Выбранный объект недвижимости не существует.',
             'start_date.required' => 'Дата заезда обязательна для заполнения.',
-            'start_date.date' => 'Некорректный формат даты заезда.',
+            'start_date.date_format' => 'Некорректный формат даты заезда. Используйте ДД.ММ.ГГГГ.',
             'start_date.after_or_equal' => 'Дата заезда не может быть в прошлом.',
             'end_date.required' => 'Дата выезда обязательна для заполнения.',
-            'end_date.date' => 'Некорректный формат даты выезда.',
+            'end_date.date_format' => 'Некорректный формат даты выезда. Используйте ДД.ММ.ГГГГ.',
             'end_date.after' => 'Дата выезда должна быть позже даты заезда.',
         ];
 
+        // Валидация с учетом текстового поля и формата дд.мм.гггг
         $validatedData = $request->validate([
             'property_id' => 'required|exists:properties,id',
-            'start_date' => 'required|date|after_or_equal:today',
-            'end_date' => 'required|date|after:start_date',
+            'start_date' => 'required|date_format:d.m.Y|after_or_equal:today',
+            'end_date' => 'required|date_format:d.m.Y|after:start_date',
         ], $messages);
 
         try {
             $property = Property::findOrFail($validatedData['property_id']);
 
+            // Преобразуем даты из дд.мм.гггг в Y-m-d для работы с Carbon и БД
+            $startDate = \Carbon\Carbon::createFromFormat('d.m.Y', $validatedData['start_date']);
+            $endDate = \Carbon\Carbon::createFromFormat('d.m.Y', $validatedData['end_date']);
+
             // Проверка пересечения с другими бронированиями
             $overlappingBookings = Booking::where('property_id', $property->id)
                 ->whereNotIn('status', ['cancelled_by_user', 'cancelled_by_landlord'])
-                ->where(function ($query) use ($validatedData) {
-                    $query->whereBetween('start_date', [$validatedData['start_date'], $validatedData['end_date']])
-                          ->orWhereBetween('end_date', [$validatedData['start_date'], $validatedData['end_date']])
-                          ->orWhere(function ($q) use ($validatedData) {
-                              $q->where('start_date', '<', $validatedData['start_date'])
-                                ->where('end_date', '>', $validatedData['end_date']);
+                ->where(function ($query) use ($startDate, $endDate) {
+                    $query->whereBetween('start_date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
+                          ->orWhereBetween('end_date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
+                          ->orWhere(function ($q) use ($startDate, $endDate) {
+                              $q->where('start_date', '<', $startDate->format('Y-m-d'))
+                                ->where('end_date', '>', $endDate->format('Y-m-d'));
                           });
                 })
                 ->exists();
@@ -57,16 +62,11 @@ class BookingController extends Controller
                     ->withInput();
             }
 
-            $startDate = Carbon::parse($validatedData['start_date']);
-            $endDate = Carbon::parse($validatedData['end_date']);
             $days = $endDate->diffInDays($startDate);
-            
-            // Убедимся, что количество дней положительное
             if ($days < 0) {
                 $days = abs($days);
             }
-            
-            // Убедимся, что цена за ночь положительная
+
             $pricePerNight = abs($property->price_per_night);
             $totalPrice = $pricePerNight * $days;
 
@@ -79,13 +79,12 @@ class BookingController extends Controller
             $booking = Booking::create([
                 'user_id' => Auth::id(),
                 'property_id' => $property->id,
-                'start_date' => $validatedData['start_date'],
-                'end_date' => $validatedData['end_date'],
+                'start_date' => $startDate->format('Y-m-d'),
+                'end_date' => $endDate->format('Y-m-d'),
                 'total_price' => $totalPrice,
                 'status' => 'pending_payment',
             ]);
 
-            // Очищаем кэш бронирований пользователя
             Cache::forget('user_bookings_' . Auth::id());
 
             return redirect()->route('payments.checkout', $booking->id)

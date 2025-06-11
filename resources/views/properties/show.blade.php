@@ -96,7 +96,11 @@
                             <div class="booking-date-group wide-booking-date-group">
                                 <span class="booking-date-field">
                                     <span class="booking-date-label">c</span>
-                                    <input type="date" name="start_date" id="start_date" class="booking-date-input @error('start_date') is-invalid @enderror" autocomplete="off" required placeholder="ДД.ММ.ГГГГ" value="{{ old('start_date') }}">
+                                    <input type="text" name="start_date" id="start_date" class="booking-date-input @error('start_date') is-invalid @enderror"
+                                        autocomplete="off" required placeholder="ДД.ММ.ГГГГ" value="{{ old('start_date') }}">
+                                    <span class="calendar-icon" style="cursor:pointer; margin-left:-28px; margin-right:8px; position:relative; z-index:2;">
+                                        <img src="/images/calendar.svg" alt="Календарь" width="20">
+                                    </span>
                                     @error('start_date')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -104,7 +108,11 @@
                                 <span class="booking-date-sep">—</span>
                                 <span class="booking-date-field">
                                     <span class="booking-date-label">по</span>
-                                    <input type="date" name="end_date" id="end_date" class="booking-date-input @error('end_date') is-invalid @enderror" autocomplete="off" required placeholder="ДД.ММ.ГГГГ" value="{{ old('end_date') }}">
+                                    <input type="text" name="end_date" id="end_date" class="booking-date-input @error('end_date') is-invalid @enderror"
+                                        autocomplete="off" required placeholder="ДД.ММ.ГГГГ" value="{{ old('end_date') }}">
+                                    <span class="calendar-icon" style="cursor:pointer; margin-left:-28px; margin-right:8px; position:relative; z-index:2;">
+                                        <img src="/images/calendar.svg" alt="Календарь" width="20">
+                                    </span>
                                     @error('end_date')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -208,26 +216,28 @@
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
     <script>
         $(document).ready(function() {
-            // Datepicker initialization
             var propertyId = @json($property->id);
             var unavailableDates = [];
-            
             function disableDates(date) {
                 var string = jQuery.datepicker.formatDate('yy-mm-dd', date);
                 return [ unavailableDates.indexOf(string) == -1 ];
             }
-            
             $.ajax({
                 url: '/properties/' + propertyId + '/unavailable-dates',
                 method: 'GET',
                 success: function(dates) {
                     unavailableDates = dates;
                     $('#start_date, #end_date').datepicker({
-                        dateFormat: 'yy-mm-dd',
+                        dateFormat: 'dd.mm.yy',
                         minDate: 0,
-                        beforeShowDay: disableDates
+                        beforeShowDay: disableDates,
+                        showAnim: 'fadeIn'
                     });
                 }
+            });
+            // Открытие календаря по иконке
+            $('.calendar-icon').on('click', function() {
+                $(this).prev('input').focus();
             });
         });
     </script>
