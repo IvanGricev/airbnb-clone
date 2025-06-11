@@ -440,7 +440,7 @@ body {
 .calendar-icon {
     position: absolute;
     right: 8px;
-    top: 7px;
+    top: 4px;
     transform: translateY(-50%);
     margin: 0;
     z-index: 2;
