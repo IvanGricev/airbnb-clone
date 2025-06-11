@@ -429,8 +429,8 @@ body {
     margin-right: 4px;
 }
 .booking-date-input {
-    font-size: 0.95rem; /* уменьшенный размер шрифта */
-    padding: 9px 32px 7px 10px; /* справа больше, чтобы текст не налезал на иконку */
+    font-size: 0.9rem;
+    padding: 12px 32px 7px 10px;
     width: 120px;
     box-sizing: border-box;
     background: #f7f8fa;
