@@ -348,4 +348,56 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const slides = document.querySelectorAll('.reviews-slider .review-slide');
+    const dots = document.querySelectorAll('.reviews-dots .dot');
+    let current = 1; // центральная карточка
+
+    function showSlide(idx) {
+        slides.forEach((slide, i) => {
+            slide.classList.remove('active', 'left', 'right');
+            if (i === idx) {
+                slide.classList.add('active');
+            } else if (i === (idx + slides.length - 1) % slides.length) {
+                slide.classList.add('left');
+            } else if (i === (idx + 1) % slides.length) {
+                slide.classList.add('right');
+            }
+        });
+        dots.forEach((dot, i) => {
+            dot.classList.toggle('active', i === idx);
+        });
+    }
+
+    function nextSlide() {
+        current = (current + 1) % slides.length;
+        showSlide(current);
+    }
+    function prevSlide() {
+        current = (current - 1 + slides.length) % slides.length;
+        showSlide(current);
+    }
+
+    // Клик по точкам
+    dots.forEach((dot, i) => {
+        dot.addEventListener('click', () => {
+            current = i;
+            showSlide(current);
+        });
+    });
+
+    // Автопрокрутка (по желанию)
+    let sliderInterval = setInterval(nextSlide, 5000);
+
+    // Остановка автопрокрутки при наведении
+    document.querySelector('.reviews-slider').addEventListener('mouseenter', () => clearInterval(sliderInterval));
+    document.querySelector('.reviews-slider').addEventListener('mouseleave', () => {
+        sliderInterval = setInterval(nextSlide, 5000);
+    });
+
+    // Инициализация
+    showSlide(current);
+});
+</script>
 @endsection
