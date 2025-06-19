@@ -1,4 +1,3 @@
-{{-- resources/views/admin/support/chat.blade.php --}}
 @extends('layouts.main')
 @section('title', 'Тикет #' . $ticket->id)
 @section('content')
