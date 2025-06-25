@@ -59,7 +59,7 @@ class PropertyController extends Controller
 
             $queryBuilder->orderBy('price_per_night', $sortOrder);
 
-            return $queryBuilder->paginate(10);
+            return $queryBuilder->paginate(15);
         });
 
         return view('properties.index', compact('properties', 'query', 'selectedTags', 'tags', 'minPrice', 'maxPrice', 'sortOrder'));
